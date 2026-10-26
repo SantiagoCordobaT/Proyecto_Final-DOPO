@@ -11,8 +11,6 @@
 [![Genre](https://img.shields.io/badge/Genre-2D%20Arcade%20Soccer-green.svg)](#)
 [![Status](https://img.shields.io/badge/Status-Project%20Proposal-brightgreen.svg)](#)
 
-*Adaptación para computador en 2D inspirada en el clásico juego arcade Head Soccer.*
-
 </div>
 
 ---
