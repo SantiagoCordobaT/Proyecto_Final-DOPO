@@ -1,3 +1,5 @@
+package dominio.excepciones;
+
 public class POOBSoccerException extends Exception {
     
     public static final String PERSONAJE_INVALIDO = "El índice del personaje seleccionado no existe.";
@@ -10,5 +12,4 @@ public class POOBSoccerException extends Exception {
     public POOBSoccerException(String message) {
         super(message);
     }
-    
 }

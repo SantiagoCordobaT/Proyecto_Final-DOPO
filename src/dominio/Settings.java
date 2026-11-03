@@ -1,3 +1,5 @@
+package dominio;
+
 public class Settings {
 
     private boolean soundOn;
