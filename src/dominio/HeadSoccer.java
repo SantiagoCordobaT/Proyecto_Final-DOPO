@@ -110,6 +110,15 @@ public class HeadSoccer {
         return characters.size();
     }
 
+    /** @return Nombres de todos los personajes del catálogo (para uso directo en vistas). */
+    public String[] getCharacterNames() {
+        String[] names = new String[characters.size()];
+        for (int i = 0; i < names.length; i++) {
+            names[i] = characters.get(i).getName();
+        }
+        return names;
+    }
+
     /**
      * @param index Indice en el catalogo.
      * @return Nombre del personaje.

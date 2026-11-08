@@ -38,8 +38,11 @@ public class Settings {
         return language;
     }
 
-    // Setter del lenguaje (posible vacio entonces manejo con expeciones)
+    // Setter del lenguaje con manejo de excepciones por si llega vacío o nulo
     public void setLanguage(String language) {
+        if (language == null || language.trim().isEmpty()) {
+            throw new IllegalArgumentException("El lenguaje no puede estar vacío.");
+        }
         this.language = language;
     }
 }
