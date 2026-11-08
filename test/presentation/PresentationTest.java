@@ -8,7 +8,6 @@ public class PresentationTest {
         SwingUtilities.invokeLater(() -> {
             System.out.println("Iniciando pruebas visuales de la interfaz de Head Soccer...");
             
-            // Abre la ventana principal directamente sin guardar la referencia en una variable
             new HeadSoccerGUI();
         });
     }
