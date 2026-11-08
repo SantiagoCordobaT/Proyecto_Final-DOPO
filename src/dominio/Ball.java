@@ -165,4 +165,21 @@ public class Ball {
     public double getWeightFactor() {
         return weightFactor;
     }
+
+    // Metodos de modificacion usados por la cancha, los arcos y la fachada del dominio
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
+
+    public void setSpeedX(double speedX) {
+        this.speedX = speedX;
+    }
+
+    public void setSpeedY(double speedY) {
+        this.speedY = speedY;
+    }
 }

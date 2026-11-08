@@ -30,6 +30,10 @@ public class Settings {
         return musicOn;
     }
 
+    public void setMusicOn(boolean musicOn) {
+        this.musicOn = musicOn;
+    }
+
     public String getLanguage() {
         return language;
     }

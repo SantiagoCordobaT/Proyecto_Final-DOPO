@@ -1,0 +1,27 @@
+package dominio.modalidades;
+
+import dominio.Ball;
+import dominio.Field;
+import dominio.excepciones.POOBSoccerException;
+import dominio.personajes.Character;
+
+/**
+ * Estrategia de control de un personaje (Strategy). Evita preguntar si el
+ * jugador es humano o maquina.
+ *
+ * @author Santiago Cordoba - Camilo Rivas
+ * @version 1.0
+ */
+public interface Controller {
+
+    /**
+     * Se invoca en cada tick antes de actualizar la fisica.
+     *
+     * @param self Personaje controlado.
+     * @param opponent Rival.
+     * @param ball Balon.
+     * @param field Cancha.
+     * @throws POOBSoccerException Si una accion viola las reglas del juego.
+     */
+    void control(Character self, Character opponent, Ball ball, Field field) throws POOBSoccerException;
+}
