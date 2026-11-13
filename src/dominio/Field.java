@@ -43,6 +43,20 @@ public class Field {
         ball.bounceOffWalls(LEFT_WALL_X, WIDTH);
     }
 
+    /**
+     * Posicion con la que se ve el balon entre dos pasos de fisica: avanza la fraccion
+     * de paso pendiente sin salirse de las paredes ni hundirse en el suelo.
+     *
+     * @param ball Balon.
+     * @param fraction Fraccion (0 a 1) del siguiente paso ya transcurrida.
+     * @return Centro visible del balon como {x, y}.
+     */
+    double[] visibleBall(Ball ball, double fraction) {
+        double x = Math.max(LEFT_WALL_X + Ball.RADIUS, Math.min(WIDTH - Ball.RADIUS, ball.xAfter(fraction)));
+        double y = Math.min(GROUND_Y - Ball.RADIUS, ball.yAfter(fraction));
+        return new double[] { x, y };
+    }
+
     /** @return Cada arco (el izquierdo y luego el derecho) como {izquierda, arriba, ancho, alto}. */
     double[][] getGoalBounds() {
         double[][] bounds = new double[goals.length][];

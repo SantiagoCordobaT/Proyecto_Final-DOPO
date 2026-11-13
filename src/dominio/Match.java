@@ -242,12 +242,20 @@ final class Match implements MatchContext {
         return field.getGoalBounds();
     }
 
-    double getBallX() {
-        return ball.getX();
+    int getPlayerFacing(int number) throws POOBSoccerException {
+        return player(number).getFacing();
     }
 
-    double getBallY() {
-        return ball.getY();
+    boolean isPlayerKicking(int number) throws POOBSoccerException {
+        return player(number).isKicking();
+    }
+
+    /**
+     * @return Centro visible del balon como {x, y}: su posicion adelantada por la fraccion
+     *         de paso de fisica pendiente, para que se vea fluido entre pasos.
+     */
+    double[] getBallPosition() {
+        return field.visibleBall(ball, Math.max(0.0, accumulator / STEP_SECONDS));
     }
 
     /** @return Estado que muestra el tipo de partido (reloj, meta, balones y racha...). */

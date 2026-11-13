@@ -352,19 +352,29 @@ public final class HeadSoccer {
     }
 
     /**
-     * @return Posicion horizontal del balon.
-     * @throws POOBSoccerException Si no hay partido.
+     * @param number Jugador (1 o 2).
+     * @return Sentido de ataque del jugador: 1 hacia la derecha, -1 hacia la izquierda.
+     * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
-    public double getBallX() throws POOBSoccerException {
-        return requireMatch().getBallX();
+    public int getPlayerFacing(int number) throws POOBSoccerException {
+        return requireMatch().getPlayerFacing(number);
     }
 
     /**
-     * @return Posicion vertical del balon.
+     * @param number Jugador (1 o 2).
+     * @return true mientras dura la patada que el jugador acaba de ejecutar.
+     * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
+     */
+    public boolean isPlayerKicking(int number) throws POOBSoccerException {
+        return requireMatch().isPlayerKicking(number);
+    }
+
+    /**
+     * @return Centro del balon como {x, y}, suavizado entre pasos de fisica.
      * @throws POOBSoccerException Si no hay partido.
      */
-    public double getBallY() throws POOBSoccerException {
-        return requireMatch().getBallY();
+    public double[] getBallPosition() throws POOBSoccerException {
+        return requireMatch().getBallPosition();
     }
 
     /**

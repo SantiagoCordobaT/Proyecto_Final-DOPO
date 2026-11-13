@@ -270,6 +270,11 @@ public class Character implements Named {
         return effects.allowActions();
     }
 
+    /** @return true mientras dura la patada que el personaje acaba de ejecutar. */
+    public boolean isKicking() {
+        return kickCooldown > 0.0;
+    }
+
     /** @return true si hay una patada solicitada y el personaje puede ejecutarla. */
     private boolean canKickNow() {
         return canAct() && kickBuffer > 0.0 && kickCooldown <= 0.0;

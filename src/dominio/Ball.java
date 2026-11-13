@@ -208,6 +208,22 @@ public class Ball {
         speedY *= HARD_HIT_SLOWDOWN;
     }
 
+    /**
+     * @param fraction Fraccion (0 a 1) del siguiente paso de fisica ya transcurrida.
+     * @return Coordenada horizontal que tendra el centro al avanzar esa fraccion de paso.
+     */
+    double xAfter(double fraction) {
+        return x + speedX * fraction;
+    }
+
+    /**
+     * @param fraction Fraccion (0 a 1) del siguiente paso de fisica ya transcurrida.
+     * @return Coordenada vertical que tendra el centro al avanzar esa fraccion de paso.
+     */
+    double yAfter(double fraction) {
+        return y + speedY * fraction;
+    }
+
     /** @return Coordenada horizontal del centro. */
     public double getX() {
         return x;

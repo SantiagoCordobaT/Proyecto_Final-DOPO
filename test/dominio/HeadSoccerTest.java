@@ -393,6 +393,41 @@ public class HeadSoccerTest {
     }
 
     @Test
+    public void kickShouldBeVisibleWhileItLasts() throws POOBSoccerException {
+        Character a = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
+        Character b = new Character("B", "Japón", 3, 3, 3, 3, new StunPower());
+        a.enterAt(400.0, 1);
+        b.enterAt(400.0, -1);
+        assertFalse(a.isKicking());
+        a.requestKick();
+        a.tryKick(ballBeside(a), b);
+        assertTrue(a.isKicking());
+        a.update(1.0);
+        assertFalse(a.isKicking());
+    }
+
+    @Test
+    public void facadeShouldExposeFacingAndKicking() throws POOBSoccerException {
+        start(PVSP, TIME);
+        assertEquals(1, game.getPlayerFacing(1));
+        assertEquals(-1, game.getPlayerFacing(2));
+        assertFalse(game.isPlayerKicking(1));
+    }
+
+    @Test
+    public void ballShouldLookAheadBetweenPhysicsStepsWithoutLeavingTheField() {
+        Field field = new Field();
+        Ball ball = new Ball();
+        ball.placeAt(450.0, 100.0);
+        ball.kick(5, 1);
+        assertArrayEquals(new double[] { 450.0, 100.0 }, field.visibleBall(ball, 0.0), 1e-9);
+        assertArrayEquals(new double[] { 455.0, 95.0 }, field.visibleBall(ball, 0.5), 1e-9);
+        ball.placeAt(Field.WIDTH - Ball.RADIUS, 100.0);
+        ball.kick(5, 1);
+        assertEquals(Field.WIDTH - Ball.RADIUS, field.visibleBall(ball, 0.5)[0], 1e-9);
+    }
+
+    @Test
     public void restartShouldClearEffectsAndReturnHome() throws POOBSoccerException {
         Character c = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
         c.enterAt(400.0, 1);
@@ -511,7 +546,7 @@ public class HeadSoccerTest {
         assertEquals(LEFT_HOME_X, centerX(m.getPlayerBounds(1)), 1e-9);
         assertEquals(RIGHT_HOME_X, centerX(m.getPlayerBounds(2)), 1e-9);
         assertEquals(0, m.getPlayerEffects(1).length);
-        assertEquals(Field.WIDTH / 2.0, m.getBallX(), 1e-9);
+        assertEquals(Field.WIDTH / 2.0, m.getBallPosition()[0], 1e-9);
     }
 
     @Test
@@ -664,9 +699,9 @@ public class HeadSoccerTest {
         start(PVSP, TIME);
         assertEquals("01:00", game.getMatchStatus());
         game.pause();
-        double y = game.getBallY();
+        double y = game.getBallPosition()[1];
         game.updateTick(1.0);
-        assertEquals(y, game.getBallY(), 1e-9);
+        assertEquals(y, game.getBallPosition()[1], 1e-9);
         assertEquals("01:00", game.getMatchStatus());
         game.resume();
         game.updateTick(1.0);
@@ -725,7 +760,7 @@ public class HeadSoccerTest {
     public void keyboardShouldNotDriveMachine() throws POOBSoccerException {
         start(PVSM, GOALS_3);
         double before = centerX(game.getPlayerBounds(2));
-        assertTrue(game.getBallX() < before);
+        assertTrue(game.getBallPosition()[0] < before);
         game.pressAction(2, "RIGHT");
         game.pressAction(2, "POWER");
         game.updateTick(TICK);
@@ -764,7 +799,7 @@ public class HeadSoccerTest {
         for (int i = 0; i < 600; i++) {
             game.updateTick(TICK);
         }
-        assertTrue(game.getBallX() >= 0.0 && game.getBallX() <= Field.WIDTH);
+        assertTrue(game.getBallPosition()[0] >= 0.0 && game.getBallPosition()[0] <= Field.WIDTH);
     }
 
     // ---------------------------------------------------------------- catalogos

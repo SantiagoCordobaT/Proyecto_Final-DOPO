@@ -105,7 +105,7 @@ final class CourtP extends JPanel {
         double width = bounds[2];
         double height = bounds[3];
         double centerX = left + width / 2.0;
-        double look = Math.signum(model.getBallX() - centerX) * width * 0.05;
+        double look = Math.signum(model.getBallPosition()[0] - centerX) * width * 0.05;
         Color[] team = resources.teamColors(model.getPlayerCountry(number));
 
         g.setColor(resources.playerColor(number));
@@ -170,8 +170,9 @@ final class CourtP extends JPanel {
     /** Balon con su sombra en el piso: la sombra se encoge cuanto mas alto vuela. */
     private void paintBall(Graphics2D g) throws POOBSoccerException {
         double radius = model.getBallRadius();
-        double x = model.getBallX();
-        double y = model.getBallY();
+        double[] position = model.getBallPosition();
+        double x = position[0];
+        double y = position[1];
         double ground = model.getGroundY();
         double shadow = radius * (1.0 + (y + radius) / ground);
         g.setColor(SHADOW);
