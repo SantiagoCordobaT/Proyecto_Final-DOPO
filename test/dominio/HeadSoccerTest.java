@@ -207,6 +207,21 @@ public class HeadSoccerTest {
     }
 
     @Test
+    public void survivalScoreShouldRestartAgainstEachNewRival() throws POOBSoccerException {
+        Match m = match(PVSM, SURVIVAL, 0, 1);
+        m.scoreGoal(2);
+        m.updateTick(TICK);
+        double playerOneCharge = m.getPlayerPowerCharge(1);
+        score(m, 1, 3);
+        assertEquals(0, m.getGoals(1));
+        assertEquals(0, m.getGoals(2));
+        assertEquals("Balones 2-3 | Racha 1", m.getStatus());
+        assertEquals(playerOneCharge, m.getPlayerPowerCharge(1), 1e-9);
+        m.scoreGoal(1);
+        assertEquals(1, m.getGoals(1));
+    }
+
+    @Test
     public void survivalShouldEndOnlyWhenPlayerOneLosesAllBalls() throws POOBSoccerException {
         Match m = match(PVSM, SURVIVAL, 0, 1);
         score(m, 1, 3);
@@ -420,6 +435,20 @@ public class HeadSoccerTest {
     }
 
     @Test
+    public void bodyPushAgainstAWallShouldKeepTheBallInsideTheField() throws POOBSoccerException {
+        Field field = new Field();
+        Character c = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
+        c.enterAt(c.getBounds()[2] / 2.0, 1);
+        Ball ball = new Ball();
+        ball.placeAt(Ball.RADIUS, Field.GROUND_Y - Ball.RADIUS);
+        assertTrue(c.touches(ball));
+        c.push(ball);
+        assertTrue(ball.getX() < Ball.RADIUS);
+        field.keepBallInside(ball);
+        assertEquals(Ball.RADIUS, ball.getX(), 1e-9);
+    }
+
+    @Test
     public void ballPartiallyInsideShouldNotBeGoal() {
         Goal goal = new Goal(0.0, Goal.WIDTH, 2);
         Ball partial = new Ball();
@@ -483,7 +512,11 @@ public class HeadSoccerTest {
     public void goalMatchStatusShouldShowTarget() throws POOBSoccerException {
         start(PVSP, GOALS_3);
         assertEquals("Meta: 3 goles | 00:00", game.getMatchStatus());
-        game.updateTick(1.0);
+        game.updateTick(0.5);
+        assertEquals("Meta: 3 goles | 00:00", game.getMatchStatus());
+        game.updateTick(0.5);
+        assertEquals("Meta: 3 goles | 00:01", game.getMatchStatus());
+        game.updateTick(0.99);
         assertEquals("Meta: 3 goles | 00:01", game.getMatchStatus());
     }
 

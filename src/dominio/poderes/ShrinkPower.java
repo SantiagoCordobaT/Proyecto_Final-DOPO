@@ -13,7 +13,7 @@ public class ShrinkPower extends Power {
 
     /** Crea el poder de reduccion. */
     public ShrinkPower() {
-        super("Reduccion", "Encoge al oponente a un tamaño diminuto.");
+        super("Reducción", "Encoge al oponente a un tamaño diminuto.");
     }
 
     @Override

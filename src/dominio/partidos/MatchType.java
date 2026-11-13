@@ -120,12 +120,14 @@ public abstract class MatchType implements Named {
     }
 
     /**
-     * @param seconds Segundos (no negativos); las fracciones se redondean hacia arriba.
+     * Cada tipo de partido redondea sus segundos antes de mostrarlos: la cuenta
+     * regresiva hacia arriba y el tiempo jugado hacia abajo.
+     *
+     * @param seconds Segundos enteros (no negativos).
      * @return Tiempo con formato "mm:ss".
      */
-    protected static String clock(double seconds) {
-        int whole = (int) Math.ceil(seconds - TOLERANCE);
-        return String.format("%02d:%02d", whole / SECONDS_PER_MINUTE, whole % SECONDS_PER_MINUTE);
+    protected static String clock(int seconds) {
+        return String.format("%02d:%02d", seconds / SECONDS_PER_MINUTE, seconds % SECONDS_PER_MINUTE);
     }
 
     /** @return true si el partido termino. */

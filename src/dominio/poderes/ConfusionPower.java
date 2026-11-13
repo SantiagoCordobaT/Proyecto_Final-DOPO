@@ -13,7 +13,7 @@ public class ConfusionPower extends Power {
 
     /** Crea el poder de confusion. */
     public ConfusionPower() {
-        super("Confusion", "Invierte los controles izquierda/derecha del oponente.");
+        super("Confusión", "Invierte los controles izquierda/derecha del oponente.");
     }
 
     @Override

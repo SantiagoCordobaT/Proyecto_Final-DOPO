@@ -13,12 +13,13 @@ public class Field {
     public static final double GROUND_Y = 450.0;
     static final int NO_GOAL = 0;
 
+    private static final double LEFT_WALL_X = 0.0;
     private static final double CEILING_Y = 0.0;
     private static final double CENTER_X = WIDTH / 2.0;
     private static final double BALL_DROP_Y = 60.0;
 
     // Arco izquierdo (defiende el jugador 1, anota el 2) y derecho (defiende el 2, anota el 1)
-    private final Goal[] goals = { new Goal(0.0, Goal.WIDTH, 2), new Goal(WIDTH, WIDTH - Goal.WIDTH, 1) };
+    private final Goal[] goals = { new Goal(LEFT_WALL_X, Goal.WIDTH, 2), new Goal(WIDTH, WIDTH - Goal.WIDTH, 1) };
 
     /**
      * Avanza el balon un paso de fisica incluyendo el rebote en los travesaños.
@@ -26,10 +27,20 @@ public class Field {
      * @param ball Balon.
      */
     void updateBall(Ball ball) {
-        ball.updatePhysics(GROUND_Y, 0.0, WIDTH, CEILING_Y);
+        ball.updatePhysics(GROUND_Y, LEFT_WALL_X, WIDTH, CEILING_Y);
         for (Goal goal : goals) {
             goal.resolveCrossbar(ball);
         }
+    }
+
+    /**
+     * Devuelve el balon a la cancha si un empuje lo saco por un costado: rebota contra
+     * la pared igual que en el paso de fisica.
+     *
+     * @param ball Balon.
+     */
+    void keepBallInside(Ball ball) {
+        ball.bounceOffWalls(LEFT_WALL_X, WIDTH);
     }
 
     /** @return Cada arco (el izquierdo y luego el derecho) como {izquierda, arriba, ancho, alto}. */

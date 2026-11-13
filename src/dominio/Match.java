@@ -94,6 +94,7 @@ final class Match implements MatchContext {
         field.updateBall(ball);
         resolveContact(players[LEFT_PLAYER], players[RIGHT_PLAYER]);
         resolveContact(players[RIGHT_PLAYER], players[LEFT_PLAYER]);
+        field.keepBallInside(ball);
     }
 
     /**
@@ -137,11 +138,16 @@ final class Match implements MatchContext {
         lastKicker = null;
     }
 
-    /** Supervivencia: entra el siguiente rival del catalogo, en su lado y con la barra vacia. */
+    /**
+     * Supervivencia: entra el siguiente rival del catalogo, en su lado y con la barra
+     * vacia. Contra el nuevo rival empieza un encuentro nuevo, asi que el marcador del
+     * jugador 1 tambien vuelve a cero.
+     */
     @Override
     public void replaceRival() throws POOBSoccerException {
         players[RIGHT_PLAYER] = rivals.nextAfter(players[RIGHT_PLAYER]);
         Side.RIGHT.place(players[RIGHT_PLAYER]);
+        players[LEFT_PLAYER].resetGoals();
     }
 
     /** Pausa el partido y suelta las acciones mantenidas, para que nadie siga moviendose al reanudar. */

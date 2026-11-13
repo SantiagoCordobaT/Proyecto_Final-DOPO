@@ -29,9 +29,12 @@ class GoalMatch extends MatchType {
         }
     }
 
-    /** @return Meta de goles y tiempo jugado, por ejemplo "Meta: 3 goles | 00:42". */
+    /**
+     * @return Meta de goles y tiempo jugado en segundos completos (redondeado hacia
+     *         abajo), por ejemplo "Meta: 3 goles | 00:42".
+     */
     @Override
     public String getStatusText() {
-        return "Meta: " + targetGoals + " goles | " + clock(getElapsedSeconds());
+        return "Meta: " + targetGoals + " goles | " + clock((int) Math.floor(getElapsedSeconds() + TOLERANCE));
     }
 }

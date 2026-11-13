@@ -74,6 +74,16 @@ public class Ball {
             y = ceilingY + RADIUS;
             speedY = -speedY * BOUNCE;
         }
+        bounceOffWalls(leftWallX, rightWallX);
+    }
+
+    /**
+     * Rebota contra las paredes laterales si el balón las toca o las pasó, y lo deja dentro de ellas.
+     *
+     * @param leftWallX   Coordenada X del límite lateral izquierdo.
+     * @param rightWallX  Coordenada X del límite lateral derecho.
+     */
+    void bounceOffWalls(double leftWallX, double rightWallX) {
         if (x - RADIUS <= leftWallX) {
             x = leftWallX + RADIUS;
             speedX = -speedX * BOUNCE;

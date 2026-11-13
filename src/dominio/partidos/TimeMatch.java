@@ -53,10 +53,10 @@ class TimeMatch extends MatchType {
         }
     }
 
-    /** @return "GOL DE ORO" o el tiempo restante "mm:ss". */
+    /** @return "GOL DE ORO" o el tiempo restante "mm:ss", con las fracciones redondeadas hacia arriba. */
     @Override
     public String getStatusText() {
-        return goldenGoal ? GOLDEN_GOAL : clock(remainingSeconds());
+        return goldenGoal ? GOLDEN_GOAL : clock((int) Math.ceil(remainingSeconds() - TOLERANCE));
     }
 
     private double remainingSeconds() {

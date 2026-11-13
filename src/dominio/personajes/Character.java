@@ -123,9 +123,14 @@ public class Character implements Named {
     public void enterAt(double homeX, int facing) {
         this.homeX = homeX;
         this.facing = facing;
-        this.goals = 0;
+        resetGoals();
         powerBar.reset();
         restart();
+    }
+
+    /** Pone el marcador del personaje en cero para un encuentro nuevo. */
+    public void resetGoals() {
+        goals = 0;
     }
 
     /** Reinicio tras un gol: vuelve a su posicion inicial, en el suelo, y limpia efectos temporales. */
