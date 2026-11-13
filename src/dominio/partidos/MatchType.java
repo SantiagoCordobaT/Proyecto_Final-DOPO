@@ -3,21 +3,28 @@ package dominio.partidos;
 import dominio.Named;
 import dominio.excepciones.POOBSoccerException;
 import dominio.modalidades.GameMode;
-import dominio.personajes.Character;
 
 /**
- * Tipo de partido (Strategy): decide cuando termina el juego y quien gana.
+ * Tipo de partido (Strategy): decide cuando termina el juego, quien gana y que
+ * estado muestra. Lee el partido solo a traves de {@link MatchContext}.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
 public abstract class MatchType implements Named {
 
+    protected static final int PLAYER_ONE = 1;
+    protected static final int PLAYER_TWO = 2;
+    protected static final double TOLERANCE = 1e-9;
+
+    private static final int SECONDS_PER_MINUTE = 60;
+    private static final int NO_WINNER = 0;
+
     private final String name;
-    private Character player1;
-    private Character player2;
-    private Character winner;
+    private MatchContext context;
     private boolean finished;
+    private int winner;
+    private double elapsedSeconds;
 
     /** @param name Nombre del tipo de partido. */
     protected MatchType(String name) {
@@ -25,142 +32,115 @@ public abstract class MatchType implements Named {
     }
 
     /**
-     * Verifica que el tipo de partido sea compatible con la modalidad.
-     * Por defecto lo es; Supervivencia lo redefine.
+     * Por defecto todo tipo de partido admite cualquier modalidad; Supervivencia lo redefine.
      *
      * @param mode Modalidad elegida.
-     * @throws POOBSoccerException Si no son compatibles.
+     * @return true si el tipo de partido se puede jugar en esa modalidad.
      */
-    public void validateMode(GameMode mode) throws POOBSoccerException {
-        if (mode == null) {
-            throw new POOBSoccerException(POOBSoccerException.MODO_INVALIDO);
-        }
+    public boolean supports(GameMode mode) {
+        return true;
     }
 
     /**
-     * Inicia (o reinicia) el partido con los jugadores indicados.
+     * Inicia (o reinicia) el tipo de partido para un partido nuevo: sin ganador y con el reloj en cero.
      *
-     * @param mode Modalidad.
-     * @param player1 Jugador 1.
-     * @param player2 Jugador 2.
-     * @throws POOBSoccerException Si falta algun jugador o la modalidad no es compatible.
+     * @param context Partido en curso.
      */
-    public void begin(GameMode mode, Character player1, Character player2) throws POOBSoccerException {
-        validateMode(mode);
-        if (player1 == null || player2 == null) {
-            throw new POOBSoccerException(POOBSoccerException.JUGADORES_INCOMPLETOS);
-        }
-        this.player1 = player1;
-        this.player2 = player2;
-        this.winner = null;
+    public void begin(MatchContext context) {
+        this.context = context;
         this.finished = false;
-        onBegin();
+        this.winner = NO_WINNER;
+        this.elapsedSeconds = 0.0;
     }
-
-    /** Se llama cuando entra un nuevo rival; por defecto no hace nada. */
-    protected void onRivalReplaced() {
-        // Solo Supervivencia necesita reaccionar.
-    }
-
-    /** Reinicia el estado propio del tipo de partido. */
-    protected abstract void onBegin();
 
     /**
      * Avanza el reloj del partido.
      *
      * @param deltaTimeSeconds Segundos transcurridos.
+     * @throws POOBSoccerException Si el marcador no se pudiera consultar.
      */
-    public abstract void tick(double deltaTimeSeconds);
+    public void tick(double deltaTimeSeconds) throws POOBSoccerException {
+        elapsedSeconds += deltaTimeSeconds;
+    }
 
     /**
-     * Se llama despues de registrar un gol.
+     * Metodo plantilla: se llama despues de sumar un gol y solo lo procesa si el partido sigue en juego.
      *
-     * @param scorer Jugador que anota (ya tiene el gol sumado).
-     * @param conceded Jugador que recibe el gol.
+     * @param scorer Jugador (1 o 2) que anota (ya tiene el gol sumado).
+     * @throws POOBSoccerException Si el partido no pudiera reaccionar al gol.
      */
-    public abstract void goalScored(Character scorer, Character conceded);
-
-    /** @return Segundos restantes (0 si no hay limite de tiempo). */
-    public double getRemainingSeconds() {
-        return 0.0;
-    }
-
-    /** @return true si esta en Gol de Oro. */
-    public boolean isGoldenGoal() {
-        return false;
-    }
-
-    /**
-     * @param player Jugador consultado.
-     * @return Balones (vidas) restantes; 0 si el tipo de partido no los usa.
-     */
-    public int getBalls(Character player) {
-        return 0;
-    }
-
-    /**
-     * @return true si hay que cargar un nuevo rival de la maquina (solo Supervivencia).
-     */
-    public boolean needsNewRival() {
-        return false;
-    }
-
-    /**
-     * Reemplaza al jugador 2 (rival de la maquina) por uno nuevo.
-     *
-     * @param newRival Nuevo rival.
-     * @throws POOBSoccerException Si el rival es nulo.
-     */
-    public void replaceRival(Character newRival) throws POOBSoccerException {
-        if (newRival == null) {
-            throw new POOBSoccerException(POOBSoccerException.JUGADORES_INCOMPLETOS);
+    public final void goalScored(int scorer) throws POOBSoccerException {
+        if (!isFinished()) {
+            onGoal(scorer);
         }
-        this.player2 = newRival;
-        onRivalReplaced();
     }
 
-    /** @return Victorias seguidas en la serie de Supervivencia (0 en los demas tipos). */
-    public int getStreak() {
-        return 0;
-    }
+    /**
+     * Paso variable de {@link #goalScored}: reaccion propia de cada tipo de partido al gol.
+     *
+     * @param scorer Jugador (1 o 2) que anota.
+     * @throws POOBSoccerException Si el partido no pudiera reaccionar al gol.
+     */
+    protected abstract void onGoal(int scorer) throws POOBSoccerException;
+
+    /** @return Texto de estado para el marcador (reloj, meta, balones...). */
+    public abstract String getStatusText();
 
     /**
      * Cierra el partido.
      *
-     * @param winner Ganador.
+     * @param winner Jugador (1 o 2) ganador.
      */
-    protected void finish(Character winner) {
+    protected final void finish(int winner) {
         this.winner = winner;
         this.finished = true;
     }
 
     /**
-     * @return Jugador 1.
+     * @param player Jugador (1 o 2).
+     * @return Goles del jugador.
+     * @throws POOBSoccerException Si el jugador no es 1 ni 2.
      */
-    protected Character getPlayer1() {
-        return player1;
+    protected final int goalsOf(int player) throws POOBSoccerException {
+        return context.getGoals(player);
     }
 
     /**
-     * @return Jugador 2 (rival actual).
+     * Pide al partido el siguiente rival.
+     *
+     * @throws POOBSoccerException Si el catalogo no pudiera entregar el rival.
      */
-    protected Character getPlayer2() {
-        return player2;
+    protected final void replaceRival() throws POOBSoccerException {
+        context.replaceRival();
     }
 
-    /** @return Ganador (null mientras no termine). */
-    public Character getWinner() {
-        return winner;
+    /** @return Segundos jugados desde {@link #begin}. */
+    protected final double getElapsedSeconds() {
+        return elapsedSeconds;
+    }
+
+    /**
+     * @param seconds Segundos (no negativos); las fracciones se redondean hacia arriba.
+     * @return Tiempo con formato "mm:ss".
+     */
+    protected static String clock(double seconds) {
+        int whole = (int) Math.ceil(seconds - TOLERANCE);
+        return String.format("%02d:%02d", whole / SECONDS_PER_MINUTE, whole % SECONDS_PER_MINUTE);
     }
 
     /** @return true si el partido termino. */
-    public boolean isFinished() {
+    public final boolean isFinished() {
         return finished;
+    }
+
+    /** @return Jugador (1 o 2) ganador; solo tiene sentido cuando {@link #isFinished()}. */
+    public final int getWinner() {
+        return winner;
     }
 
     /** @return Nombre del tipo de partido. */
     @Override
-    public String getName() {
+    public final String getName() {
         return name;
     }
 }

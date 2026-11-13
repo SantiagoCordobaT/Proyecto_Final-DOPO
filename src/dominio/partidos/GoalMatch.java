@@ -1,6 +1,6 @@
 package dominio.partidos;
 
-import dominio.personajes.Character;
+import dominio.excepciones.POOBSoccerException;
 
 /**
  * Partido por goles: sin limite de tiempo, gana el primero en llegar a la meta (3, 5 o 7).
@@ -23,19 +23,15 @@ public class GoalMatch extends MatchType {
     }
 
     @Override
-    protected void onBegin() {
-        // No tiene estado propio: las metas se leen de los goles de los jugadores.
-    }
-
-    @Override
-    public void tick(double deltaTimeSeconds) {
-        // Sin limite de tiempo.
-    }
-
-    @Override
-    public void goalScored(Character scorer, Character conceded) {
-        if (!isFinished() && scorer.getGoals() >= targetGoals) {
+    protected void onGoal(int scorer) throws POOBSoccerException {
+        if (goalsOf(scorer) >= targetGoals) {
             finish(scorer);
         }
+    }
+
+    /** @return Meta de goles y tiempo jugado, por ejemplo "Meta: 3 goles | 00:42". */
+    @Override
+    public String getStatusText() {
+        return "Meta: " + targetGoals + " goles | " + clock(getElapsedSeconds());
     }
 }

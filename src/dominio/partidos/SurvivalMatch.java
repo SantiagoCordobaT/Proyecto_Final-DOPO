@@ -2,89 +2,90 @@ package dominio.partidos;
 
 import dominio.excepciones.POOBSoccerException;
 import dominio.modalidades.GameMode;
-import dominio.personajes.Character;
 
 /**
  * Supervivencia (solo PvsM): serie de partidos contra la maquina jugada con balones.
- * Cada gol quita un balon al rival. Si la maquina se queda sin balones se suma una
- * victoria a la racha y entra un nuevo rival con balones llenos; la serie termina
- * unicamente cuando el jugador 1 pierde todos sus balones.
+ * Cada gol quita un balon a quien lo recibe. Si la maquina se queda sin balones se
+ * suma una victoria a la racha y entra un nuevo rival con balones llenos; la serie
+ * termina unicamente cuando el jugador 1 pierde todos sus balones.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
 public class SurvivalMatch extends MatchType {
 
-    public static final int INITIAL_BALLS = 3;
+    private static final int INITIAL_BALLS = 3;
 
-    private int balls1;
-    private int balls2;
+    // Balones de cada jugador, indexados por numero de jugador - 1
+    private Lives[] lives;
     private int streak;
-    private boolean newRivalRequested;
 
     /** Crea el partido de supervivencia; solo lo crea {@link MatchTypeCatalog}. */
     SurvivalMatch() {
         super("Supervivencia");
     }
 
+    /** @return true solo si la modalidad admite Supervivencia. */
     @Override
-    public void validateMode(GameMode mode) throws POOBSoccerException {
-        super.validateMode(mode);
-        if (!mode.supportsSurvival()) {
-            throw new POOBSoccerException(POOBSoccerException.SUPERVIVENCIA_SOLO_PVSM);
-        }
+    public boolean supports(GameMode mode) {
+        return mode.supportsSurvival();
     }
 
     @Override
-    protected void onBegin() {
-        balls1 = INITIAL_BALLS;
-        balls2 = INITIAL_BALLS;
+    public void begin(MatchContext context) {
+        super.begin(context);
+        lives = new Lives[] { new PlayerLives(), new RivalLives() };
         streak = 0;
-        newRivalRequested = false;
     }
 
+    /** Quien recibe el gol es el otro jugador: su indice (numero - 1) es {@code PLAYER_TWO - scorer}. */
     @Override
-    public void tick(double deltaTimeSeconds) {
-        // Sin limite de tiempo.
+    protected void onGoal(int scorer) throws POOBSoccerException {
+        lives[PLAYER_TWO - scorer].lose();
     }
 
+    /** @return Balones de cada jugador y racha, por ejemplo "Balones 3-2 | Racha 1". */
     @Override
-    public void goalScored(Character scorer, Character conceded) {
-        if (isFinished()) {
-            return;
-        }
-        if (conceded == getPlayer1()) {
-            balls1--;
-            if (balls1 <= 0) {
-                finish(scorer);
+    public String getStatusText() {
+        return String.format("Balones %d-%d | Racha %d", lives[0].balls, lives[1].balls, streak);
+    }
+
+    /**
+     * Balones de un jugador (metodo plantilla): perder el ultimo balon dispara
+     * la reaccion propia de cada lado.
+     */
+    private abstract class Lives {
+
+        int balls = INITIAL_BALLS;
+
+        final void lose() throws POOBSoccerException {
+            balls--;
+            if (balls == 0) {
+                exhausted();
             }
-            return;
         }
-        balls2--;
-        if (balls2 <= 0) {
+
+        /** Reaccion cuando el jugador se queda sin balones. */
+        abstract void exhausted() throws POOBSoccerException;
+    }
+
+    /** Balones del jugador 1: al agotarse, la maquina gana la serie. */
+    private final class PlayerLives extends Lives {
+
+        @Override
+        void exhausted() {
+            finish(PLAYER_TWO);
+        }
+    }
+
+    /** Balones de la maquina: al agotarse sube la racha y entra un nuevo rival con balones llenos. */
+    private final class RivalLives extends Lives {
+
+        @Override
+        void exhausted() throws POOBSoccerException {
             streak++;
-            balls2 = INITIAL_BALLS;
-            newRivalRequested = true;
+            balls = INITIAL_BALLS;
+            replaceRival();
         }
-    }
-
-    @Override
-    public boolean needsNewRival() {
-        return newRivalRequested;
-    }
-
-    @Override
-    protected void onRivalReplaced() {
-        newRivalRequested = false;
-    }
-
-    @Override
-    public int getStreak() {
-        return streak;
-    }
-
-    @Override
-    public int getBalls(Character player) {
-        return player == getPlayer1() ? balls1 : balls2;
     }
 }
