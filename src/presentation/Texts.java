@@ -41,6 +41,7 @@ final class Texts {
         put("settings.language", "Idioma", "Language");
         put("settings.save", "Guardar", "Save");
         put("match.hint", "P / Esc: pausa", "P / Esc: pause");
+        put("match.goal", "¡GOL!", "GOAL!");
         put("hud.armed", "¡PODER LISTO!", "POWER READY!");
         put("pause.title", "Pausa", "Pause");
         put("pause.resume", "Reanudar", "Resume");

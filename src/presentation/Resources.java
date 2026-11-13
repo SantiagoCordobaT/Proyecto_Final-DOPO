@@ -4,10 +4,12 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GradientPaint;
+import java.awt.GraphicsEnvironment;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.LayoutManager;
 import java.awt.Polygon;
+import java.awt.RadialGradientPaint;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.event.ActionListener;
@@ -47,8 +49,9 @@ final class Resources {
     private static final String STREET_FACE = "Impact";
     static final Font TITLE_FONT = new Font(STREET_FACE, Font.ITALIC, 76);
     static final Font HEADING_FONT = new Font(STREET_FACE, Font.ITALIC, 30);
-    static final Font SCORE_FONT = new Font(STREET_FACE, Font.PLAIN, 44);
+    static final Font SCORE_FONT = new Font(STREET_FACE, Font.PLAIN, 40);
     static final Font TEXT_FONT = new Font(Font.SANS_SERIF, Font.BOLD, 14);
+    static final Font HINT_FONT = new Font(Font.SANS_SERIF, Font.PLAIN, 11);
     private static final Font GRAFFITI_FONT = new Font(STREET_FACE, Font.ITALIC, 92);
 
     // Medidas nominales del fondo; al pintarlo se escala al tamano del lienzo
@@ -64,6 +67,9 @@ final class Resources {
     private static final int POST_STEP = 150;
     private static final int LAMP_Y = 28;
     private static final int CONE_SPREAD = 220;
+    private static final int LAMP_HALO = 64;
+    private static final int SLAB_WIDTH = 75;
+    private static final int SLAB_SPREAD = 5;
     private static final String GRAFFITI = "POOB";
     private static final Color[] NEUTRAL_TEAM = { Color.GRAY, Color.LIGHT_GRAY, Color.DARK_GRAY };
 
@@ -71,7 +77,7 @@ final class Resources {
 
     private final Map<String, Color[]> teams = new HashMap<String, Color[]>();
     private final Color[] playerColors = { ACCENT, RIVAL };
-    private final BufferedImage backdrop;
+    private BufferedImage backdrop;
 
     private Resources() {
         teams.put("Canadá", new Color[] { new Color(216, 30, 44), Color.WHITE, new Color(216, 30, 44) });
@@ -80,7 +86,7 @@ final class Resources {
         teams.put("Brasil", new Color[] { new Color(0, 156, 59), new Color(255, 223, 0), new Color(0, 39, 118) });
         UIManager.put("ProgressBar.selectionForeground", ASPHALT);
         UIManager.put("ProgressBar.selectionBackground", TEXT);
-        backdrop = paintStreet();
+        backdrop = paintStreet(WIDTH, HEIGHT);
     }
 
     /** @return La unica instancia del gestor de recursos. */
@@ -115,9 +121,15 @@ final class Resources {
         return (int) Math.round(ground * HEIGHT / GROUND);
     }
 
-    /** Pinta el fondo callejero escalado al tamano indicado. */
+    /**
+     * Pinta el fondo callejero del tamano indicado. El fondo se dibuja una sola vez
+     * por tamano y se reutiliza en cada cuadro.
+     */
     void paintBackdrop(Graphics g, int width, int height) {
-        g.drawImage(backdrop, 0, 0, width, height, null);
+        if (backdrop.getWidth() != width || backdrop.getHeight() != height) {
+            backdrop = paintStreet(width, height);
+        }
+        g.drawImage(backdrop, 0, 0, null);
     }
 
     /** @return Boton con el estilo del juego y su escuchador ya suscrito. */
@@ -172,15 +184,19 @@ final class Resources {
         return panel;
     }
 
-    private static BufferedImage paintStreet() {
-        BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+    private static BufferedImage paintStreet(int width, int height) {
+        // Imagen en el formato de la pantalla: copiarla en cada cuadro es lo mas rapido posible
+        BufferedImage image = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
+                .getDefaultConfiguration().createCompatibleImage(width, height);
         Graphics2D g = image.createGraphics();
+        g.scale(width / (double) WIDTH, height / (double) HEIGHT);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         paintSkyline(g);
         paintFence(g);
         paintWall(g);
-        paintFloodlights(g);
         paintFloor(g);
+        paintFloodlights(g);
+        paintVignette(g);
         g.dispose();
         return image;
     }
@@ -253,24 +269,43 @@ final class Resources {
         g.fillRect(0, WALL_TOP, WIDTH, GROUND - WALL_TOP);
     }
 
-    /** Dos postes de luz con su haz sobre la cancha. */
+    /** Dos postes de luz con su haz sobre la cancha, el charco de luz en el piso y el halo de la lampara. */
     private static void paintFloodlights(Graphics2D g) {
+        Color glow = new Color(255, 250, 210, 150);
+        Color none = new Color(255, 250, 210, 0);
         for (int x = WIDTH / 6; x < WIDTH; x += WIDTH * 2 / 3) {
-            g.setPaint(new GradientPaint(0, LAMP_Y, new Color(255, 250, 210, 70), 0, GROUND,
-                    new Color(255, 250, 210, 0)));
+            g.setPaint(new GradientPaint(0, LAMP_Y, new Color(255, 250, 210, 70), 0, GROUND, none));
             g.fill(new Polygon(new int[] { x - 30, x + 30, x + CONE_SPREAD, x - CONE_SPREAD },
                     new int[] { LAMP_Y + 18, LAMP_Y + 18, GROUND, GROUND }, 4));
+            g.setColor(new Color(255, 250, 210, 34));
+            g.fillOval(x - CONE_SPREAD, GROUND + 4, 2 * CONE_SPREAD, HEIGHT - GROUND - 8);
             g.setColor(new Color(40, 40, 46));
             g.fillRect(x - 4, LAMP_Y + 10, 8, GROUND - LAMP_Y - 10);
+            g.setPaint(new RadialGradientPaint(x, LAMP_Y + 9f, LAMP_HALO, new float[] { 0f, 1f },
+                    new Color[] { glow, none }));
+            g.fillOval(x - LAMP_HALO, LAMP_Y + 9 - LAMP_HALO, 2 * LAMP_HALO, 2 * LAMP_HALO);
             g.setColor(new Color(236, 234, 214));
             g.fillRoundRect(x - 34, LAMP_Y, 68, 18, 8, 8);
         }
     }
 
-    /** Piso de concreto con la linea de la cancha, la marca central y grietas. */
+    /** Bordes oscurecidos: centran la mirada en la cancha. */
+    private static void paintVignette(Graphics2D g) {
+        g.setPaint(new RadialGradientPaint(WIDTH / 2f, HEIGHT / 2f, WIDTH * 0.62f, new float[] { 0.55f, 1f },
+                new Color[] { new Color(0, 0, 0, 0), new Color(0, 0, 0, 150) }));
+        g.fillRect(0, 0, WIDTH, HEIGHT);
+    }
+
+    /** Piso de concreto en perspectiva con la linea de la cancha, la marca central y grietas. */
     private static void paintFloor(Graphics2D g) {
         g.setPaint(new GradientPaint(0, GROUND, new Color(104, 104, 110), 0, HEIGHT, new Color(56, 56, 62)));
         g.fillRect(0, GROUND, WIDTH, HEIGHT - GROUND);
+        g.setColor(new Color(40, 40, 44, 110));
+        g.setStroke(new BasicStroke(1f));
+        for (int x = -WIDTH / 2; x <= WIDTH / 2; x += SLAB_WIDTH) {
+            g.drawLine(WIDTH / 2 + x, GROUND, WIDTH / 2 + x * SLAB_SPREAD / 4, HEIGHT);
+        }
+        g.drawLine(0, GROUND + (HEIGHT - GROUND) / 3, WIDTH, GROUND + (HEIGHT - GROUND) / 3);
         g.setColor(new Color(40, 40, 44));
         g.setStroke(new BasicStroke(1.5f));
         g.drawPolyline(new int[] { 120, 150, 172, 210 }, new int[] { HEIGHT, GROUND + 26, GROUND + 18, GROUND + 4 }, 4);

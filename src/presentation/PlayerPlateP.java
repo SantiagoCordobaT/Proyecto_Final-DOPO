@@ -25,6 +25,8 @@ import dominio.excepciones.POOBSoccerException;
 final class PlayerPlateP extends JPanel {
 
     private static final int PERCENT = 100;
+    private static final double PULSE_SECONDS = 0.5;
+    private static final Color[] PULSE_COLORS = { Resources.READY, Resources.TEXT };
 
     private final HeadSoccer model;
     private final int number;
@@ -32,6 +34,7 @@ final class PlayerPlateP extends JPanel {
     private final TeamBadge badge = new TeamBadge();
     private final JLabel name;
     private final JProgressBar power;
+    private double pulse;
 
     /**
      * @param model Fachada del dominio.
@@ -59,16 +62,19 @@ final class PlayerPlateP extends JPanel {
     }
 
     /**
-     * Actualiza la placa con el estado actual del jugador.
+     * Actualiza la placa con el estado actual del jugador; la barra late mientras
+     * el poder esta armado.
      *
+     * @param seconds Segundos reales transcurridos desde el cuadro anterior.
      * @throws POOBSoccerException Si no hay un partido iniciado.
      */
-    void refresh() throws POOBSoccerException {
+    void refresh(double seconds) throws POOBSoccerException {
         boolean armed = model.isPlayerPowerArmed(number);
         badge.setCountry(model.getPlayerCountry(number));
         name.setText(model.getPlayerName(number).toUpperCase());
         power.setValue((int) Math.round(model.getPlayerPowerBar(number) * PERCENT));
         power.setString(armed ? text("hud.armed") : model.getPlayerPowerName(number));
-        power.setForeground(armed ? Resources.READY : color);
+        pulse = (pulse + seconds) % PULSE_SECONDS;
+        power.setForeground(armed ? PULSE_COLORS[(int) (pulse * PULSE_COLORS.length / PULSE_SECONDS)] : color);
     }
 }

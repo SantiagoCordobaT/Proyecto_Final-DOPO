@@ -1,9 +1,6 @@
 package presentation;
 
-import static presentation.Texts.text;
-
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -13,7 +10,6 @@ import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -21,8 +17,8 @@ import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Pantalla del partido: marcador al norte, lienzo de la cancha al centro y ayuda
- * al sur. Su temporizador entrega el tiempo real a la fachada y repinta; su
+ * Pantalla del partido: marcador al norte y lienzo de la cancha al
+ * centro. Su temporizador entrega el tiempo real a la fachada y repinta; su
  * escuchador de teclado traduce las teclas de los dos jugadores en acciones de
  * la fachada. No contiene reglas del juego.
  *
@@ -32,7 +28,7 @@ import dominio.excepciones.POOBSoccerException;
 @SuppressWarnings("serial")
 final class MatchP extends JPanel {
 
-    private static final int FRAME_MILLIS = 16;
+    private static final int FRAME_MILLIS = 8;
     private static final double NANOS_PER_SECOND = 1e9;
     // Tope de tiempo por cuadro: una pausa de la ventana no hace saltar la fisica
     private static final double MAX_FRAME_SECONDS = 0.1;
@@ -43,7 +39,6 @@ final class MatchP extends JPanel {
     private final HeadSoccer model;
     private final HudP hud;
     private final CourtP court;
-    private final JLabel hint;
     private final Timer timer;
     private final Map<Integer, PlayerKey> keys = new HashMap<Integer, PlayerKey>();
     private long lastNanos;
@@ -54,17 +49,12 @@ final class MatchP extends JPanel {
      */
     MatchP(HeadSoccerGUI gui, HeadSoccer model) {
         super(new BorderLayout());
-        Resources resources = Resources.getInstance();
         this.gui = gui;
         this.model = model;
         hud = new HudP(model);
         court = new CourtP(model);
-        hint = resources.label("", Resources.TEXT_FONT);
-        JPanel footer = resources.panel(new FlowLayout(FlowLayout.CENTER, Resources.GAP, Resources.GAP / 3));
-        footer.add(hint);
         add(hud, BorderLayout.NORTH);
         add(court, BorderLayout.CENTER);
-        add(footer, BorderLayout.SOUTH);
         timer = new Timer(FRAME_MILLIS, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -87,7 +77,8 @@ final class MatchP extends JPanel {
 
     /** Arranca el ciclo del partido ya iniciado en la fachada y toma el teclado. */
     void start() {
-        hint.setText(text("match.hint"));
+        hud.relabel();
+        court.enter();
         lastNanos = System.nanoTime();
         timer.start();
         requestFocusInWindow();
@@ -121,8 +112,8 @@ final class MatchP extends JPanel {
         lastNanos = now;
         try {
             model.updateTick(seconds);
-            hud.refresh();
-            court.repaint();
+            hud.refresh(seconds);
+            court.animate(seconds);
             if (model.isMatchFinished()) {
                 timer.stop();
                 gui.showResult();
