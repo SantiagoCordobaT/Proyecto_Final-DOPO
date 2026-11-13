@@ -44,8 +44,9 @@ final class FieldDrawing implements Drawable {
         g.setStroke(THICK);
         g.draw(new Line2D.Double(0.0, ground, width, ground));
         g.draw(new Line2D.Double(width / 2.0, ground - MIDLINE_HEIGHT, width / 2.0, ground));
+        double crossbar = game.getCrossbarThickness();
         for (double[] goal : game.getGoalBounds()) {
-            drawGoal(g, goal, game.getCrossbarThickness());
+            drawGoal(g, goal, crossbar);
         }
     }
 
