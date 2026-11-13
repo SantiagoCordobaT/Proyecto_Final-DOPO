@@ -1,73 +1,96 @@
 package presentation;
 
+import java.awt.CardLayout;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
 import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
-import javax.swing.*;
 
-public class HeadSoccerGUI extends JFrame {
-    private HeadSoccer model;
-    private MainMenuP mainMenu;
-    private GameModeD gameModeDialog;
-    private CharacterSelectD characterSelectDialog;
-    private SettingsD settingsDialog;
+/**
+ * Ventana principal de POOBSoccer: un mazo de pantallas (CardLayout) por el que
+ * se navega del menu a la configuracion del partido y a la seleccion de personajes.
+ *
+ * @author Santiago Cordoba - Camilo Rivas
+ * @version 1.0
+ */
+@SuppressWarnings("serial")
+public final class HeadSoccerGUI extends JFrame {
 
-    public HeadSoccerGUI() {
-        try {
-            model = HeadSoccer.getInstance();
-        } catch (POOBSoccerException e) {
-            JOptionPane.showMessageDialog(this, "Error al inicializar el juego: " + e.getMessage());
-        }
+    private static final String TITLE = "POOBSoccer";
+    private static final int FRAME_WIDTH = 900;
+    private static final int FRAME_HEIGHT = 620;
 
-        setTitle("Head Soccer");
-        setSize(800, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+    private final CardLayout cards = new CardLayout();
+    private final JPanel deck = new JPanel(cards);
+    private final MainMenuP menu;
+    private final MatchSetupP setup;
+    private final CharacterSelectP characterSelect;
+
+    /**
+     * Crea la ventana y sus pantallas (Creator).
+     *
+     * @param game Fachada del juego que usan las pantallas.
+     */
+    private HeadSoccerGUI(HeadSoccer game) {
+        super(TITLE);
+        menu = register(new MainMenuP(this, game));
+        setup = register(new MatchSetupP(this, game));
+        characterSelect = register(new CharacterSelectP(this, game));
+        setContentPane(deck);
+        setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setResizable(false);
-
-        // Inicializar el menú principal
-        mainMenu = new MainMenuP(this);
-        add(mainMenu);
-        
-        setVisible(true);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
-    public void openGamesModes() {
-        model.newGame();
-        gameModeDialog = new GameModeD(this);
-        gameModeDialog.setVisible(true);
+    /** Muestra el menu principal. */
+    void showMenu() {
+        display(menu);
     }
 
-    public void selectMode(int index) {
+    /** Muestra la eleccion de modalidad y tipo de partido. */
+    void showSetup() {
+        display(setup);
+    }
+
+    /** Muestra la seleccion de personajes. */
+    void showCharacterSelect() {
+        display(characterSelect);
+    }
+
+    private <S extends Screen> S register(S screen) {
+        deck.add(screen, screen.getName());
+        return screen;
+    }
+
+    private void display(Screen screen) {
+        cards.show(deck, screen.getName());
+        screen.enter();
+    }
+
+    /**
+     * Abre la ventana en el menu principal. Si el juego no se puede crear, informa el
+     * error y no abre la ventana.
+     */
+    private static void launch() {
         try {
-            model.selectMode(index);
+            HeadSoccerGUI gui = new HeadSoccerGUI(HeadSoccer.getInstance());
+            gui.showMenu();
+            gui.setVisible(true);
         } catch (POOBSoccerException e) {
-            JOptionPane.showMessageDialog(this, "Error al seleccionar modalidad: " + e.getMessage());
+            Screen.report(null, e);
         }
     }
 
-    public void openCharacterSelect() {
-        characterSelectDialog = new CharacterSelectD(this);
-        characterSelectDialog.setVisible(true);
-    }
-
-    public void selectCharacter(int playerIndex, int charIndex) {
-        try {
-            model.selectPlayer(playerIndex, charIndex);
-        } catch (POOBSoccerException e) {
-            JOptionPane.showMessageDialog(this, "Error al seleccionar personaje: " + e.getMessage());
-        }
-    }
-
-    public void openSettings() {
-        settingsDialog = new SettingsD(this);
-        settingsDialog.setVisible(true);
-    }
-
-    public HeadSoccer getModel() {
-        return model;
-    }
-
+    /**
+     * Punto de entrada de la aplicacion.
+     *
+     * @param args No se usan.
+     */
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new HeadSoccerGUI());
+        SwingUtilities.invokeLater(HeadSoccerGUI::launch);
     }
 }

@@ -1,39 +1,51 @@
 package presentation;
 
-import javax.swing.*;
-import java.awt.*;
+import static presentation.Texts.text;
 
-public class SettingsD extends JDialog {
-    private JCheckBox soundCheck;
-    private JCheckBox musicCheck;
-    private JList<String> languagelist;
-    private JButton saveButton;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.Frame;
 
-    public SettingsD(HeadSoccerGUI gui) {
-        super(gui, "Configuración", true);
-        setSize(350, 300);
-        setLocationRelativeTo(gui);
-        setLayout(new GridLayout(4, 1, 10, 10));
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
-        soundCheck = new JCheckBox("Sonido", gui.getModel().getSettings().isSoundOn());
-        musicCheck = new JCheckBox("Música", gui.getModel().getSettings().isMusicOn());
-        
-        String[] languages = {"Español", "Inglés"};
-        languagelist = new JList<>(languages);
-        languagelist.setSelectedIndex(0);
+/**
+ * Configuracion (ventana modal): el idioma de la interfaz. Guardar cambia el
+ * idioma de {@link Texts}; cerrar la ventana lo deja como estaba.
+ *
+ * @author Santiago Cordoba - Camilo Rivas
+ * @version 1.0
+ */
+@SuppressWarnings("serial")
+final class SettingsD extends JDialog {
 
-        saveButton = new JButton("Guardar / Volver");
+    private static final int MARGIN = 15;
 
-        add(soundCheck);
-        add(musicCheck);
-        add(new JScrollPane(languagelist));
-        add(saveButton);
-
-        saveButton.addActionListener(e -> {
-            gui.getModel().getSettings().setSoundOn(soundCheck.isSelected());
-            gui.getModel().getSettings().setMusicOn(musicCheck.isSelected());
-            gui.getModel().getSettings().setLanguage(languagelist.getSelectedValue());
+    /** @param owner Ventana sobre la que se abre la configuracion. */
+    SettingsD(Frame owner) {
+        super(owner, text("settings.title"), true);
+        Texts texts = Texts.getInstance();
+        JComboBox<String> languages = new JComboBox<String>(texts.getLanguages());
+        languages.setSelectedIndex(texts.getLanguage());
+        JButton save = new JButton(text("settings.save"));
+        save.addActionListener(e -> {
+            texts.setLanguage(languages.getSelectedIndex());
             dispose();
         });
+
+        JPanel language = new JPanel(new FlowLayout());
+        language.add(new JLabel(text("settings.language")));
+        language.add(languages);
+        JPanel content = new JPanel(new BorderLayout(MARGIN, MARGIN));
+        content.setBorder(BorderFactory.createEmptyBorder(MARGIN, MARGIN, MARGIN, MARGIN));
+        content.add(language, BorderLayout.CENTER);
+        content.add(save, BorderLayout.SOUTH);
+        setContentPane(content);
+        pack();
+        setLocationRelativeTo(owner);
     }
 }

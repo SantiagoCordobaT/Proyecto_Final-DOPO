@@ -28,7 +28,6 @@ public final class HeadSoccer {
     private final GameModeCatalog modes;
     private final MatchTypeCatalog matchTypes;
     private final CharacterCatalog characters;
-    private final Settings settings;
     private final Character[] chosen = new Character[Match.PLAYERS];
 
     private GameMode selectedMode;
@@ -41,7 +40,6 @@ public final class HeadSoccer {
      * @throws POOBSoccerException Si algun dato del catalogo fuera invalido.
      */
     private HeadSoccer() throws POOBSoccerException {
-        this.settings = new Settings();
         this.modes = new GameModeCatalog();
         this.matchTypes = new MatchTypeCatalog();
         this.characters = new CharacterCatalog();
@@ -403,12 +401,5 @@ public final class HeadSoccer {
      */
     public double getGroundY() {
         return Field.GROUND_Y;
-    }
-
-    /**
-     * @return Configuracion del juego (sonido, musica e idioma).
-     */
-    public Settings getSettings() {
-        return settings;
     }
 }
