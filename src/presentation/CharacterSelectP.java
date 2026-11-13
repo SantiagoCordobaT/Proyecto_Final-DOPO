@@ -1,13 +1,10 @@
 package presentation;
 
-import static presentation.Texts.text;
-
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
@@ -60,7 +57,7 @@ final class CharacterSelectP extends StepScreen {
             game.selectPlayer(1, first.getSelectedIndex());
             game.selectPlayer(2, second.getSelectedIndex());
             game.startMatch();
-            JOptionPane.showMessageDialog(this, text("select.ready"));
+            gui.showGame();
         } catch (POOBSoccerException e) {
             report(this, e);
         }

@@ -12,8 +12,8 @@ class Goal {
 
     static final double WIDTH = 90.0;
     static final double HEIGHT = 140.0;
+    static final double CROSSBAR_THICKNESS = 10.0;
 
-    private static final double CROSSBAR_THICKNESS = 10.0;
     private static final double CROSSBAR_TOP = Field.GROUND_Y - HEIGHT;
     private static final double CROSSBAR_BOTTOM = CROSSBAR_TOP + CROSSBAR_THICKNESS;
 

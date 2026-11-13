@@ -749,4 +749,14 @@ public class HeadSoccerTest {
         POOBSoccerException e = assertThrows(POOBSoccerException.class, () -> game.getCharacterCountry(-1));
         assertEquals(POOBSoccerException.PERSONAJE_INVALIDO, e.getMessage());
     }
+
+    @Test
+    public void facadeShouldExposeTheGeometryThePhysicsUses() {
+        assertEquals(Field.WIDTH, game.getFieldWidth(), 1e-9);
+        assertEquals(Field.GROUND_Y, game.getGroundY(), 1e-9);
+        assertEquals(Ball.RADIUS, game.getBallRadius(), 1e-9);
+        assertEquals(Goal.WIDTH, game.getGoalWidth(), 1e-9);
+        assertEquals(Goal.HEIGHT, game.getGoalHeight(), 1e-9);
+        assertEquals(Goal.CROSSBAR_THICKNESS, game.getCrossbarThickness(), 1e-9);
+    }
 }

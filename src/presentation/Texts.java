@@ -33,7 +33,6 @@ final class Texts {
         put("select.title", "Escoge tu personaje", "Choose your character");
         put("select.player1", "Jugador 1", "Player 1");
         put("select.player2", "Jugador 2", "Player 2");
-        put("select.ready", "¡Partido listo!", "Match ready!");
         put("card.country", "País:", "Country:");
         put("card.speed", "Velocidad:", "Speed:");
         put("card.jump", "Salto:", "Jump:");
@@ -43,6 +42,7 @@ final class Texts {
         put("settings.title", "Configuración", "Settings");
         put("settings.language", "Idioma:", "Language:");
         put("settings.save", "Guardar", "Save");
+        put("hud.armed", "¡PODER LISTO!", "POWER READY!");
         put("error.title", "Error", "Error");
     }
 

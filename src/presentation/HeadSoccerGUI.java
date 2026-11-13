@@ -11,7 +11,8 @@ import dominio.excepciones.POOBSoccerException;
 
 /**
  * Ventana principal de POOBSoccer: un mazo de pantallas (CardLayout) por el que
- * se navega del menu a la configuracion del partido y a la seleccion de personajes.
+ * se navega del menu a la configuracion del partido, a la seleccion de personajes
+ * y al partido.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -20,17 +21,17 @@ import dominio.excepciones.POOBSoccerException;
 public final class HeadSoccerGUI extends JFrame {
 
     private static final String TITLE = "POOBSoccer";
-    private static final int FRAME_WIDTH = 900;
-    private static final int FRAME_HEIGHT = 620;
 
     private final CardLayout cards = new CardLayout();
     private final JPanel deck = new JPanel(cards);
     private final MainMenuP menu;
     private final MatchSetupP setup;
     private final CharacterSelectP characterSelect;
+    private final GamePanel match;
 
     /**
-     * Crea la ventana y sus pantallas (Creator).
+     * Crea la ventana y sus pantallas (Creator). La ventana toma el tamano de su
+     * pantalla mas grande, la del partido.
      *
      * @param game Fachada del juego que usan las pantallas.
      */
@@ -39,9 +40,10 @@ public final class HeadSoccerGUI extends JFrame {
         menu = register(new MainMenuP(this, game));
         setup = register(new MatchSetupP(this, game));
         characterSelect = register(new CharacterSelectP(this, game));
+        match = register(new GamePanel(this, game));
         setContentPane(deck);
-        setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setResizable(false);
+        pack();
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
@@ -59,6 +61,11 @@ public final class HeadSoccerGUI extends JFrame {
     /** Muestra la seleccion de personajes. */
     void showCharacterSelect() {
         display(characterSelect);
+    }
+
+    /** Muestra el partido ya iniciado y arranca su ciclo de juego. */
+    void showGame() {
+        display(match);
     }
 
     private <S extends Screen> S register(S screen) {

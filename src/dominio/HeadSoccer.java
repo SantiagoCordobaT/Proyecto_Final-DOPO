@@ -402,4 +402,25 @@ public final class HeadSoccer {
     public double getGroundY() {
         return Field.GROUND_Y;
     }
+
+    /**
+     * @return Ancho de cada arco.
+     */
+    public double getGoalWidth() {
+        return Goal.WIDTH;
+    }
+
+    /**
+     * @return Alto de cada arco, desde el suelo hasta lo alto del travesaño.
+     */
+    public double getGoalHeight() {
+        return Goal.HEIGHT;
+    }
+
+    /**
+     * @return Grosor del travesaño de cada arco.
+     */
+    public double getCrossbarThickness() {
+        return Goal.CROSSBAR_THICKNESS;
+    }
 }
