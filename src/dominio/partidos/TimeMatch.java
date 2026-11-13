@@ -15,8 +15,8 @@ public class TimeMatch extends MatchType {
     private double remainingSeconds;
     private boolean goldenGoal;
 
-    /** Crea el partido por tiempo. */
-    public TimeMatch() {
+    /** Crea el partido por tiempo; solo lo crea {@link MatchTypeCatalog}. */
+    TimeMatch() {
         super("Por Tiempo");
     }
 

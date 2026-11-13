@@ -14,6 +14,7 @@ import dominio.efectos.StunEffect;
 import dominio.excepciones.POOBSoccerException;
 import dominio.partidos.TimeMatch;
 import dominio.personajes.Character;
+import dominio.personajes.CharacterCatalog;
 import dominio.poderes.ConfusionPower;
 import dominio.poderes.FreezePower;
 import dominio.poderes.PowerBar;
@@ -511,10 +512,41 @@ public class HeadSoccerTest {
     @Test
     public void everyCharacterShouldHaveAUniquePower() throws POOBSoccerException {
         Set<String> powers = new HashSet<String>();
-        for (int i = 0; i < game.getCharacterCount(); i++) {
+        int count = game.getCharacterNames().length;
+        for (int i = 0; i < count; i++) {
             assertTrue(powers.add(game.getCharacterPowerName(i)), "Poder repetido: " + game.getCharacterPowerName(i));
         }
-        assertEquals(game.getCharacterCount(), powers.size());
+        assertEquals(count, powers.size());
+    }
+
+    @Test
+    public void catalogShouldCycleRivals() throws POOBSoccerException {
+        String[] names = game.getCharacterNames();
+        int last = names.length - 1;
+        game.selectMode(PVSM);
+        game.selectMatchType(SURVIVAL);
+        game.selectPlayer1(0);
+        game.selectPlayer2(last);
+        game.startMatch();
+        for (int rival = 0; rival < 2; rival++) {
+            for (int i = 0; i < 3; i++) {
+                putBallInRightGoal();
+                game.updateTick(TICK);
+            }
+            assertEquals(names[rival], game.getPlayerName(2));
+        }
+        assertEquals(2, game.getSurvivalStreak());
+    }
+
+    @Test
+    public void catalogsShouldListOptionsInOrder() throws POOBSoccerException {
+        assertEquals(3, game.getModeNames().length);
+        assertEquals(5, game.getMatchTypeNames().length);
+        assertEquals("Por Goles (3)", game.getMatchTypeNames()[GOALS_3]);
+        assertEquals("Jacob", game.getCharacterNames()[0]);
+        CharacterCatalog catalog = new CharacterCatalog();
+        POOBSoccerException e = assertThrows(POOBSoccerException.class, () -> catalog.get(99));
+        assertEquals(POOBSoccerException.PERSONAJE_INVALIDO, e.getMessage());
     }
 
     @Test

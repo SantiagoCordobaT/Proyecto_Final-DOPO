@@ -8,8 +8,8 @@ package dominio.modalidades;
  */
 public class MvsM extends GameMode {
 
-    /** Crea la modalidad MvsM. */
-    public MvsM() {
+    /** Crea la modalidad MvsM; solo la crea {@link GameModeCatalog}. */
+    MvsM() {
         super("Máquina vs Máquina");
     }
 

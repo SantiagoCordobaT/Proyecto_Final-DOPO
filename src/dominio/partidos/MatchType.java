@@ -1,5 +1,6 @@
 package dominio.partidos;
 
+import dominio.Named;
 import dominio.excepciones.POOBSoccerException;
 import dominio.modalidades.GameMode;
 import dominio.personajes.Character;
@@ -10,7 +11,7 @@ import dominio.personajes.Character;
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-public abstract class MatchType {
+public abstract class MatchType implements Named {
 
     private final String name;
     private Character player1;
@@ -158,6 +159,7 @@ public abstract class MatchType {
     }
 
     /** @return Nombre del tipo de partido. */
+    @Override
     public String getName() {
         return name;
     }

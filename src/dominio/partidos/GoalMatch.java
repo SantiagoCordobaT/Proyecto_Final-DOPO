@@ -1,6 +1,5 @@
 package dominio.partidos;
 
-import dominio.excepciones.POOBSoccerException;
 import dominio.personajes.Character;
 
 /**
@@ -11,22 +10,15 @@ import dominio.personajes.Character;
  */
 public class GoalMatch extends MatchType {
 
-    public static final int GOALS_SHORT = 3;
-    public static final int GOALS_MEDIUM = 5;
-    public static final int GOALS_LONG = 7;
-
     private final int targetGoals;
 
     /**
-     * @param targetGoals Meta de goles (3, 5 o 7).
-     * @throws POOBSoccerException Si la meta no es valida.
+     * Solo lo crea {@link MatchTypeCatalog}, que decide las metas ofrecidas.
+     *
+     * @param targetGoals Meta de goles.
      */
-    public GoalMatch(int targetGoals) throws POOBSoccerException {
+    GoalMatch(int targetGoals) {
         super("Por Goles (" + targetGoals + ")");
-        boolean valid = targetGoals == GOALS_SHORT || targetGoals == GOALS_MEDIUM || targetGoals == GOALS_LONG;
-        if (!valid) {
-            throw new POOBSoccerException(POOBSoccerException.META_INVALIDA);
-        }
         this.targetGoals = targetGoals;
     }
 

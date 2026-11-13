@@ -2,6 +2,7 @@ package dominio.personajes;
 
 import dominio.Ball;
 import dominio.Field;
+import dominio.Named;
 import dominio.efectos.Effect;
 import dominio.efectos.StatusEffects;
 import dominio.efectos.StunEffect;
@@ -17,7 +18,7 @@ import dominio.poderes.PowerBar;
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-public class Character {
+public class Character implements Named {
 
     public static final int MIN_STAT = 1;
     public static final int MAX_STAT = 5;
@@ -300,6 +301,7 @@ public class Character {
     /**
      * @return Nombre del personaje.
      */
+    @Override
     public String getName() {
         return name;
     }

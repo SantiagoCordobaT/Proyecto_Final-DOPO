@@ -22,8 +22,8 @@ public class SurvivalMatch extends MatchType {
     private int streak;
     private boolean newRivalRequested;
 
-    /** Crea el partido de supervivencia. */
-    public SurvivalMatch() {
+    /** Crea el partido de supervivencia; solo lo crea {@link MatchTypeCatalog}. */
+    SurvivalMatch() {
         super("Supervivencia");
     }
 

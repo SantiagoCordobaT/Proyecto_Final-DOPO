@@ -1,5 +1,7 @@
 package dominio.modalidades;
 
+import dominio.Named;
+
 /**
  * Modalidad de juego. Define que controlador usa cada jugador y si admite
  * el tipo de partido Supervivencia (LSP/Strategy).
@@ -7,7 +9,7 @@ package dominio.modalidades;
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-public abstract class GameMode {
+public abstract class GameMode implements Named {
 
     private final String name;
 
@@ -28,6 +30,7 @@ public abstract class GameMode {
     }
 
     /** @return Nombre de la modalidad. */
+    @Override
     public String getName() {
         return name;
     }

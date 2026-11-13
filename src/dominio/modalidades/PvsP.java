@@ -8,8 +8,8 @@ package dominio.modalidades;
  */
 public class PvsP extends GameMode {
 
-    /** Crea la modalidad PvsP. */
-    public PvsP() {
+    /** Crea la modalidad PvsP; solo la crea {@link GameModeCatalog}. */
+    PvsP() {
         super("Jugador vs Jugador");
     }
 

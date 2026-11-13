@@ -19,7 +19,6 @@ public class POOBSoccerException extends Exception {
     public static final String PARTIDO_NO_INICIADO = "El partido no ha sido iniciado.";
     public static final String JUGADOR_INVALIDO = "El número de jugador debe ser 1 o 2.";
     public static final String TIEMPO_INVALIDO = "El tiempo transcurrido no puede ser negativo.";
-    public static final String META_INVALIDA = "La meta de goles debe ser 3, 5 o 7.";
 
     /**
      * Crea la excepcion con el mensaje indicado.

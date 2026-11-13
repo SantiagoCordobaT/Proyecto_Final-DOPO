@@ -1,23 +1,13 @@
 package dominio;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import dominio.excepciones.POOBSoccerException;
 import dominio.modalidades.Controller;
 import dominio.modalidades.GameMode;
-import dominio.modalidades.MvsM;
-import dominio.modalidades.PvsM;
-import dominio.modalidades.PvsP;
-import dominio.partidos.GoalMatch;
+import dominio.modalidades.GameModeCatalog;
 import dominio.partidos.MatchType;
-import dominio.partidos.SurvivalMatch;
-import dominio.partidos.TimeMatch;
+import dominio.partidos.MatchTypeCatalog;
 import dominio.personajes.Character;
-import dominio.poderes.ConfusionPower;
-import dominio.poderes.FreezePower;
-import dominio.poderes.StunPower;
-import dominio.poderes.ShrinkPower;
+import dominio.personajes.CharacterCatalog;
 
 /**
  * Fachada (Facade) del dominio de POOBSoccer. La presentacion solo usa tipos
@@ -31,9 +21,9 @@ public class HeadSoccer {
     public static final double PHYSICS_STEP_SECONDS = 1.0 / 60.0;
     public static final double TIME_TOLERANCE = 1e-9;
 
-    private final List<GameMode> modes;
-    private final List<MatchType> matchTypes;
-    private final List<Character> characters;
+    private final GameModeCatalog modes;
+    private final MatchTypeCatalog matchTypes;
+    private final CharacterCatalog characters;
     private final Settings settings;
     private final Field field;
     private final Ball ball;
@@ -45,7 +35,6 @@ public class HeadSoccer {
     private Controller controller1;
     private Controller controller2;
     private Character lastKicker;
-    private int rivalCatalogIndex;
 
     private boolean started;
     private boolean paused;
@@ -60,58 +49,26 @@ public class HeadSoccer {
         this.settings = new Settings();
         this.field = new Field();
         this.ball = new Ball();
-
-        this.modes = new ArrayList<GameMode>();
-        modes.add(new PvsP());
-        modes.add(new PvsM());
-        modes.add(new MvsM());
-
-        this.matchTypes = new ArrayList<MatchType>();
-        matchTypes.add(new TimeMatch());
-        matchTypes.add(new GoalMatch(GoalMatch.GOALS_SHORT));
-        matchTypes.add(new GoalMatch(GoalMatch.GOALS_MEDIUM));
-        matchTypes.add(new GoalMatch(GoalMatch.GOALS_LONG));
-        matchTypes.add(new SurvivalMatch());
-
-        this.characters = new ArrayList<Character>();
-        characters.add(new Character("Jacob", "Canadá", 3, 3, 4, 3, new FreezePower()));
-        characters.add(new Character("Kenji", "Japón", 5, 4, 2, 2, new StunPower()));
-        characters.add(new Character("Mateo", "Colombia", 4, 3, 3, 4, new ConfusionPower()));
-        characters.add(new Character("Rafael", "Brasil", 4, 5, 3, 3, new ShrinkPower()));
+        this.modes = new GameModeCatalog();
+        this.matchTypes = new MatchTypeCatalog();
+        this.characters = new CharacterCatalog();
     }
 
     // ------------------------------------------------------------ catalogos
 
     /** @return Nombres de las modalidades. */
     public String[] getModeNames() {
-        String[] names = new String[modes.size()];
-        for (int i = 0; i < names.length; i++) {
-            names[i] = modes.get(i).getName();
-        }
-        return names;
+        return modes.names();
     }
 
     /** @return Nombres de los tipos de partido. */
     public String[] getMatchTypeNames() {
-        String[] names = new String[matchTypes.size()];
-        for (int i = 0; i < names.length; i++) {
-            names[i] = matchTypes.get(i).getName();
-        }
-        return names;
-    }
-
-    /** @return Cantidad de personajes del catalogo. */
-    public int getCharacterCount() {
-        return characters.size();
+        return matchTypes.names();
     }
 
     /** @return Nombres de todos los personajes del catálogo (para uso directo en vistas). */
     public String[] getCharacterNames() {
-        String[] names = new String[characters.size()];
-        for (int i = 0; i < names.length; i++) {
-            names[i] = characters.get(i).getName();
-        }
-        return names;
+        return characters.names();
     }
 
     /**
@@ -120,7 +77,7 @@ public class HeadSoccer {
      * @throws POOBSoccerException Si el indice no existe.
      */
     public String getCharacterCountry(int index) throws POOBSoccerException {
-        return catalogCharacter(index).getCountry();
+        return characters.get(index).getCountry();
     }
 
     /**
@@ -129,7 +86,7 @@ public class HeadSoccer {
      * @throws POOBSoccerException Si el indice no existe.
      */
     public int getCharacterSpeed(int index) throws POOBSoccerException {
-        return catalogCharacter(index).getSpeed();
+        return characters.get(index).getSpeed();
     }
 
     /**
@@ -138,7 +95,7 @@ public class HeadSoccer {
      * @throws POOBSoccerException Si el indice no existe.
      */
     public int getCharacterJump(int index) throws POOBSoccerException {
-        return catalogCharacter(index).getJump();
+        return characters.get(index).getJump();
     }
 
     /**
@@ -147,7 +104,7 @@ public class HeadSoccer {
      * @throws POOBSoccerException Si el indice no existe.
      */
     public int getCharacterStrength(int index) throws POOBSoccerException {
-        return catalogCharacter(index).getStrength();
+        return characters.get(index).getStrength();
     }
 
     /**
@@ -156,7 +113,7 @@ public class HeadSoccer {
      * @throws POOBSoccerException Si el indice no existe.
      */
     public int getCharacterPowerLevel(int index) throws POOBSoccerException {
-        return catalogCharacter(index).getPowerLevel();
+        return characters.get(index).getPowerLevel();
     }
 
     /**
@@ -165,7 +122,7 @@ public class HeadSoccer {
      * @throws POOBSoccerException Si el indice no existe.
      */
     public String getCharacterPowerName(int index) throws POOBSoccerException {
-        return catalogCharacter(index).getPowerName();
+        return characters.get(index).getPowerName();
     }
 
     /**
@@ -174,14 +131,7 @@ public class HeadSoccer {
      * @throws POOBSoccerException Si el indice no existe.
      */
     public String getCharacterPowerDescription(int index) throws POOBSoccerException {
-        return catalogCharacter(index).getPowerDescription();
-    }
-
-    private Character catalogCharacter(int index) throws POOBSoccerException {
-        if (index < 0 || index >= characters.size()) {
-            throw new POOBSoccerException(POOBSoccerException.PERSONAJE_INVALIDO);
-        }
-        return characters.get(index);
+        return characters.get(index).getPowerDescription();
     }
 
     // ------------------------------------------------------------ selecciones
@@ -193,9 +143,6 @@ public class HeadSoccer {
      * @throws POOBSoccerException Si el indice es invalido o es incompatible con el tipo de partido elegido.
      */
     public void selectMode(int index) throws POOBSoccerException {
-        if (index < 0 || index >= modes.size()) {
-            throw new POOBSoccerException(POOBSoccerException.MODO_INVALIDO);
-        }
         GameMode mode = modes.get(index);
         if (selectedMatchType != null) {
             selectedMatchType.validateMode(mode);
@@ -210,9 +157,6 @@ public class HeadSoccer {
      * @throws POOBSoccerException Si el indice es invalido o es incompatible con la modalidad elegida.
      */
     public void selectMatchType(int index) throws POOBSoccerException {
-        if (index < 0 || index >= matchTypes.size()) {
-            throw new POOBSoccerException(POOBSoccerException.MODO_INVALIDO);
-        }
         MatchType type = matchTypes.get(index);
         if (selectedMode != null) {
             type.validateMode(selectedMode);
@@ -227,7 +171,7 @@ public class HeadSoccer {
      * @throws POOBSoccerException Si el indice no existe.
      */
     public void selectPlayer1(int index) throws POOBSoccerException {
-        player1 = catalogCharacter(index).copy();
+        player1 = characters.get(index).copy();
     }
 
     /**
@@ -237,8 +181,7 @@ public class HeadSoccer {
      * @throws POOBSoccerException Si el indice no existe.
      */
     public void selectPlayer2(int index) throws POOBSoccerException {
-        player2 = catalogCharacter(index).copy();
-        rivalCatalogIndex = index;
+        player2 = characters.get(index).copy();
     }
 
     // ------------------------------------------------------------ partido
@@ -372,8 +315,7 @@ public class HeadSoccer {
 
     /** Supervivencia: entra un nuevo rival de la maquina (siguiente del catalogo) con balones llenos. */
     private void loadNextRival() throws POOBSoccerException {
-        rivalCatalogIndex = (rivalCatalogIndex + 1) % characters.size();
-        player2 = characters.get(rivalCatalogIndex).copy();
+        player2 = characters.nextAfter(player2);
         selectedMatchType.replaceRival(player2);
         Side.RIGHT.place(player2);
     }
