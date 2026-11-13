@@ -205,6 +205,7 @@ flowchart TB
   subgraph P["presentation (Swing)"]
     GUI["HeadSoccerGUI (JFrame): model : HeadSoccer"]
     PNL["Paneles (JPanel): MainMenuP, MatchP, HudP, PlayerPlateP, CourtP, CharacterCard, TeamBadge"]
+    ACT["Actores de CourtP (Actor): PlayerSprite + EffectOverlay, BallSprite, GoalSprite, Particles, GoalCelebration"]
     DLG["Diálogos (JDialog) sobre StreetDialog: GameModeD, CharacterSelectD, SettingsD, PauseD, ResultD"]
     KEY["MatchP.Keyboard (KeyAdapter): tabla de PlayerKey"]
     RES["Singleton: Resources (recursos gráficos) y Texts (idioma)"]
@@ -224,6 +225,8 @@ flowchart TB
   GUI --> PNL
   GUI --> DLG
   PNL --> KEY
+  PNL --> ACT
+  ACT --> HS
   PNL --> RES
   DLG --> RES
   GUI --> HS
@@ -242,7 +245,7 @@ flowchart TB
   PO --> EF
 ```
 
-**Un cuadro del juego:** un `javax.swing.Timer` de 16 ms llama a `MatchP.advance()`, que mide el tiempo real (con tope de 0,1 s para que una pausa de la ventana no haga saltar la física) y llama a `HeadSoccer.updateTick(dt)`. `Match` pide a cada `Controller` las intenciones de su personaje, actualiza los personajes con `dt`, avanza el balón en pasos fijos de 1/60 s, revisa los goles con `Field.scorerOf` y deja que el `MatchType` avance su reloj. Luego `MatchP` refresca el marcador (`HudP`), repinta el lienzo (`CourtP.paintComponent`, que llama primero a `super.paintComponent`) y, si el partido terminó, abre `ResultD`.
+**Un cuadro del juego:** un `javax.swing.Timer` de 8 ms llama a `MatchP.advance()`, que mide el tiempo real (con tope de 0,1 s para que una pausa de la ventana no haga saltar la física) y llama a `HeadSoccer.updateTick(dt)`. `Match` pide a cada `Controller` las intenciones de su personaje, actualiza los personajes con `dt`, avanza el balón en pasos fijos de 1/60 s, revisa los goles con `Field.scorerOf` y deja que el `MatchType` avance su reloj. Luego `MatchP` refresca el marcador (`HudP`) y llama a `CourtP.animate(dt)`: cada actor lee de la fachada lo que necesita y avanza su animación (`Actor.update`), y después `CourtP.paintComponent` (que llama primero a `super.paintComponent`) los pinta en orden (`Actor.paint`). Si el partido terminó, abre `ResultD`.
 
 ### Patrones aplicados
 
@@ -252,12 +255,12 @@ flowchart TB
 | **Facade / Controller (GRASP)** | `HeadSoccer` recibe todos los eventos del sistema (selecciones, inicio, tick, pausa, teclas) y valida antes de delegar en `Match` o en los catálogos. La vista solo traduce eventos de Swing: el `Timer` llama a `updateTick`, `MatchP.Keyboard` a `pressAction`/`releaseAction` y la pérdida de foco de `MatchP` a `releaseAllActions`. `HeadSoccerGUI` guarda la única referencia al dominio (`model : HeadSoccer`) y la entrega a los contenedores que compone. |
 | **Template Method** | `Controller.control` (pasos `direction`, `wantsJump`, `wantsKick`, `wantsPower`); `MatchType.goalScored`, final, que ignora los goles de un partido terminado y delega en `onGoal`; `SurvivalMatch.Lives.lose` con el paso `exhausted()` (jugador o rival); `Power.applyEffect` con el paso `createEffect()`; `StreetDialog` fija el armazón de todo diálogo (título, cuerpo, botones y cierre por `close()`), y cada diálogo aporta su cuerpo y extiende `close()` cuando debe dejar el juego en un estado seguro. |
 | **Factory Method** | `Power.createEffect()` (cada poder crea su efecto) y `GameMode.createPlayer1Controller()` / `createPlayer2Controller()` (cada modalidad crea los controladores). |
-| **Polymorphism / Strategy** | En vez de condicionales por tipo: `GameMode` (quién controla y si admite Supervivencia), `MatchType` (`supports`, `onGoal`, `getStatusText`), los efectos redefinen `allowsActions`, `getScale` y `getHorizontalSign`, `Controller` humano o máquina, `Lives` del jugador o del rival, `StreetDialog.close()`, el enum `Side` y la tabla de teclas de `MatchP` en vez de un `switch`. |
+| **Polymorphism / Strategy** | En vez de condicionales por tipo: `GameMode` (quién controla y si admite Supervivencia), `MatchType` (`supports`, `onGoal`, `getStatusText`), los efectos redefinen `allowsActions`, `getScale` y `getHorizontalSign`, `Controller` humano o máquina, `Lives` del jugador o del rival, `StreetDialog.close()`, la lista de `Actor` que recorre `CourtP`, la tabla nombre de efecto → animación de `EffectOverlay`, el enum `Side` y la tabla de teclas de `MatchP` en vez de un `switch`. |
 | **Prototype** | `Character.copy()` (con `PowerBar.fresh()`): cada partido recibe copias de los personajes elegidos, así dos jugadores con el mismo personaje no comparten estado y una revancha empieza limpia. `CharacterCatalog.nextAfter` entrega una copia del siguiente rival. |
 | **Command** | `PlayerKey`: una tecla es el par (jugador, acción) que sabe presionarse y soltarse sobre la fachada. |
 | **Information Expert** | `Ball` resuelve sus rebotes, empujes y patadas; `Goal` decide si el balón está adentro y el rebote en el travesaño; `Field` sabe dónde están los arcos (la vista los dibuja con `getGoalBounds`), quién anota, desde dónde cae el balón y lo devuelve a la cancha si un empuje lo saca por un costado; `Character` patea, empuja y salta; `PowerBar` carga, arma y dispara; `StatusEffects` combina los efectos; cada `MatchType` arma su texto de estado; `CharacterCatalog` conoce el orden de los rivales y los datos de cada personaje; `Match.index` valida la numeración de jugadores. |
 | **Creator** | `HeadSoccer` crea los catálogos y cada `Match`; `Match` crea la cancha, el balón y (por la modalidad) los controladores; `Character` crea su `PowerBar` y sus `StatusEffects`; cada catálogo crea sus opciones; `SurvivalMatch` crea sus `Lives`; `HeadSoccerGUI` crea sus paneles y diálogos, `MatchP` su marcador, su lienzo y su tabla de teclas, y `Resources` los componentes con el estilo del juego. |
-| **Protected Variations** | Abstracciones `Power`, `Effect`, `Controller`, `GameMode`, `MatchType` e interfaces `MatchContext` y `Named`. Las modalidades, los controladores y los tipos de partido concretos solo son visibles dentro de su paquete: fuera de él únicamente se conoce su catálogo y su clase abstracta. `MatchType` lee el partido solo por `MatchContext`, la vista solo ve tipos simples, `Texts` aísla el idioma y `Resources` el estilo visual. |
+| **Protected Variations** | Abstracciones `Power`, `Effect`, `Controller`, `GameMode`, `MatchType` e interfaces `MatchContext`, `Named` y `Actor` (agregar una animación nueva no toca a las demás). Las modalidades, los controladores y los tipos de partido concretos solo son visibles dentro de su paquete: fuera de él únicamente se conoce su catálogo y su clase abstracta. `MatchType` lee el partido solo por `MatchContext`, la vista solo ve tipos simples, `Texts` aísla el idioma y `Resources` el estilo visual. |
 | **High Cohesion / Low Coupling** | La fachada solo valida y delega; la simulación vive en `Match`; `Character` reparte la barra y los efectos en `PowerBar` y `StatusEffects`; `Goal` no conoce personajes; la vista depende únicamente de `HeadSoccer`. |
 | **Law of Demeter** | Sin cadenas `a.getB().c()`: la fachada pregunta a `CharacterCatalog` los datos de un personaje y a `Match` los de un jugador, y `Character.getPowerName()` responde por su poder. |
 | **Composite (contenedores Swing)** | `JFrame` y `JDialog` contienen `JPanel` que contienen componentes. La disposición se delega en `BorderLayout` (ventana, diálogos, pantalla del partido), `GridLayout` (marcador, listas, estadísticas), `FlowLayout` (barras de botones) y `CardLayout` (menú o partido); nunca posición absoluta. Los componentes son atributos privados armados en el constructor. |
@@ -274,6 +277,8 @@ flowchart TB
 * **Relojes.** La cuenta regresiva de Por Tiempo redondea hacia arriba (01:00 al empezar, 00:59 tras un segundo) y el tiempo jugado de Por Goles hacia abajo (00:00 hasta completar el primer segundo).
 * **Idioma.** Es una preferencia de la vista, guardada en `Texts`; los nombres del dominio (modalidades, personajes, poderes, efectos y mensajes de error) se muestran tal cual.
 * **Estilo visual.** Cancha callejera nocturna (muro con grafiti, malla, reflectores y piso de concreto) pintada con figuras de Java2D, sin archivos de imagen. El juego sigue siendo 2D de vista lateral con personajes cabezones: cada uno lleva los colores de su país, mira hacia el balón y tiene en el piso un aro del color de su jugador.
+* **Animación.** Los personajes conservan la silueta de Head Soccer (cabeza grande, torso corto y zapatos; sin piernas ni manos). Cada actor deduce su animación de lo que cambia entre dos cuadros (corre, salta, cae, bota, cambia el marcador) y de consultas simples de la fachada (`getPlayerFacing`, `isPlayerKicking`, `isPlayerPowerArmed`, `getPlayerEffects`); ninguno decide reglas. Un efecto del dominio sin animación propia se muestra con su nombre.
+* **Fluidez.** La física del balón sigue en pasos fijos de 1/60 s, pero `getBallPosition()` lo entrega adelantado por la fracción de paso pendiente (sin salirse de la cancha), así no se ve a saltos. El fondo se pinta una sola vez por tamaño y los actores reutilizan sus figuras y pinceles en vez de crearlos en cada cuadro. La cancha se escala de forma uniforme al espacio disponible para entrar completa en pantallas bajas.
 * **Referencia al dominio en la vista.** Solo `HeadSoccerGUI` obtiene la fachada (`HeadSoccer.getInstance()`); los paneles y diálogos la reciben en su constructor y ninguno conoce otra clase del dominio aparte de `POOBSoccerException`.
 
 ---
