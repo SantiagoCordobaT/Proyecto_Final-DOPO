@@ -121,15 +121,6 @@ public class HeadSoccer {
 
     /**
      * @param index Indice en el catalogo.
-     * @return Nombre del personaje.
-     * @throws POOBSoccerException Si el indice no existe.
-     */
-    public String getCharacterName(int index) throws POOBSoccerException {
-        return catalogCharacter(index).getName();
-    }
-
-    /**
-     * @param index Indice en el catalogo.
      * @return Pais del personaje.
      * @throws POOBSoccerException Si el indice no existe.
      */
@@ -565,15 +556,6 @@ public class HeadSoccer {
 
     /**
      * @param number Jugador (1 o 2).
-     * @return true si el jugador esta aturdido.
-     * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
-     */
-    public boolean isPlayerStunned(int number) throws POOBSoccerException {
-        return player(number).isStunned();
-    }
-
-    /**
-     * @param number Jugador (1 o 2).
      * @return Nombres de los efectos activos del jugador.
      * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
@@ -679,9 +661,5 @@ public class HeadSoccer {
 
     Character getPlayer2() {
         return player2;
-    }
-
-    MatchType getMatchType() {
-        return selectedMatchType;
     }
 }

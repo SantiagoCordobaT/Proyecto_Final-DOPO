@@ -107,20 +107,6 @@ public class Goal {
     }
 
     /**
-     * @return Borde izquierdo del arco.
-     */
-    public double getLeftX() {
-        return leftX;
-    }
-
-    /**
-     * @return Borde derecho del arco.
-     */
-    public double getRightX() {
-        return rightX;
-    }
-
-    /**
      * @return Coordenada Y de la parte superior del travesano.
      */
     public double getCrossbarTop() {

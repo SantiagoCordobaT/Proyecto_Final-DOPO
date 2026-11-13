@@ -46,9 +46,4 @@ public class GoalMatch extends MatchType {
             finish(scorer);
         }
     }
-
-    /** @return Meta de goles. */
-    public int getTargetGoals() {
-        return targetGoals;
-    }
 }

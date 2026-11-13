@@ -36,9 +36,9 @@ public class Character {
 
     private final String name;
     private final String country;
-    private int speed;
-    private int jump;
-    private int strength;
+    private final int speed;
+    private final int jump;
+    private final int strength;
     private int goals;
     private double powerBar;
     private boolean powerActive;
@@ -100,33 +100,6 @@ public class Character {
         if (value < MIN_STAT || value > MAX_STAT) {
             throw new POOBSoccerException(POOBSoccerException.ESTADISTICAS_FUERA_DE_RANGO);
         }
-    }
-
-    /**
-     * @param speed Nueva velocidad (1 a 5).
-     * @throws POOBSoccerException Si esta fuera de rango.
-     */
-    public void setSpeed(int speed) throws POOBSoccerException {
-        validateStat(speed);
-        this.speed = speed;
-    }
-
-    /**
-     * @param jump Nuevo salto (1 a 5).
-     * @throws POOBSoccerException Si esta fuera de rango.
-     */
-    public void setJump(int jump) throws POOBSoccerException {
-        validateStat(jump);
-        this.jump = jump;
-    }
-
-    /**
-     * @param strength Nueva fuerza (1 a 5).
-     * @throws POOBSoccerException Si esta fuera de rango.
-     */
-    public void setStrength(int strength) throws POOBSoccerException {
-        validateStat(strength);
-        this.strength = strength;
     }
 
     /**
@@ -242,16 +215,13 @@ public class Character {
      *
      * @param opponent Rival.
      * @param ball Balon.
-     * @return true si se disparo el poder.
      */
-    public boolean fireActivePower(Character opponent, Ball ball) {
-        if (!powerActive) {
-            return false;
+    public void fireActivePower(Character opponent, Ball ball) {
+        if (powerActive) {
+            power.applyEffect(opponent, ball);
+            powerActive = false;
+            powerBar = POWER_EMPTY;
         }
-        power.applyEffect(opponent, ball);
-        powerActive = false;
-        powerBar = POWER_EMPTY;
-        return true;
     }
 
     /** @return true si la barra esta llena. */

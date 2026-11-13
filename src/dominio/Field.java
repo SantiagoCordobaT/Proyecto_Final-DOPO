@@ -61,13 +61,6 @@ public class Field {
     }
 
     /**
-     * @return Coordenada Y del techo.
-     */
-    public double getCeilingY() {
-        return ceilingY;
-    }
-
-    /**
      * @return Coordenada X del borde izquierdo.
      */
     public double getLeftWallX() {

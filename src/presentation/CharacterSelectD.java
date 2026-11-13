@@ -2,7 +2,6 @@ package presentation;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 
 public class CharacterSelectD extends JDialog {
     private JList<String> characterList;
@@ -38,9 +37,5 @@ public class CharacterSelectD extends JDialog {
         });
 
         cancelButton.addActionListener(e -> dispose());
-    }
-
-    public void showCharacters(ArrayList<String> names) {
-        characterList.setListData(names.toArray(new String[0]));
     }
 }

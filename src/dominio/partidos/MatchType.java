@@ -84,11 +84,6 @@ public abstract class MatchType {
         return 0.0;
     }
 
-    /** @return true si el partido tiene limite de tiempo. */
-    public boolean hasTimeLimit() {
-        return false;
-    }
-
     /** @return true si esta en Gol de Oro. */
     public boolean isGoldenGoal() {
         return false;

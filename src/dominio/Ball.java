@@ -9,21 +9,23 @@ package dominio;
  * @version 1.0
  */
 public class Ball {
+    // Aceleración de caída vertical por paso de física
+    private static final double GRAVITY = 0.45;
+    // Conserva el 75% de la velocidad en cada bote
+    private static final double BOUNCE_FACTOR = 0.75;
+
     // Coordenadas espaciales y velocidades vectoriales
     private double x;
     private double y;
     private double speedX;
     private double speedY;
 
-    // Propiedades físicas y geométricas
-    private double radius;
-    private double gravity;
-    private double bounceFactor;
-    private double weightFactor;
+    // Propiedad geométrica
+    private final double radius;
 
     /**
      * Constructor con valores físicos predeterminados y equilibrados.
-     * 
+     *
      * @param startX Posición horizontal inicial (centro del campo).
      * @param startY Posición vertical inicial (altura de caída).
      * @param radius Radio en píxeles del balón.
@@ -32,23 +34,6 @@ public class Ball {
         this.x = startX;
         this.y = startY;
         this.radius = radius;
-        this.speedX = 0.0;
-        this.speedY = 0.0;
-        this.gravity = 0.45;       // Aceleración de caída vertical
-        this.bounceFactor = 0.75;  // Conserva el 75% de la velocidad en cada bote
-        this.weightFactor = 1.0;   // Resistencia base al impacto
-    }
-
-    /**
-     * Constructor completo por si se requiere calibrar manualmente los coeficientes físicos.
-     */
-    public Ball(double startX, double startY, double radius, double gravity, double bounceFactor, double weightFactor) {
-        this.x = startX;
-        this.y = startY;
-        this.radius = radius;
-        this.gravity = gravity;
-        this.bounceFactor = bounceFactor;
-        this.weightFactor = weightFactor;
         this.speedX = 0.0;
         this.speedY = 0.0;
     }
@@ -78,14 +63,14 @@ public class Ball {
      */
     public void updatePhysics(double groundY, double leftWallX, double rightWallX, double ceilingY) {
         // Aplicar aceleración gravitacional y traslación
-        speedY += gravity;
+        speedY += GRAVITY;
         x += speedX;
         y += speedY;
 
         // Colisión con el suelo
         if (y + radius >= groundY) {
             y = groundY - radius;                  // Corrección para no atravesar el piso
-            speedY = -speedY * bounceFactor;       // Inversión vertical con amortiguación
+            speedY = -speedY * BOUNCE_FACTOR;      // Inversión vertical con amortiguación
             speedX = speedX * 0.98;                // Fricción por rozamiento con el césped
 
             // Zona muerta: evita temblor continuo cuando el bote es leve
@@ -97,40 +82,36 @@ public class Ball {
         // Colisión con el techo
         if (y - radius <= ceilingY) {
             y = ceilingY + radius;
-            speedY = -speedY * bounceFactor;
+            speedY = -speedY * BOUNCE_FACTOR;
         }
 
         // Colisión con el borde lateral izquierdo
         if (x - radius <= leftWallX) {
             x = leftWallX + radius;
-            speedX = -speedX * bounceFactor;
+            speedX = -speedX * BOUNCE_FACTOR;
         }
 
         // Colisión con el borde lateral derecho
         if (x + radius >= rightWallX) {
             x = rightWallX - radius;
-            speedX = -speedX * bounceFactor;
+            speedX = -speedX * BOUNCE_FACTOR;
         }
     }
 
     /**
-     * Aplica el impacto de una patada al balón considerando la fuerza del jugador,
-     * la dirección hacia donde ataca y el peso del esférico.
-     * 
-     * @param characterStrength Estadística de fuerza del personaje (de 1 a 5).
+     * Aplica el impacto de una patada al balón considerando la fuerza del jugador
+     * y la dirección hacia donde ataca.
+     *
+     * @param characterStrength Estadística de fuerza del personaje (de 1 a 5, validada por Character).
      * @param directionX        Sentido horizontal: 1 (hacia la derecha) o -1 (hacia la izquierda).
      */
     public void kick(int characterStrength, int directionX) {
-        // Validación de la fuerza del personaje
-        if (characterStrength < 1) characterStrength = 1;
-        if (characterStrength > 5) characterStrength = 5;
-
         // Cálculo de la velocidad por la patada
         double kickSpeed = characterStrength * 2.0; // Escala lineal de fuerza
 
-        // Aplicación de la dirección y ajuste por peso del balón
-        speedX += directionX * kickSpeed / weightFactor;
-        speedY -= kickSpeed / weightFactor; // La patada también levanta el balón
+        // Aplicación de la dirección
+        speedX += directionX * kickSpeed;
+        speedY -= kickSpeed; // La patada también levanta el balón
     }
 
     // Métodos de Consulta (Getters)
@@ -154,16 +135,8 @@ public class Ball {
         return speedY;
     }
 
-    public double getGravity() {
-        return gravity;
-    }
-
     public double getBounceFactor() {
-        return bounceFactor;
-    }
-
-    public double getWeightFactor() {
-        return weightFactor;
+        return BOUNCE_FACTOR;
     }
 
     // Metodos de modificacion usados por la cancha, los arcos y la fachada del dominio

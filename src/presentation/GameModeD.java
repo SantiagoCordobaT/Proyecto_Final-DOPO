@@ -2,7 +2,6 @@ package presentation;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 
 public class GameModeD extends JDialog {
     private JList<String> modelList;
@@ -38,9 +37,5 @@ public class GameModeD extends JDialog {
         });
 
         cancelButton.addActionListener(e -> dispose());
-    }
-
-    public void showModes(ArrayList<String> names) {
-        modelList.setListData(names.toArray(new String[0]));
     }
 }

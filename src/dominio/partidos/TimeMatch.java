@@ -58,11 +58,6 @@ public class TimeMatch extends MatchType {
     }
 
     @Override
-    public boolean hasTimeLimit() {
-        return true;
-    }
-
-    @Override
     public boolean isGoldenGoal() {
         return goldenGoal;
     }

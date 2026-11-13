@@ -40,11 +40,6 @@ public abstract class Effect {
         return name;
     }
 
-    /** @return Segundos restantes. */
-    public double getRemainingSeconds() {
-        return remainingSeconds;
-    }
-
     /** @return true si el personaje puede moverse, saltar y patear. */
     public boolean allowsActions() {
         return true;
