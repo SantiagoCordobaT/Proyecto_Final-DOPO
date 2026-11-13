@@ -1,7 +1,6 @@
 package dominio.modalidades;
 
 import dominio.Ball;
-import dominio.Field;
 import dominio.personajes.Character;
 
 /**
@@ -20,7 +19,7 @@ public class AIController implements Controller {
     public static final double KICK_RANGE = 100.0;
 
     @Override
-    public void control(Character self, Character opponent, Ball ball, Field field) {
+    public void control(Character self, Ball ball) {
         double targetX = ball.getX() - self.getFacing() * BEHIND_BALL_OFFSET;
         double distanceX = targetX - self.getX();
         if (distanceX > DEAD_ZONE) {
@@ -32,10 +31,10 @@ public class AIController implements Controller {
         }
 
         double ballDx = Math.abs(ball.getX() - self.getX());
-        double ballDy = Math.abs(ball.getY() - (self.getTop() + self.getHeight() / 2.0));
+        double ballDy = Math.abs(ball.getY() - self.getCenterY());
 
         if (ball.getY() < self.getTop() - HIGH_BALL_MARGIN && ballDx < JUMP_RANGE_X) {
-            self.jump(field.getGroundY());
+            self.jump();
         }
         if (ballDx < KICK_RANGE && ballDy < KICK_RANGE) {
             self.requestKick();

@@ -1,55 +1,47 @@
 package dominio;
 
-import dominio.personajes.Character;
-
 /**
  * Arco de la cancha. El area interior esta bajo el travesaño; el balon solo es
- * gol cuando esta completamente dentro de esa area.
+ * gol cuando esta completamente dentro de esa area. El arco sabe que jugador
+ * anota en el, asi el autogol queda cubierto sin codigo especial.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-public class Goal {
+class Goal {
 
-    private static final double EPSILON = 1e-6;
+    static final double WIDTH = 90.0;
+    static final double HEIGHT = 140.0;
+
+    private static final double CROSSBAR_THICKNESS = 10.0;
+    private static final double CROSSBAR_TOP = Field.GROUND_Y - HEIGHT;
+    private static final double CROSSBAR_BOTTOM = CROSSBAR_TOP + CROSSBAR_THICKNESS;
 
     private final double leftX;
     private final double rightX;
-    private final double crossbarTop;
-    private final double crossbarThickness;
-    private final double groundY;
+    private final double mouthX;
     private final int mouthDirection;
-    private Character defender;
-    private Character attacker;
+    private final int scorer;
 
     /**
-     * @param leftX Borde izquierdo del arco.
-     * @param rightX Borde derecho del arco.
-     * @param crossbarTop Altura (y) de la parte superior del travesaño.
-     * @param crossbarThickness Grosor del travesaño.
-     * @param groundY Altura del suelo.
-     * @param mouthDirection 1 si la boca del arco mira a la derecha, -1 si mira a la izquierda.
+     * @param backX Coordenada X del fondo del arco (pegado a la pared).
+     * @param mouthX Coordenada X de la boca del arco (mira hacia la cancha).
+     * @param scorer Jugador (1 o 2) que anota cuando el balon entra en este arco.
      */
-    public Goal(double leftX, double rightX, double crossbarTop, double crossbarThickness, double groundY,
-            int mouthDirection) {
-        this.leftX = leftX;
-        this.rightX = rightX;
-        this.crossbarTop = crossbarTop;
-        this.crossbarThickness = crossbarThickness;
-        this.groundY = groundY;
-        this.mouthDirection = mouthDirection;
+    Goal(double backX, double mouthX, int scorer) {
+        this.leftX = Math.min(backX, mouthX);
+        this.rightX = Math.max(backX, mouthX);
+        this.mouthX = mouthX;
+        this.mouthDirection = (int) Math.signum(mouthX - backX);
+        this.scorer = scorer;
     }
 
     /**
      * @param ball Balon.
      * @return true solo si el balon esta completamente dentro del area del arco.
      */
-    public boolean isBallInside(Ball ball) {
-        double r = ball.getRadius();
-        return ball.getX() - r >= leftX - EPSILON
-                && ball.getX() + r <= rightX + EPSILON
-                && ball.getY() - r >= crossbarTop + crossbarThickness
-                && ball.getY() + r <= groundY + EPSILON;
+    boolean isBallInside(Ball ball) {
+        return ball.isInside(leftX, CROSSBAR_BOTTOM, rightX, Field.GROUND_Y);
     }
 
     /**
@@ -57,59 +49,21 @@ public class Goal {
      *
      * @param ball Balon a corregir.
      */
-    public void resolveCrossbar(Ball ball) {
-        double r = ball.getRadius();
-        double bottom = crossbarTop + crossbarThickness;
-        double closestX = Math.max(leftX, Math.min(ball.getX(), rightX));
-        double closestY = Math.max(crossbarTop, Math.min(ball.getY(), bottom));
-        double dx = ball.getX() - closestX;
-        double dy = ball.getY() - closestY;
-        if (dx * dx + dy * dy >= r * r) {
+    void resolveCrossbar(Ball ball) {
+        if (!ball.overlaps(leftX, CROSSBAR_TOP, rightX, CROSSBAR_BOTTOM)) {
             return;
         }
-        double bounce = ball.getBounceFactor();
-        if (ball.getY() < crossbarTop) {
-            ball.setY(crossbarTop - r);
-            ball.setSpeedY(-Math.abs(ball.getSpeedY()) * bounce);
-        } else if (ball.getY() > bottom) {
-            ball.setY(bottom + r);
-            ball.setSpeedY(Math.abs(ball.getSpeedY()) * bounce);
+        if (ball.isAbove(CROSSBAR_TOP)) {
+            ball.bounceUp(CROSSBAR_TOP);
+        } else if (ball.isBelow(CROSSBAR_BOTTOM)) {
+            ball.bounceDown(CROSSBAR_BOTTOM);
         } else {
-            double mouthEdge = mouthDirection > 0 ? rightX : leftX;
-            ball.setX(mouthEdge + mouthDirection * r);
-            ball.setSpeedX(mouthDirection * Math.abs(ball.getSpeedX()) * bounce);
+            ball.bounceSideways(mouthX, mouthDirection);
         }
     }
 
-    /**
-     * Asigna quien defiende y quien ataca este arco.
-     *
-     * @param defender Dueño del arco.
-     * @param attacker Rival que anota en el.
-     */
-    public void setPlayers(Character defender, Character attacker) {
-        this.defender = defender;
-        this.attacker = attacker;
-    }
-
-    /**
-     * @return Personaje que defiende el arco.
-     */
-    public Character getDefender() {
-        return defender;
-    }
-
-    /**
-     * @return Personaje que anota en el arco.
-     */
-    public Character getAttacker() {
-        return attacker;
-    }
-
-    /**
-     * @return Coordenada Y de la parte superior del travesano.
-     */
-    public double getCrossbarTop() {
-        return crossbarTop;
+    /** @return Jugador (1 o 2) que anota en este arco. */
+    int getScorer() {
+        return scorer;
     }
 }

@@ -55,12 +55,24 @@ public class HeadSoccerTest {
         return Arrays.asList(effectNames).contains(effectName);
     }
 
+    private static double centerX(double[] bounds) {
+        return bounds[0] + bounds[2] / 2.0;
+    }
+
+    /** @return Balon quieto pegado al costado derecho del personaje, a media altura (al alcance de su patada). */
+    private static Ball ballBeside(Character character) {
+        double[] bounds = character.getBounds();
+        Ball ball = new Ball();
+        ball.placeAt(bounds[0] + bounds[2] + 10.0, character.getCenterY());
+        return ball;
+    }
+
     private void putBallInLeftGoal() {
-        game.getBall().resetPosition(Field.GOAL_WIDTH / 2.0, Field.GROUND_Y - Field.BALL_RADIUS - 5.0);
+        game.getBall().placeAt(Goal.WIDTH / 2.0, Field.GROUND_Y - Ball.RADIUS - 5.0);
     }
 
     private void putBallInRightGoal() {
-        game.getBall().resetPosition(Field.WIDTH - Field.GOAL_WIDTH / 2.0, Field.GROUND_Y - Field.BALL_RADIUS - 5.0);
+        game.getBall().placeAt(Field.WIDTH - Goal.WIDTH / 2.0, Field.GROUND_Y - Ball.RADIUS - 5.0);
     }
 
     // ---------------------------------------------------------------- estadisticas
@@ -90,7 +102,7 @@ public class HeadSoccerTest {
         assertNotSame(original, copy);
         copy.stun();
         copy.addGoal();
-        copy.update(1.0, new Field());
+        copy.update(1.0);
         assertEquals(0, original.getEffectNames().length);
         assertEquals(0, original.getGoals());
         assertEquals(0.0, original.getPowerCharge(), 1e-9);
@@ -165,44 +177,47 @@ public class HeadSoccerTest {
 
     @Test
     public void freezePowerShouldBlockOpponentActions() throws POOBSoccerException {
-        Field field = new Field();
         Character victim = new Character("B", "Canadá", 3, 3, 3, 3, new FreezePower());
-        victim.placeAt(400.0, field.getGroundY(), 1);
+        Character rival = new Character("C", "Japón", 3, 3, 3, 3, new StunPower());
+        victim.enterAt(400.0, 1);
+        rival.enterAt(Side.RIGHT.homeX, -1);
+        double top = victim.getTop();
         new FreezePower().applyEffect(victim);
         assertTrue(hasEffect(victim.getEffectNames(), FreezeEffect.NAME));
-        assertFalse(victim.jump(field.getGroundY()));
-        assertFalse(victim.requestKick());
+        victim.requestKick();
+        assertFalse(victim.tryKick(ballBeside(victim), rival));
+        victim.jump();
         victim.setMoveDirection(1);
-        victim.update(0.5, field);
+        victim.update(0.5);
         assertEquals(400.0, victim.getX(), 1e-9);
+        assertEquals(top, victim.getTop(), 1e-9);
     }
 
     @Test
     public void shrinkPowerShouldHalveOpponentSize() throws POOBSoccerException {
         Character victim = new Character("B", "Japón", 3, 3, 3, 3, new ShrinkPower());
-        double width = victim.getWidth();
+        double width = victim.getBounds()[2];
         new ShrinkPower().applyEffect(victim);
-        assertEquals(width / 2.0, victim.getWidth(), 1e-9);
+        assertEquals(width / 2.0, victim.getBounds()[2], 1e-9);
     }
 
     @Test
     public void confusionPowerShouldInvertHorizontalControls() throws POOBSoccerException {
-        Field field = new Field();
         Character victim = new Character("B", "Brasil", 3, 3, 3, 3, new ConfusionPower());
-        victim.placeAt(400.0, field.getGroundY(), 1);
+        victim.enterAt(400.0, 1);
         new ConfusionPower().applyEffect(victim);
         victim.setMoveDirection(1);
-        victim.update(0.5, field);
+        victim.update(0.5);
         assertTrue(victim.getX() < 400.0);
     }
 
     @Test
     public void kickWithActivePowerShouldAffectOpponent() throws POOBSoccerException {
         start(PVSP, TIME);
-        Character p1 = game.getPlayer1();
         game.updateTick(17.0);
         game.activatePlayerPower(1);
-        game.getBall().resetPosition(p1.getX() + 40.0, p1.getY() - 40.0);
+        double[] bounds = game.getPlayerBounds(1);
+        game.getBall().placeAt(bounds[0] + bounds[2] + 10.0, bounds[1] + bounds[3] / 2.0);
         game.playerKick(1);
         game.updateTick(TICK);
         assertTrue(hasEffect(game.getPlayerEffects(2), FreezeEffect.NAME));
@@ -214,20 +229,72 @@ public class HeadSoccerTest {
 
     @Test
     public void stunShouldLastThreeSeconds() throws POOBSoccerException {
-        Field field = new Field();
         Character c = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
-        c.placeAt(400.0, field.getGroundY(), 1);
+        Character rival = new Character("B", "Japón", 3, 3, 3, 3, new StunPower());
+        c.enterAt(400.0, 1);
+        rival.enterAt(Side.RIGHT.homeX, -1);
+        double top = c.getTop();
         c.stun();
         assertTrue(hasEffect(c.getEffectNames(), StunEffect.NAME));
-        assertFalse(c.jump(field.getGroundY()));
-        assertFalse(c.requestKick());
+        c.requestKick();
+        assertFalse(c.tryKick(ballBeside(c), rival));
+        c.jump();
         c.setMoveDirection(1);
-        c.update(2.9, field);
+        c.update(2.9);
         assertTrue(hasEffect(c.getEffectNames(), StunEffect.NAME));
         assertEquals(400.0, c.getX(), 1e-9);
-        c.update(0.2, field);
+        assertEquals(top, c.getTop(), 1e-9);
+        c.update(0.2);
         assertEquals(0, c.getEffectNames().length);
-        assertTrue(c.requestKick());
+        c.requestKick();
+        assertTrue(c.tryKick(ballBeside(c), rival));
+    }
+
+    @Test
+    public void meleeKickShouldStunOpponentForThreeSeconds() throws POOBSoccerException {
+        Character a = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
+        Character b = new Character("B", "Japón", 3, 3, 3, 3, new StunPower());
+        a.enterAt(400.0, 1);
+        double[] boundsA = a.getBounds();
+        b.enterAt(boundsA[0] + boundsA[2] + 5.0 + b.getBounds()[2] / 2.0, -1);
+        Ball farBall = new Ball();
+        farBall.placeAt(Field.WIDTH - Goal.WIDTH, Ball.RADIUS);
+        a.requestKick();
+        assertFalse(a.tryKick(farBall, b));
+        assertTrue(hasEffect(b.getEffectNames(), StunEffect.NAME));
+        b.requestKick();
+        assertFalse(b.tryKick(ballBeside(b), a));
+        b.update(2.9);
+        assertTrue(hasEffect(b.getEffectNames(), StunEffect.NAME));
+        b.update(0.2);
+        assertEquals(0, b.getEffectNames().length);
+    }
+
+    @Test
+    public void restartShouldClearEffectsAndReturnHome() throws POOBSoccerException {
+        Character c = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
+        c.enterAt(400.0, 1);
+        c.setMoveDirection(1);
+        c.update(0.5);
+        c.stun();
+        c.addGoal();
+        c.restart();
+        assertEquals(0, c.getEffectNames().length);
+        assertEquals(400.0, c.getX(), 1e-9);
+        assertEquals(1, c.getGoals());
+        assertTrue(c.getPowerCharge() > 0.0);
+    }
+
+    @Test
+    public void enterAtShouldResetGoalsAndPowerBar() throws POOBSoccerException {
+        Character c = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
+        c.addGoal();
+        c.update(1.0);
+        c.enterAt(Side.RIGHT.homeX, -1);
+        assertEquals(0, c.getGoals());
+        assertEquals(0.0, c.getPowerCharge(), 1e-9);
+        assertEquals(Side.RIGHT.homeX, c.getX(), 1e-9);
+        assertEquals(-1, c.getFacing());
     }
 
     // ---------------------------------------------------------------- goles
@@ -251,22 +318,37 @@ public class HeadSoccerTest {
     }
 
     @Test
-    public void ballPartiallyInsideShouldNotBeGoal() throws POOBSoccerException {
+    public void fieldShouldCreditTheAttackerOfEachGoal() {
         Field field = new Field();
-        Ball ball = new Ball(Field.GOAL_WIDTH, Field.GROUND_Y - Field.BALL_RADIUS - 5.0, Field.BALL_RADIUS);
-        assertFalse(field.getLeftGoal().isBallInside(ball));
-        ball.setX(Field.GOAL_WIDTH - Field.BALL_RADIUS);
-        assertTrue(field.getLeftGoal().isBallInside(ball));
+        Ball ball = new Ball();
+        ball.placeAt(Goal.WIDTH / 2.0, Field.GROUND_Y - Ball.RADIUS);
+        assertEquals(2, field.scorerOf(ball));
+        ball.placeAt(Field.WIDTH - Goal.WIDTH / 2.0, Field.GROUND_Y - Ball.RADIUS);
+        assertEquals(1, field.scorerOf(ball));
+        field.dropBall(ball);
+        assertEquals(Field.NO_GOAL, field.scorerOf(ball));
+        assertEquals(Field.WIDTH / 2.0, ball.getX(), 1e-9);
     }
 
     @Test
-    public void ballShouldBounceOnCrossbar() throws POOBSoccerException {
-        Field field = new Field();
-        Goal goal = field.getLeftGoal();
-        Ball ball = new Ball(Field.GOAL_WIDTH / 2.0, goal.getCrossbarTop() - Field.BALL_RADIUS + 3.0, Field.BALL_RADIUS);
-        ball.setSpeedY(5.0);
+    public void ballPartiallyInsideShouldNotBeGoal() {
+        Goal goal = new Goal(0.0, Goal.WIDTH, 2);
+        Ball partial = new Ball();
+        partial.placeAt(Goal.WIDTH, Field.GROUND_Y - Ball.RADIUS - 5.0);
+        assertFalse(goal.isBallInside(partial));
+        Ball inside = new Ball();
+        inside.placeAt(Goal.WIDTH - Ball.RADIUS, Field.GROUND_Y - Ball.RADIUS - 5.0);
+        assertTrue(goal.isBallInside(inside));
+    }
+
+    @Test
+    public void ballShouldBounceOnCrossbar() {
+        Goal goal = new Goal(0.0, Goal.WIDTH, 2);
+        double crossbarTop = Field.GROUND_Y - Goal.HEIGHT;
+        Ball ball = new Ball();
+        ball.placeAt(Goal.WIDTH / 2.0, crossbarTop - Ball.RADIUS + 3.0);
         goal.resolveCrossbar(ball);
-        assertTrue(ball.getSpeedY() < 0.0);
+        assertEquals(crossbarTop - Ball.RADIUS, ball.getY(), 1e-9);
     }
 
     @Test
@@ -275,8 +357,8 @@ public class HeadSoccerTest {
         game.getPlayer1().stun();
         putBallInRightGoal();
         game.updateTick(TICK);
-        assertEquals(Field.PLAYER1_START_X, game.getPlayerX(1), 1e-9);
-        assertEquals(Field.PLAYER2_START_X, game.getPlayerX(2), 1e-9);
+        assertEquals(Side.LEFT.homeX, centerX(game.getPlayerBounds(1)), 1e-9);
+        assertEquals(Side.RIGHT.homeX, centerX(game.getPlayerBounds(2)), 1e-9);
         assertEquals(0, game.getPlayerEffects(1).length);
         assertEquals(Field.WIDTH / 2.0, game.getBallX(), 1e-9);
     }
@@ -355,10 +437,10 @@ public class HeadSoccerTest {
     @Test
     public void aiShouldChaseTheBall() throws POOBSoccerException {
         start(PVSM, GOALS_3);
-        game.getBall().resetPosition(Field.WIDTH / 2.0 + 150.0, Field.GROUND_Y - Field.BALL_RADIUS);
-        double before = game.getPlayerX(2);
+        game.getBall().placeAt(Field.WIDTH / 2.0 + 150.0, Field.GROUND_Y - Ball.RADIUS);
+        double before = centerX(game.getPlayerBounds(2));
         game.updateTick(TICK);
-        assertTrue(game.getPlayerX(2) < before);
+        assertTrue(centerX(game.getPlayerBounds(2)) < before);
     }
 
     @Test
@@ -371,22 +453,6 @@ public class HeadSoccerTest {
     }
 
     // ---------------------------------------------------------------- ajustes del PDF
-
-    @Test
-    public void meleeKickShouldStunOpponentForThreeSeconds() throws POOBSoccerException {
-        start(PVSP, TIME);
-        Character p1 = game.getPlayer1();
-        Character p2 = game.getPlayer2();
-        p2.placeAt(p1.getX() + Character.BASE_WIDTH + 5.0, Field.GROUND_Y, -1);
-        game.playerKick(1);
-        game.updateTick(TICK);
-        assertTrue(hasEffect(game.getPlayerEffects(2), StunEffect.NAME));
-        assertFalse(p2.requestKick());
-        game.updateTick(2.9);
-        assertTrue(hasEffect(game.getPlayerEffects(2), StunEffect.NAME));
-        game.updateTick(0.2);
-        assertEquals(0, game.getPlayerEffects(2).length);
-    }
 
     @Test
     public void meleeKickOutOfRangeShouldNotStun() throws POOBSoccerException {

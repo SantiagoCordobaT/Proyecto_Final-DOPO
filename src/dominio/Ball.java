@@ -1,18 +1,33 @@
 package dominio;
 
 /**
- * Representa el balón de fútbol 2D en POOBSoccer.
- * Maneja la cinemática, la gravedad, la fricción del césped,
- * los rebotes en los límites del campo y la respuesta al ser pateado.
- * 
+ * Representa el balón de fútbol 2D en POOBSoccer (Experto en información):
+ * maneja su cinemática, la gravedad, la fricción del césped, los rebotes en los
+ * límites del campo y su propia respuesta a patadas, empujes y travesaños.
+ * Avanza en pasos fijos de física (velocidades en píxeles por paso).
+ *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
 public class Ball {
+
+    public static final double RADIUS = 15.0;
+
     // Aceleración de caída vertical por paso de física
     private static final double GRAVITY = 0.45;
     // Conserva el 75% de la velocidad en cada bote
-    private static final double BOUNCE_FACTOR = 0.75;
+    private static final double BOUNCE = 0.75;
+    // Fricción por rozamiento con el césped
+    private static final double GROUND_FRICTION = 0.98;
+    // Zona muerta: bajo esta velocidad vertical el balón deja de botar
+    private static final double REST_SPEED = 0.5;
+    private static final double KICK_SPEED_PER_STRENGTH = 2.0;
+    // Velocidad lateral mínima con la que sale el balón al ser empujado por un cuerpo
+    private static final double PUSH_SPEED = 3.0;
+    // Desde esta rapidez el balón aturde al personaje que golpea
+    private static final double HARD_HIT_SPEED = 12.0;
+    private static final double HARD_HIT_SLOWDOWN = 0.6;
+    private static final double EPSILON = 1e-6;
 
     // Coordenadas espaciales y velocidades vectoriales
     private double x;
@@ -20,139 +35,178 @@ public class Ball {
     private double speedX;
     private double speedY;
 
-    // Propiedad geométrica
-    private final double radius;
-
     /**
-     * Constructor con valores físicos predeterminados y equilibrados.
+     * Ubica el balón en un punto y cancela cualquier inercia previa para que caiga limpiamente.
      *
-     * @param startX Posición horizontal inicial (centro del campo).
-     * @param startY Posición vertical inicial (altura de caída).
-     * @param radius Radio en píxeles del balón.
+     * @param x Coordenada horizontal del centro.
+     * @param y Coordenada vertical del centro.
      */
-    public Ball(double startX, double startY, double radius) {
-        this.x = startX;
-        this.y = startY;
-        this.radius = radius;
+    void placeAt(double x, double y) {
+        this.x = x;
+        this.y = y;
         this.speedX = 0.0;
         this.speedY = 0.0;
     }
 
     /**
-     * Reubica el balón en el centro superior de la cancha tras anotarse un gol
-     * y cancela cualquier inercia previa para que caiga limpiamente.
-     * 
-     * @param centerX Coordenada horizontal del centro del campo.
-     * @param dropY   Altura desde la cual se dejará caer el esférico.
-     */
-    public void resetPosition(double centerX, double dropY) {
-        this.x = centerX;
-        this.y = dropY;
-        this.speedX = 0.0;
-        this.speedY = 0.0;
-    }
-
-    /**
-     * Actualiza la posición del balón aplicando gravedad en cada tick
+     * Actualiza la posición del balón aplicando gravedad en cada paso
      * y resolviendo colisiones contra el suelo, techo y límites laterales.
-     * 
+     *
      * @param groundY     Coordenada Y de la superficie del suelo.
      * @param leftWallX   Coordenada X del límite lateral izquierdo.
      * @param rightWallX  Coordenada X del límite lateral derecho.
      * @param ceilingY    Coordenada Y del límite superior de la cancha.
      */
-    public void updatePhysics(double groundY, double leftWallX, double rightWallX, double ceilingY) {
-        // Aplicar aceleración gravitacional y traslación
+    void updatePhysics(double groundY, double leftWallX, double rightWallX, double ceilingY) {
         speedY += GRAVITY;
         x += speedX;
         y += speedY;
 
-        // Colisión con el suelo
-        if (y + radius >= groundY) {
-            y = groundY - radius;                  // Corrección para no atravesar el piso
-            speedY = -speedY * BOUNCE_FACTOR;      // Inversión vertical con amortiguación
-            speedX = speedX * 0.98;                // Fricción por rozamiento con el césped
-
-            // Zona muerta: evita temblor continuo cuando el bote es leve
-            if (Math.abs(speedY) < 0.5) {
+        if (y + RADIUS >= groundY) {
+            y = groundY - RADIUS;
+            speedY = -speedY * BOUNCE;
+            speedX = speedX * GROUND_FRICTION;
+            if (Math.abs(speedY) < REST_SPEED) {
                 speedY = 0.0;
             }
         }
-
-        // Colisión con el techo
-        if (y - radius <= ceilingY) {
-            y = ceilingY + radius;
-            speedY = -speedY * BOUNCE_FACTOR;
+        if (y - RADIUS <= ceilingY) {
+            y = ceilingY + RADIUS;
+            speedY = -speedY * BOUNCE;
         }
-
-        // Colisión con el borde lateral izquierdo
-        if (x - radius <= leftWallX) {
-            x = leftWallX + radius;
-            speedX = -speedX * BOUNCE_FACTOR;
+        if (x - RADIUS <= leftWallX) {
+            x = leftWallX + RADIUS;
+            speedX = -speedX * BOUNCE;
         }
-
-        // Colisión con el borde lateral derecho
-        if (x + radius >= rightWallX) {
-            x = rightWallX - radius;
-            speedX = -speedX * BOUNCE_FACTOR;
+        if (x + RADIUS >= rightWallX) {
+            x = rightWallX - RADIUS;
+            speedX = -speedX * BOUNCE;
         }
     }
 
     /**
-     * Aplica el impacto de una patada al balón considerando la fuerza del jugador
-     * y la dirección hacia donde ataca.
+     * Aplica el impacto de una patada: empuja en la dirección de ataque y levanta el balón.
      *
-     * @param characterStrength Estadística de fuerza del personaje (de 1 a 5, validada por Character).
-     * @param directionX        Sentido horizontal: 1 (hacia la derecha) o -1 (hacia la izquierda).
+     * @param strength  Estadística de fuerza del personaje (de 1 a 5).
+     * @param direction Sentido horizontal: 1 (hacia la derecha) o -1 (hacia la izquierda).
      */
-    public void kick(int characterStrength, int directionX) {
-        // Cálculo de la velocidad por la patada
-        double kickSpeed = characterStrength * 2.0; // Escala lineal de fuerza
-
-        // Aplicación de la dirección
-        speedX += directionX * kickSpeed;
-        speedY -= kickSpeed; // La patada también levanta el balón
+    public void kick(int strength, int direction) {
+        double kickSpeed = strength * KICK_SPEED_PER_STRENGTH;
+        speedX += direction * kickSpeed;
+        speedY -= kickSpeed;
     }
 
-    // Métodos de Consulta (Getters)
+    /**
+     * @param left   Borde izquierdo del rectángulo.
+     * @param top    Borde superior del rectángulo.
+     * @param right  Borde derecho del rectángulo.
+     * @param bottom Borde inferior del rectángulo.
+     * @return true si el balón toca o se solapa con el rectángulo.
+     */
+    public boolean overlaps(double left, double top, double right, double bottom) {
+        double dx = x - Math.max(left, Math.min(x, right));
+        double dy = y - Math.max(top, Math.min(y, bottom));
+        return dx * dx + dy * dy <= RADIUS * RADIUS;
+    }
+
+    /**
+     * @param left   Borde izquierdo del rectángulo.
+     * @param top    Borde superior del rectángulo.
+     * @param right  Borde derecho del rectángulo.
+     * @param bottom Borde inferior del rectángulo.
+     * @return true solo si el balón está completamente dentro del rectángulo.
+     */
+    boolean isInside(double left, double top, double right, double bottom) {
+        return x - RADIUS >= left - EPSILON
+                && x + RADIUS <= right + EPSILON
+                && y - RADIUS >= top - EPSILON
+                && y + RADIUS <= bottom + EPSILON;
+    }
+
+    /**
+     * @param surfaceY Altura de referencia.
+     * @return true si el centro del balón está por encima de esa altura.
+     */
+    public boolean isAbove(double surfaceY) {
+        return y < surfaceY;
+    }
+
+    /**
+     * @param surfaceY Altura de referencia.
+     * @return true si el centro del balón está por debajo de esa altura.
+     */
+    boolean isBelow(double surfaceY) {
+        return y > surfaceY;
+    }
+
+    /**
+     * Rebota hacia arriba sobre una superficie (cabeza de un personaje o travesaño).
+     *
+     * @param surfaceY Altura de la superficie.
+     */
+    public void bounceUp(double surfaceY) {
+        y = surfaceY - RADIUS;
+        speedY = -Math.abs(speedY) * BOUNCE;
+    }
+
+    /**
+     * Rebota hacia abajo bajo una superficie (parte inferior del travesaño).
+     *
+     * @param surfaceY Altura de la superficie.
+     */
+    void bounceDown(double surfaceY) {
+        y = surfaceY + RADIUS;
+        speedY = Math.abs(speedY) * BOUNCE;
+    }
+
+    /**
+     * Rebota horizontalmente contra un borde vertical (frente del travesaño).
+     *
+     * @param edgeX     Coordenada X del borde.
+     * @param direction Sentido de salida: 1 derecha, -1 izquierda.
+     */
+    void bounceSideways(double edgeX, int direction) {
+        x = edgeX + direction * RADIUS;
+        speedX = direction * Math.abs(speedX) * BOUNCE;
+    }
+
+    /**
+     * Sale empujado por un cuerpo hacia un lado, con al menos la velocidad de empuje.
+     *
+     * @param edgeX     Coordenada X del borde del cuerpo que empuja.
+     * @param direction Sentido de salida: 1 derecha, -1 izquierda.
+     */
+    public void pushSideways(double edgeX, int direction) {
+        x = edgeX + direction * RADIUS;
+        speedX = direction * Math.max(Math.abs(speedX), PUSH_SPEED);
+    }
+
+    /**
+     * @param referenceX Coordenada X de referencia.
+     * @return 1 si el balón está a la derecha de la referencia (o justo sobre ella), -1 si está a la izquierda.
+     */
+    public int sideOf(double referenceX) {
+        return x >= referenceX ? 1 : -1;
+    }
+
+    /** @return true si el balón va lo bastante rápido para aturdir a quien golpea. */
+    boolean isHardHit() {
+        return Math.sqrt(speedX * speedX + speedY * speedY) >= HARD_HIT_SPEED;
+    }
+
+    /** Frena el balón tras golpear con fuerza a un personaje. */
+    void slowDown() {
+        speedX *= HARD_HIT_SLOWDOWN;
+        speedY *= HARD_HIT_SLOWDOWN;
+    }
+
+    /** @return Coordenada horizontal del centro. */
     public double getX() {
         return x;
     }
 
+    /** @return Coordenada vertical del centro. */
     public double getY() {
         return y;
-    }
-
-    public double getRadius() {
-        return radius;
-    }
-
-    public double getSpeedX() {
-        return speedX;
-    }
-
-    public double getSpeedY() {
-        return speedY;
-    }
-
-    public double getBounceFactor() {
-        return BOUNCE_FACTOR;
-    }
-
-    // Metodos de modificacion usados por la cancha, los arcos y la fachada del dominio
-    public void setX(double x) {
-        this.x = x;
-    }
-
-    public void setY(double y) {
-        this.y = y;
-    }
-
-    public void setSpeedX(double speedX) {
-        this.speedX = speedX;
-    }
-
-    public void setSpeedY(double speedY) {
-        this.speedY = speedY;
     }
 }

@@ -1,7 +1,6 @@
 package dominio.modalidades;
 
 import dominio.Ball;
-import dominio.Field;
 import dominio.personajes.Character;
 
 /**
@@ -17,9 +16,7 @@ public interface Controller {
      * Se invoca en cada tick antes de actualizar la fisica.
      *
      * @param self Personaje controlado.
-     * @param opponent Rival.
      * @param ball Balon.
-     * @param field Cancha.
      */
-    void control(Character self, Character opponent, Ball ball, Field field);
+    void control(Character self, Ball ball);
 }

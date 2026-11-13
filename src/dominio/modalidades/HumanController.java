@@ -1,7 +1,6 @@
 package dominio.modalidades;
 
 import dominio.Ball;
-import dominio.Field;
 import dominio.personajes.Character;
 
 /**
@@ -14,7 +13,7 @@ import dominio.personajes.Character;
 public class HumanController implements Controller {
 
     @Override
-    public void control(Character self, Character opponent, Ball ball, Field field) {
+    public void control(Character self, Ball ball) {
         // Las acciones del humano se reciben externamente.
     }
 }

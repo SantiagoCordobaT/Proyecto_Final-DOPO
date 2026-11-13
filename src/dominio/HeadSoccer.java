@@ -30,11 +30,6 @@ public class HeadSoccer {
 
     public static final double PHYSICS_STEP_SECONDS = 1.0 / 60.0;
     public static final double TIME_TOLERANCE = 1e-9;
-    public static final double KICK_REACH = 15.0;
-    public static final double PUSH_SPEED = 3.0;
-    public static final double STUN_BALL_SPEED = 12.0;
-    public static final double STUN_BALL_SLOWDOWN = 0.6;
-    public static final double MELEE_RANGE = 10.0;
 
     private final List<GameMode> modes;
     private final List<MatchType> matchTypes;
@@ -64,7 +59,7 @@ public class HeadSoccer {
     public HeadSoccer() throws POOBSoccerException {
         this.settings = new Settings();
         this.field = new Field();
-        this.ball = new Ball(field.getCenterX(), Field.BALL_DROP_Y, Field.BALL_RADIUS);
+        this.ball = new Ball();
 
         this.modes = new ArrayList<GameMode>();
         modes.add(new PvsP());
@@ -265,14 +260,9 @@ public class HeadSoccer {
         controller1 = selectedMode.createPlayer1Controller();
         controller2 = selectedMode.createPlayer2Controller();
 
-        player1.placeAt(Field.PLAYER1_START_X, field.getGroundY(), 1);
-        player2.placeAt(Field.PLAYER2_START_X, field.getGroundY(), -1);
-        player1.resetForNewMatch(field.getGroundY());
-        player2.resetForNewMatch(field.getGroundY());
-        field.getLeftGoal().setPlayers(player1, player2);
-        field.getRightGoal().setPlayers(player2, player1);
-
-        ball.resetPosition(field.getCenterX(), Field.BALL_DROP_Y);
+        Side.LEFT.place(player1);
+        Side.RIGHT.place(player2);
+        field.dropBall(ball);
         lastKicker = null;
         physicsAccumulator = 0.0;
         paused = false;
@@ -319,17 +309,19 @@ public class HeadSoccer {
             return;
         }
 
-        controller1.control(player1, player2, ball, field);
-        controller2.control(player2, player1, ball, field);
+        controller1.control(player1, ball);
+        controller2.control(player2, ball);
 
-        player1.update(deltaTimeSeconds, field);
-        player2.update(deltaTimeSeconds, field);
+        player1.update(deltaTimeSeconds);
+        player2.update(deltaTimeSeconds);
 
         physicsAccumulator += deltaTimeSeconds;
         while (physicsAccumulator >= PHYSICS_STEP_SECONDS - TIME_TOLERANCE) {
             physicsAccumulator -= PHYSICS_STEP_SECONDS;
             stepBall();
-            if (checkGoals()) {
+            int scorer = field.scorerOf(ball);
+            if (scorer != Field.NO_GOAL) {
+                registerGoal(scorer);
                 physicsAccumulator = 0.0;
             }
         }
@@ -339,72 +331,39 @@ public class HeadSoccer {
 
     private void stepBall() {
         field.updateBall(ball);
-        resolveCharacterBall(player1, player2);
-        resolveCharacterBall(player2, player1);
+        resolveContact(player1, player2);
+        resolveContact(player2, player1);
     }
 
     /**
-     * Resuelve la patada y el contacto de un personaje: patea el balon si lo alcanza y
-     * aturde al rival si esta en rango cuerpo a cuerpo; si no patea, solo empuja el balon.
+     * Resuelve la patada y el contacto de un personaje con el balon: si lo patea queda
+     * como ultimo pateador; si solo lo toca, un balonazo fuerte de otro lo aturde y
+     * frena el balon, y luego el cuerpo lo empuja.
      */
-    private void resolveCharacterBall(Character character, Character opponent) {
-        boolean ballInReach = character.touches(ball, KICK_REACH);
-        boolean opponentInReach = character.isInMeleeRange(opponent, MELEE_RANGE);
-        if (character.canKickNow() && (ballInReach || opponentInReach)) {
-            kick(character, opponent, ballInReach, opponentInReach);
-            return;
-        }
-        if (!character.touches(ball, 0.0)) {
-            return;
-        }
-        double speed = Math.sqrt(ball.getSpeedX() * ball.getSpeedX() + ball.getSpeedY() * ball.getSpeedY());
-        if (speed >= STUN_BALL_SPEED && lastKicker != character) {
-            character.stun();
-            ball.setSpeedX(ball.getSpeedX() * STUN_BALL_SLOWDOWN);
-            ball.setSpeedY(ball.getSpeedY() * STUN_BALL_SLOWDOWN);
-        }
-        pushBall(character);
-    }
-
-    private void kick(Character character, Character opponent, boolean ballInReach, boolean opponentInReach) {
-        character.registerKick();
-        if (opponentInReach) {
-            opponent.stun();
-        }
-        if (ballInReach) {
-            ball.kick(character.getStrength(), character.getFacing());
-            character.firePowerOn(opponent);
+    private void resolveContact(Character character, Character opponent) {
+        if (character.tryKick(ball, opponent)) {
             lastKicker = character;
+            return;
         }
+        if (!character.touches(ball)) {
+            return;
+        }
+        if (character != lastKicker && ball.isHardHit()) {
+            character.stun();
+            ball.slowDown();
+        }
+        character.push(ball);
     }
 
-    private void pushBall(Character character) {
-        int side = ball.getX() >= character.getX() ? 1 : -1;
-        if (ball.getY() < character.getTop()) {
-            ball.setY(character.getTop() - ball.getRadius());
-            ball.setSpeedY(-Math.abs(ball.getSpeedY()) * ball.getBounceFactor());
-        } else {
-            ball.setX(character.getX() + side * (character.getWidth() / 2.0 + ball.getRadius()));
-            ball.setSpeedX(side * Math.max(Math.abs(ball.getSpeedX()), PUSH_SPEED));
-        }
-    }
-
-    private boolean checkGoals() throws POOBSoccerException {
-        Goal[] goals = { field.getLeftGoal(), field.getRightGoal() };
-        for (Goal goal : goals) {
-            if (goal.isBallInside(ball)) {
-                registerGoal(goal);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /** Suma el gol al atacante del arco (cubre el autogol) y reinicia la jugada. */
-    private void registerGoal(Goal goal) throws POOBSoccerException {
-        Character scorer = goal.getAttacker();
+    /**
+     * Suma el gol a quien anota (el arco lo decide, asi el autogol queda cubierto) y reinicia la jugada.
+     *
+     * @param scorerNumber Jugador (1 o 2) que anota; el otro (3 - scorerNumber) recibe el gol.
+     */
+    private void registerGoal(int scorerNumber) throws POOBSoccerException {
+        Character scorer = player(scorerNumber);
         scorer.addGoal();
-        selectedMatchType.goalScored(scorer, goal.getDefender());
+        selectedMatchType.goalScored(scorer, player(3 - scorerNumber));
         if (selectedMatchType.needsNewRival()) {
             loadNextRival();
         }
@@ -416,16 +375,13 @@ public class HeadSoccer {
         rivalCatalogIndex = (rivalCatalogIndex + 1) % characters.size();
         player2 = characters.get(rivalCatalogIndex).copy();
         selectedMatchType.replaceRival(player2);
-        player2.placeAt(Field.PLAYER2_START_X, field.getGroundY(), -1);
-        player2.resetForNewMatch(field.getGroundY());
-        field.getLeftGoal().setPlayers(player1, player2);
-        field.getRightGoal().setPlayers(player2, player1);
+        Side.RIGHT.place(player2);
     }
 
     private void restartPlay() {
-        player1.resetForRestart(field.getGroundY());
-        player2.resetForRestart(field.getGroundY());
-        ball.resetPosition(field.getCenterX(), Field.BALL_DROP_Y);
+        player1.restart();
+        player2.restart();
+        field.dropBall(ball);
         lastKicker = null;
     }
 
@@ -455,21 +411,23 @@ public class HeadSoccer {
     }
 
     /**
+     * El jugador salta si esta en el suelo y ningun efecto lo impide.
+     *
      * @param number Jugador (1 o 2).
-     * @return true si salto.
      * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
-    public boolean playerJump(int number) throws POOBSoccerException {
-        return player(number).jump(field.getGroundY());
+    public void playerJump(int number) throws POOBSoccerException {
+        player(number).jump();
     }
 
     /**
+     * El jugador solicita una patada si ningun efecto lo impide.
+     *
      * @param number Jugador (1 o 2).
-     * @return true si la patada fue aceptada.
      * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
-    public boolean playerKick(int number) throws POOBSoccerException {
-        return player(number).requestKick();
+    public void playerKick(int number) throws POOBSoccerException {
+        player(number).requestKick();
     }
 
     /**
@@ -504,38 +462,11 @@ public class HeadSoccer {
 
     /**
      * @param number Jugador (1 o 2).
-     * @return Posicion horizontal del jugador.
+     * @return Hitbox actual del jugador como {izquierda, arriba, ancho, alto}.
      * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
-    public double getPlayerX(int number) throws POOBSoccerException {
-        return player(number).getX();
-    }
-
-    /**
-     * @param number Jugador (1 o 2).
-     * @return Posicion vertical (pies) del jugador.
-     * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
-     */
-    public double getPlayerY(int number) throws POOBSoccerException {
-        return player(number).getY();
-    }
-
-    /**
-     * @param number Jugador (1 o 2).
-     * @return Ancho actual del hitbox del jugador.
-     * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
-     */
-    public double getPlayerWidth(int number) throws POOBSoccerException {
-        return player(number).getWidth();
-    }
-
-    /**
-     * @param number Jugador (1 o 2).
-     * @return Alto actual del hitbox del jugador.
-     * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
-     */
-    public double getPlayerHeight(int number) throws POOBSoccerException {
-        return player(number).getHeight();
+    public double[] getPlayerBounds(int number) throws POOBSoccerException {
+        return player(number).getBounds();
     }
 
     /**
@@ -615,21 +546,21 @@ public class HeadSoccer {
      * @return Radio del balon.
      */
     public double getBallRadius() {
-        return ball.getRadius();
+        return Ball.RADIUS;
     }
 
     /**
      * @return Ancho de la cancha.
      */
     public double getFieldWidth() {
-        return field.getRightWallX() - field.getLeftWallX();
+        return Field.WIDTH;
     }
 
     /**
      * @return Coordenada Y del suelo.
      */
     public double getGroundY() {
-        return field.getGroundY();
+        return Field.GROUND_Y;
     }
 
     /**
