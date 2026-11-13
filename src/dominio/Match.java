@@ -22,6 +22,8 @@ final class Match implements MatchContext {
 
     private static final double STEP_SECONDS = 1.0 / 60.0;
     private static final double TOLERANCE = 1e-9;
+    /** Cantidad de jugadores de un partido, numerados 1 y 2. */
+    static final int PLAYERS = 2;
     private static final int LEFT_PLAYER = 0;
     private static final int RIGHT_PLAYER = 1;
 
@@ -174,12 +176,15 @@ final class Match implements MatchContext {
     }
 
     /**
+     * Traduce el numero de jugador a su posicion en los arreglos (Information Expert de
+     * la numeracion; la fachada tambien la usa al elegir los personajes).
+     *
      * @param number Jugador (1 o 2).
      * @return Posicion del jugador en los arreglos.
      * @throws POOBSoccerException Si el jugador no es 1 ni 2.
      */
-    private int index(int number) throws POOBSoccerException {
-        if (number < 1 || number > players.length) {
+    static int index(int number) throws POOBSoccerException {
+        if (number < 1 || number > PLAYERS) {
             throw new POOBSoccerException(POOBSoccerException.JUGADOR_INVALIDO);
         }
         return number - 1;

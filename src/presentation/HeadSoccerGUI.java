@@ -13,7 +13,7 @@ public class HeadSoccerGUI extends JFrame {
 
     public HeadSoccerGUI() {
         try {
-            model = new HeadSoccer();
+            model = HeadSoccer.getInstance();
         } catch (POOBSoccerException e) {
             JOptionPane.showMessageDialog(this, "Error al inicializar el juego: " + e.getMessage());
         }
@@ -32,6 +32,7 @@ public class HeadSoccerGUI extends JFrame {
     }
 
     public void openGamesModes() {
+        model.newGame();
         gameModeDialog = new GameModeD(this);
         gameModeDialog.setVisible(true);
     }
@@ -51,11 +52,7 @@ public class HeadSoccerGUI extends JFrame {
 
     public void selectCharacter(int playerIndex, int charIndex) {
         try {
-            if (playerIndex == 1) {
-                model.selectPlayer1(charIndex);
-            } else {
-                model.selectPlayer2(charIndex);
-            }
+            model.selectPlayer(playerIndex, charIndex);
         } catch (POOBSoccerException e) {
             JOptionPane.showMessageDialog(this, "Error al seleccionar personaje: " + e.getMessage());
         }

@@ -46,14 +46,19 @@ public class HeadSoccerTest {
 
     @BeforeEach
     public void setUp() throws POOBSoccerException {
-        game = new HeadSoccer();
+        game = HeadSoccer.getInstance();
+        game.newGame();
     }
 
     private void start(int mode, int matchType) throws POOBSoccerException {
+        start(mode, matchType, 0, 0);
+    }
+
+    private void start(int mode, int matchType, int character1, int character2) throws POOBSoccerException {
         game.selectMode(mode);
         game.selectMatchType(matchType);
-        game.selectPlayer1(0);
-        game.selectPlayer2(0);
+        game.selectPlayer(1, character1);
+        game.selectPlayer(2, character2);
         game.startMatch();
     }
 
@@ -148,20 +153,26 @@ public class HeadSoccerTest {
         game.selectMode(MVSM);
         assertThrows(POOBSoccerException.class, () -> game.selectMatchType(SURVIVAL));
 
-        game.selectMode(PVSM);
-        game.selectMatchType(SURVIVAL);
-        game.selectPlayer1(0);
-        game.selectPlayer2(1);
-        game.startMatch();
+        start(PVSM, SURVIVAL, 0, 1);
         assertFalse(game.isMatchFinished());
         assertEquals("Balones 3-3 | Racha 0", game.getMatchStatus());
     }
 
     @Test
-    public void survivalShouldNotAllowSwitchingToOtherModes() throws POOBSoccerException {
+    public void selectingModeShouldClearMatchType() throws POOBSoccerException {
         game.selectMode(PVSM);
         game.selectMatchType(SURVIVAL);
-        assertThrows(POOBSoccerException.class, () -> game.selectMode(PVSP));
+        game.selectMode(PVSP);
+        game.selectPlayer(1, 0);
+        game.selectPlayer(2, 1);
+        POOBSoccerException e = assertThrows(POOBSoccerException.class, () -> game.startMatch());
+        assertEquals(POOBSoccerException.MODO_INVALIDO, e.getMessage());
+    }
+
+    @Test
+    public void matchTypeShouldRequireMode() {
+        POOBSoccerException e = assertThrows(POOBSoccerException.class, () -> game.selectMatchType(TIME));
+        assertEquals(POOBSoccerException.MODO_INVALIDO, e.getMessage());
     }
 
     @Test
@@ -536,20 +547,62 @@ public class HeadSoccerTest {
     public void shouldNotStartWithoutBothPlayers() throws POOBSoccerException {
         game.selectMode(PVSP);
         game.selectMatchType(TIME);
-        game.selectPlayer1(0);
+        game.selectPlayer(1, 0);
         POOBSoccerException e = assertThrows(POOBSoccerException.class, () -> game.startMatch());
         assertEquals(POOBSoccerException.JUGADORES_INCOMPLETOS, e.getMessage());
     }
 
     @Test
-    public void shouldRejectInvalidSelections() {
-        assertThrows(POOBSoccerException.class, () -> game.selectPlayer1(99));
+    public void shouldRejectInvalidSelections() throws POOBSoccerException {
+        POOBSoccerException e = assertThrows(POOBSoccerException.class, () -> game.selectPlayer(1, 99));
+        assertEquals(POOBSoccerException.PERSONAJE_INVALIDO, e.getMessage());
+        e = assertThrows(POOBSoccerException.class, () -> game.selectPlayer(3, 0));
+        assertEquals(POOBSoccerException.JUGADOR_INVALIDO, e.getMessage());
+        assertThrows(POOBSoccerException.class, () -> game.selectPlayer(0, 0));
         assertThrows(POOBSoccerException.class, () -> game.selectMode(-1));
-        assertThrows(POOBSoccerException.class, () -> game.selectMatchType(99));
-        POOBSoccerException e = assertThrows(POOBSoccerException.class, () -> game.updateTick(TICK));
+        game.selectMode(PVSP);
+        e = assertThrows(POOBSoccerException.class, () -> game.selectMatchType(99));
+        assertEquals(POOBSoccerException.MODO_INVALIDO, e.getMessage());
+        e = assertThrows(POOBSoccerException.class, () -> game.updateTick(TICK));
         assertEquals(POOBSoccerException.PARTIDO_NO_INICIADO, e.getMessage());
         assertThrows(POOBSoccerException.class, () -> game.pressAction(1, "KICK"));
         assertThrows(POOBSoccerException.class, () -> game.getMatchStatus());
+    }
+
+    @Test
+    public void singletonShouldBeUnique() throws POOBSoccerException {
+        assertSame(game, HeadSoccer.getInstance());
+    }
+
+    @Test
+    public void newGameShouldClearSession() throws POOBSoccerException {
+        start(PVSP, TIME);
+        game.newGame();
+        POOBSoccerException e = assertThrows(POOBSoccerException.class, () -> game.getMatchStatus());
+        assertEquals(POOBSoccerException.PARTIDO_NO_INICIADO, e.getMessage());
+        e = assertThrows(POOBSoccerException.class, () -> game.startMatch());
+        assertEquals(POOBSoccerException.MODO_INVALIDO, e.getMessage());
+        game.selectMode(PVSP);
+        game.selectMatchType(TIME);
+        e = assertThrows(POOBSoccerException.class, () -> game.startMatch());
+        assertEquals(POOBSoccerException.JUGADORES_INCOMPLETOS, e.getMessage());
+    }
+
+    @Test
+    public void rematchShouldStartFreshWithTheChosenCharacters() throws POOBSoccerException {
+        String[] names = game.getCharacterNames();
+        start(PVSP, TIME, 0, 1);
+        game.pressAction(1, "RIGHT");
+        game.updateTick(1.0);
+        assertTrue(game.getPlayerPowerBar(2) > 0.0);
+
+        game.startMatch();
+        assertEquals(names[0], game.getPlayerName(1));
+        assertEquals(names[1], game.getPlayerName(2));
+        assertEquals(0.0, game.getPlayerPowerBar(2), 1e-9);
+        assertEquals("01:00", game.getMatchStatus());
+        game.updateTick(TICK);
+        assertEquals(Side.LEFT.homeX, centerX(game.getPlayerBounds(1)), 1e-9);
     }
 
     @Test
@@ -685,5 +738,15 @@ public class HeadSoccerTest {
         assertEquals(3, game.getCharacterPowerLevel(3));
         assertFalse(game.getCharacterPowerDescription(0).isEmpty());
         assertThrows(POOBSoccerException.class, () -> game.getCharacterPowerLevel(99));
+    }
+
+    @Test
+    public void facadeShouldExposeCharacterCardData() throws POOBSoccerException {
+        assertEquals("Canadá", game.getCharacterCountry(0));
+        assertEquals(3, game.getCharacterSpeed(0));
+        assertEquals(3, game.getCharacterJump(0));
+        assertEquals(4, game.getCharacterStrength(0));
+        POOBSoccerException e = assertThrows(POOBSoccerException.class, () -> game.getCharacterCountry(-1));
+        assertEquals(POOBSoccerException.PERSONAJE_INVALIDO, e.getMessage());
     }
 }

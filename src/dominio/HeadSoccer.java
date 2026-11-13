@@ -1,5 +1,7 @@
 package dominio;
 
+import java.util.Arrays;
+
 import dominio.excepciones.POOBSoccerException;
 import dominio.modalidades.Action;
 import dominio.modalidades.GameMode;
@@ -13,33 +15,58 @@ import dominio.personajes.CharacterCatalog;
  * Fachada (Facade / Controller) del dominio de POOBSoccer. La presentacion solo
  * usa tipos simples (String, int, boolean, double y arreglos) a traves de esta
  * clase: aqui se validan las selecciones y se delega el partido en {@link Match}.
+ * Es Singleton: toda la aplicacion comparte una unica sesion de juego, que
+ * {@link #newGame()} reinicia.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-public class HeadSoccer {
+public final class HeadSoccer {
+
+    private static HeadSoccer instance;
 
     private final GameModeCatalog modes;
     private final MatchTypeCatalog matchTypes;
     private final CharacterCatalog characters;
     private final Settings settings;
+    private final Character[] chosen = new Character[Match.PLAYERS];
 
     private GameMode selectedMode;
     private MatchType selectedMatchType;
-    private Character player1;
-    private Character player2;
     private Match match;
 
     /**
-     * Crea el juego con sus catalogos de modos, tipos de partido y personajes.
+     * Crea el juego con sus catalogos de modos, tipos de partido y personajes (Creator).
      *
      * @throws POOBSoccerException Si algun dato del catalogo fuera invalido.
      */
-    public HeadSoccer() throws POOBSoccerException {
+    private HeadSoccer() throws POOBSoccerException {
         this.settings = new Settings();
         this.modes = new GameModeCatalog();
         this.matchTypes = new MatchTypeCatalog();
         this.characters = new CharacterCatalog();
+    }
+
+    /**
+     * @return La unica instancia del juego; se crea en la primera llamada.
+     * @throws POOBSoccerException Si algun dato del catalogo fuera invalido.
+     */
+    public static HeadSoccer getInstance() throws POOBSoccerException {
+        if (instance == null) {
+            instance = new HeadSoccer();
+        }
+        return instance;
+    }
+
+    /**
+     * Empieza una sesion nueva: olvida la modalidad, el tipo de partido, los personajes
+     * elegidos y el partido anterior.
+     */
+    public void newGame() {
+        selectedMode = null;
+        selectedMatchType = null;
+        Arrays.fill(chosen, null);
+        match = null;
     }
 
     // ------------------------------------------------------------ catalogos
@@ -125,75 +152,63 @@ public class HeadSoccer {
     // ------------------------------------------------------------ selecciones
 
     /**
-     * Elige la modalidad.
+     * Elige la modalidad (primer paso de la configuracion). Olvida el tipo de partido
+     * elegido, que debe volver a validarse contra la nueva modalidad.
      *
      * @param index Indice de la modalidad.
-     * @throws POOBSoccerException Si el indice es invalido o es incompatible con el tipo de partido elegido.
+     * @throws POOBSoccerException Si el indice es invalido.
      */
     public void selectMode(int index) throws POOBSoccerException {
-        GameMode mode = modes.get(index);
-        if (selectedMatchType != null) {
-            requireCompatible(mode, selectedMatchType);
-        }
-        selectedMode = mode;
+        selectedMode = modes.get(index);
+        selectedMatchType = null;
     }
 
     /**
-     * Elige el tipo de partido.
+     * Elige el tipo de partido para la modalidad ya elegida; el tipo decide si la
+     * admite (solo Supervivencia la restringe a PvsM).
      *
      * @param index Indice del tipo de partido.
-     * @throws POOBSoccerException Si el indice es invalido o es incompatible con la modalidad elegida.
+     * @throws POOBSoccerException Si no hay modalidad, el indice es invalido o el tipo no admite la modalidad.
      */
     public void selectMatchType(int index) throws POOBSoccerException {
+        if (selectedMode == null) {
+            throw new POOBSoccerException(POOBSoccerException.MODO_INVALIDO);
+        }
         MatchType type = matchTypes.get(index);
-        if (selectedMode != null) {
-            requireCompatible(selectedMode, type);
+        if (!type.supports(selectedMode)) {
+            throw new POOBSoccerException(POOBSoccerException.SUPERVIVENCIA_SOLO_PVSM);
         }
         selectedMatchType = type;
     }
 
-    /** El tipo de partido decide si admite la modalidad (solo Supervivencia la restringe a PvsM). */
-    private static void requireCompatible(GameMode mode, MatchType type) throws POOBSoccerException {
-        if (!type.supports(mode)) {
-            throw new POOBSoccerException(POOBSoccerException.SUPERVIVENCIA_SOLO_PVSM);
-        }
-    }
-
     /**
-     * Elige el personaje del jugador 1 (se clona del catalogo).
+     * Elige el personaje de un jugador.
      *
-     * @param index Indice del catalogo.
-     * @throws POOBSoccerException Si el indice no existe.
+     * @param number Jugador (1 o 2).
+     * @param characterIndex Indice del personaje en el catalogo.
+     * @throws POOBSoccerException Si el jugador no es 1 ni 2 o el personaje no existe.
      */
-    public void selectPlayer1(int index) throws POOBSoccerException {
-        player1 = characters.get(index).copy();
-    }
-
-    /**
-     * Elige el personaje del jugador 2 (se clona del catalogo).
-     *
-     * @param index Indice del catalogo.
-     * @throws POOBSoccerException Si el indice no existe.
-     */
-    public void selectPlayer2(int index) throws POOBSoccerException {
-        player2 = characters.get(index).copy();
+    public void selectPlayer(int number, int characterIndex) throws POOBSoccerException {
+        chosen[Match.index(number)] = characters.get(characterIndex);
     }
 
     // ------------------------------------------------------------ partido
 
     /**
-     * Inicia un partido nuevo con la configuracion elegida (Creator del partido).
+     * Inicia un partido nuevo con la configuracion elegida (Creator del partido). Cada
+     * partido recibe copias de los personajes elegidos (Prototype), asi una revancha
+     * empieza con los mismos personajes y sin estado del partido anterior.
      *
-     * @throws POOBSoccerException Si falta modalidad, tipo de partido o algun jugador.
+     * @throws POOBSoccerException Si falta el tipo de partido (o la modalidad) o algun jugador.
      */
     public void startMatch() throws POOBSoccerException {
-        if (selectedMode == null || selectedMatchType == null) {
+        if (selectedMatchType == null) {
             throw new POOBSoccerException(POOBSoccerException.MODO_INVALIDO);
         }
-        if (player1 == null || player2 == null) {
+        if (Arrays.asList(chosen).contains(null)) {
             throw new POOBSoccerException(POOBSoccerException.JUGADORES_INCOMPLETOS);
         }
-        match = new Match(selectedMode, selectedMatchType, player1, player2, characters);
+        match = new Match(selectedMode, selectedMatchType, chosen[0].copy(), chosen[1].copy(), characters);
     }
 
     private Match requireMatch() throws POOBSoccerException {
