@@ -153,6 +153,11 @@ final class Match implements MatchContext {
     /** Pausa el partido y suelta las acciones mantenidas, para que nadie siga moviendose al reanudar. */
     void pause() {
         paused = true;
+        releaseAll();
+    }
+
+    /** Suelta las acciones que los jugadores mantenian presionadas. */
+    void releaseAll() {
         for (Controller controller : controllers) {
             controller.releaseAll();
         }

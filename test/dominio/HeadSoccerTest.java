@@ -668,6 +668,18 @@ public class HeadSoccerTest {
     }
 
     @Test
+    public void releasingAllActionsShouldStopHeldKeysWithoutPausing() throws POOBSoccerException {
+        start(PVSP, TIME);
+        game.pressAction(1, "RIGHT");
+        game.pressAction(2, "LEFT");
+        game.releaseAllActions();
+        game.updateTick(1.0);
+        assertEquals(LEFT_HOME_X, centerX(game.getPlayerBounds(1)), 1e-9);
+        assertEquals(RIGHT_HOME_X, centerX(game.getPlayerBounds(2)), 1e-9);
+        assertEquals("00:59", game.getMatchStatus());
+    }
+
+    @Test
     public void heldKeysShouldDriveHumanPlayer() throws POOBSoccerException {
         start(PVSP, TIME);
         game.pressAction(1, "RIGHT");

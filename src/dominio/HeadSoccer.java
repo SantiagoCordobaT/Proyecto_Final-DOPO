@@ -236,6 +236,16 @@ public final class HeadSoccer {
     }
 
     /**
+     * Suelta las teclas mantenidas sin pausar, por ejemplo cuando la ventana pierde el
+     * foco y ya no recibira las teclas que se suelten fuera de ella.
+     *
+     * @throws POOBSoccerException Si el partido no ha iniciado.
+     */
+    public void releaseAllActions() throws POOBSoccerException {
+        requireMatch().releaseAll();
+    }
+
+    /**
      * Reanuda el partido.
      *
      * @throws POOBSoccerException Si el partido no ha iniciado.

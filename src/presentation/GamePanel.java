@@ -7,6 +7,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +25,8 @@ import dominio.excepciones.POOBSoccerException;
  * Pantalla del partido. Un {@link Timer} de Swing hace avanzar el juego con el
  * tiempo real transcurrido (la fachada simula) y vuelve a dibujar: arriba el
  * marcador y debajo la cancha, cada uno como una lista de {@link Drawable}. El
- * teclado llega a la fachada por {@link KeyBindings}; P o Esc pausan el partido.
+ * teclado llega a la fachada por {@link KeyBindings}; P o Esc pausan el partido y,
+ * si el panel pierde el foco, se sueltan las teclas mantenidas.
  * Al terminar el partido muestra el resultado.
  *
  * @author Santiago Cordoba - Camilo Rivas
@@ -71,6 +74,12 @@ final class GamePanel extends Screen {
 
         setFocusable(true);
         addKeyListener(new KeyBindings(this, game));
+        addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                releaseKeys();
+            }
+        });
         InputMap pauseKeys = getInputMap(WHEN_IN_FOCUSED_WINDOW);
         pauseKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_P, 0), PAUSE);
         pauseKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), PAUSE);
@@ -118,6 +127,18 @@ final class GamePanel extends Screen {
         try {
             game.pause();
             new PauseD(gui, this).setVisible(true);
+        } catch (POOBSoccerException e) {
+            report(this, e);
+        }
+    }
+
+    /**
+     * Al perder el foco el panel ya no recibe las teclas que se suelten fuera de el, asi
+     * que suelta las teclas mantenidas para que ningun jugador siga moviendose solo.
+     */
+    private void releaseKeys() {
+        try {
+            game.releaseAllActions();
         } catch (POOBSoccerException e) {
             report(this, e);
         }
