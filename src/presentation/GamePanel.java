@@ -6,9 +6,14 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.swing.AbstractAction;
+import javax.swing.InputMap;
+import javax.swing.KeyStroke;
 import javax.swing.Timer;
 
 import dominio.HeadSoccer;
@@ -17,7 +22,9 @@ import dominio.excepciones.POOBSoccerException;
 /**
  * Pantalla del partido. Un {@link Timer} de Swing hace avanzar el juego con el
  * tiempo real transcurrido (la fachada simula) y vuelve a dibujar: arriba el
- * marcador y debajo la cancha, cada uno como una lista de {@link Drawable}.
+ * marcador y debajo la cancha, cada uno como una lista de {@link Drawable}. El
+ * teclado llega a la fachada por {@link KeyBindings}; P o Esc pausan el partido.
+ * Al terminar el partido muestra el resultado.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -36,6 +43,7 @@ final class GamePanel extends Screen {
     private static final Color PLAYER2_COLOR = new Color(40, 90, 220);
     private static final Color ERROR_COLOR = Color.WHITE;
     private static final Font ERROR_FONT = new Font(Font.SANS_SERIF, Font.BOLD, 16);
+    private static final String PAUSE = "pause";
 
     private final Timer timer = new Timer(FRAME_MILLIS, e -> advance());
     private final List<Drawable> hud;
@@ -60,6 +68,18 @@ final class GamePanel extends Screen {
                 new PlayerDrawing(1, PLAYER1_COLOR),
                 new PlayerDrawing(2, PLAYER2_COLOR),
                 new BallDrawing());
+
+        setFocusable(true);
+        addKeyListener(new KeyBindings(this, game));
+        InputMap pauseKeys = getInputMap(WHEN_IN_FOCUSED_WINDOW);
+        pauseKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_P, 0), PAUSE);
+        pauseKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), PAUSE);
+        getActionMap().put(PAUSE, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pauseGame();
+            }
+        });
     }
 
     /** Empieza a contar el tiempo desde ahora y arranca el ciclo de juego. */
@@ -71,8 +91,9 @@ final class GamePanel extends Screen {
 
     /**
      * Un cuadro del ciclo de juego: avanza el partido con el tiempo transcurrido y lo
-     * dibuja. Al terminar el partido el ciclo se detiene; ante un error del dominio
-     * tambien, y se vuelve a la seleccion de personajes.
+     * dibuja. Al terminar el partido el ciclo se detiene y se muestra el resultado;
+     * ante un error del dominio tambien se detiene, y se vuelve a la seleccion de
+     * personajes. En pausa el ciclo sigue corriendo, pero el partido no avanza.
      */
     private void advance() {
         long now = System.nanoTime();
@@ -83,12 +104,39 @@ final class GamePanel extends Screen {
             repaint();
             if (game.isMatchFinished()) {
                 timer.stop();
+                gui.showResult();
             }
         } catch (POOBSoccerException e) {
             timer.stop();
             report(this, e);
             gui.showCharacterSelect();
         }
+    }
+
+    /** Pausa el partido (suelta las teclas mantenidas) y abre la ventana de pausa. */
+    private void pauseGame() {
+        try {
+            game.pause();
+            new PauseD(gui, this).setVisible(true);
+        } catch (POOBSoccerException e) {
+            report(this, e);
+        }
+    }
+
+    /** Reanuda el partido y recupera el foco del teclado que tenia la ventana de pausa. */
+    void resumeGame() {
+        try {
+            game.resume();
+            requestFocusInWindow();
+        } catch (POOBSoccerException e) {
+            report(this, e);
+        }
+    }
+
+    /** Abandona el partido: detiene el ciclo y vuelve a la seleccion de personajes. */
+    void giveUp() {
+        timer.stop();
+        gui.showCharacterSelect();
     }
 
     @Override

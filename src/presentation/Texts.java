@@ -43,6 +43,24 @@ final class Texts {
         put("settings.language", "Idioma:", "Language:");
         put("settings.save", "Guardar", "Save");
         put("hud.armed", "¡PODER LISTO!", "POWER READY!");
+        put("pause.title", "Pausa", "Pause");
+        put("pause.resume", "Reanudar", "Resume");
+        put("pause.giveUp", "Abandonar", "Give up");
+        put("pause.help", "Cómo jugar", "How to play");
+        put("help.controls",
+                "Jugador 1: A y D mover, W saltar, S patear, Q poder.\n"
+                        + "Jugador 2: flechas ← y → mover, ↑ saltar, ↓ patear, Ctrl derecho poder.\n"
+                        + "P o Esc: pausa.\n"
+                        + "La barra de poder se llena con el tiempo. Llena, el poder se arma\n"
+                        + "y la siguiente patada al balón lo lanza contra el rival.",
+                "Player 1: A and D move, W jump, S kick, Q power.\n"
+                        + "Player 2: arrows ← and → move, ↑ jump, ↓ kick, right Ctrl power.\n"
+                        + "P or Esc: pause.\n"
+                        + "The power bar fills over time. When full, the power is armed\n"
+                        + "and the next kick of the ball fires it at the rival.");
+        put("result.title", "Fin del partido", "Match over");
+        put("result.winner", "Ganador:", "Winner:");
+        put("result.next", "Siguiente", "Next");
         put("error.title", "Error", "Error");
     }
 

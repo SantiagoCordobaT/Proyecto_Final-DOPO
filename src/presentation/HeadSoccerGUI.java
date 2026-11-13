@@ -28,6 +28,7 @@ public final class HeadSoccerGUI extends JFrame {
     private final MatchSetupP setup;
     private final CharacterSelectP characterSelect;
     private final GamePanel match;
+    private final ResultP result;
 
     /**
      * Crea la ventana y sus pantallas (Creator). La ventana toma el tamano de su
@@ -41,6 +42,7 @@ public final class HeadSoccerGUI extends JFrame {
         setup = register(new MatchSetupP(this, game));
         characterSelect = register(new CharacterSelectP(this, game));
         match = register(new GamePanel(this, game));
+        result = register(new ResultP(this, game));
         setContentPane(deck);
         setResizable(false);
         pack();
@@ -66,6 +68,11 @@ public final class HeadSoccerGUI extends JFrame {
     /** Muestra el partido ya iniciado y arranca su ciclo de juego. */
     void showGame() {
         display(match);
+    }
+
+    /** Muestra el resultado del partido terminado. */
+    void showResult() {
+        display(result);
     }
 
     private <S extends Screen> S register(S screen) {
