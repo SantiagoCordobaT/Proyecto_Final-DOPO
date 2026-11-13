@@ -227,6 +227,10 @@ final class Match implements MatchContext {
         return player(number).getEffectNames();
     }
 
+    double[][] getGoalBounds() {
+        return field.getGoalBounds();
+    }
+
     double getBallX() {
         return ball.getX();
     }

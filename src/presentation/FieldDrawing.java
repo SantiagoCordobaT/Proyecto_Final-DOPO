@@ -7,10 +7,12 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 
 import dominio.HeadSoccer;
+import dominio.excepciones.POOBSoccerException;
 
 /**
- * Cancha en vista lateral: cielo, cesped, linea central y los dos arcos con su
- * travesano. Las medidas vienen de la fachada, asi el dibujo coincide con la fisica.
+ * Cancha en vista lateral: cielo, cesped, linea central y los arcos con su
+ * travesano. Las medidas y la ubicacion de los arcos vienen de la fachada, asi el
+ * dibujo coincide con la fisica.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -31,7 +33,7 @@ final class FieldDrawing implements Drawable {
     private static final BasicStroke THICK = new BasicStroke(4f);
 
     @Override
-    public void draw(Graphics2D g, HeadSoccer game) {
+    public void draw(Graphics2D g, HeadSoccer game) throws POOBSoccerException {
         double width = game.getFieldWidth();
         double ground = game.getGroundY();
         g.setColor(SKY);
@@ -42,25 +44,28 @@ final class FieldDrawing implements Drawable {
         g.setStroke(THICK);
         g.draw(new Line2D.Double(0.0, ground, width, ground));
         g.draw(new Line2D.Double(width / 2.0, ground - MIDLINE_HEIGHT, width / 2.0, ground));
-        drawGoal(g, game, 0.0);
-        drawGoal(g, game, width - game.getGoalWidth());
+        for (double[] goal : game.getGoalBounds()) {
+            drawGoal(g, goal, game.getCrossbarThickness());
+        }
     }
 
-    /** Dibuja un arco (red, postes y travesano) cuyo borde izquierdo esta en x. */
-    private static void drawGoal(Graphics2D g, HeadSoccer game, double x) {
-        double goalWidth = game.getGoalWidth();
-        double ground = game.getGroundY();
-        double top = ground - game.getGoalHeight();
-        Rectangle2D frame = new Rectangle2D.Double(x, top, goalWidth, ground - top);
+    /**
+     * Dibuja un arco: red, postes y travesano.
+     *
+     * @param bounds Arco como {izquierda, arriba, ancho, alto}, tal como lo ubica la cancha.
+     * @param crossbar Grosor del travesano.
+     */
+    private static void drawGoal(Graphics2D g, double[] bounds, double crossbar) {
+        Rectangle2D frame = new Rectangle2D.Double(bounds[0], bounds[1], bounds[2], bounds[3]);
         g.setColor(NET);
         g.fill(frame);
         g.setStroke(THIN);
-        for (double netX = x + NET_SPACING; netX < x + goalWidth; netX += NET_SPACING) {
-            g.draw(new Line2D.Double(netX, top, netX, ground));
+        for (double netX = frame.getMinX() + NET_SPACING; netX < frame.getMaxX(); netX += NET_SPACING) {
+            g.draw(new Line2D.Double(netX, frame.getMinY(), netX, frame.getMaxY()));
         }
         g.setColor(POST);
         g.setStroke(THICK);
         g.draw(frame);
-        g.fill(new Rectangle2D.Double(x, top, goalWidth, game.getCrossbarThickness()));
+        g.fill(new Rectangle2D.Double(frame.getMinX(), frame.getMinY(), frame.getWidth(), crossbar));
     }
 }

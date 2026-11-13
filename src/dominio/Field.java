@@ -32,6 +32,15 @@ public class Field {
         }
     }
 
+    /** @return Cada arco (el izquierdo y luego el derecho) como {izquierda, arriba, ancho, alto}. */
+    double[][] getGoalBounds() {
+        double[][] bounds = new double[goals.length][];
+        for (int i = 0; i < goals.length; i++) {
+            bounds[i] = goals[i].getBounds();
+        }
+        return bounds;
+    }
+
     /**
      * Deja caer el balon desde el centro superior de la cancha, sin inercia.
      *

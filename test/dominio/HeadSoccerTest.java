@@ -760,8 +760,16 @@ public class HeadSoccerTest {
         assertEquals(Field.WIDTH, game.getFieldWidth(), 1e-9);
         assertEquals(Field.GROUND_Y, game.getGroundY(), 1e-9);
         assertEquals(Ball.RADIUS, game.getBallRadius(), 1e-9);
-        assertEquals(Goal.WIDTH, game.getGoalWidth(), 1e-9);
-        assertEquals(Goal.HEIGHT, game.getGoalHeight(), 1e-9);
         assertEquals(Goal.CROSSBAR_THICKNESS, game.getCrossbarThickness(), 1e-9);
+    }
+
+    @Test
+    public void facadeShouldExposeWhereTheFieldPlacesEachGoal() throws POOBSoccerException {
+        start(PVSP, TIME);
+        double top = Field.GROUND_Y - Goal.HEIGHT;
+        double[][] goals = game.getGoalBounds();
+        assertEquals(2, goals.length);
+        assertArrayEquals(new double[] { 0.0, top, Goal.WIDTH, Goal.HEIGHT }, goals[0], 1e-9);
+        assertArrayEquals(new double[] { Field.WIDTH - Goal.WIDTH, top, Goal.WIDTH, Goal.HEIGHT }, goals[1], 1e-9);
     }
 }

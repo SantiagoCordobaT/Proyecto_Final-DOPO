@@ -62,6 +62,11 @@ class Goal {
         }
     }
 
+    /** @return Arco desde el suelo hasta lo alto del travesaño, como {izquierda, arriba, ancho, alto}. */
+    double[] getBounds() {
+        return new double[] { leftX, CROSSBAR_TOP, rightX - leftX, Field.GROUND_Y - CROSSBAR_TOP };
+    }
+
     /** @return Jugador (1 o 2) que anota en este arco. */
     int getScorer() {
         return scorer;

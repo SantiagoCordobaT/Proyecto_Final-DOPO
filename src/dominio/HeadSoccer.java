@@ -375,6 +375,15 @@ public final class HeadSoccer {
     }
 
     /**
+     * @return Cada arco de la cancha (el izquierdo y luego el derecho), desde el suelo
+     *         hasta lo alto del travesaño, como {izquierda, arriba, ancho, alto}.
+     * @throws POOBSoccerException Si no hay partido.
+     */
+    public double[][] getGoalBounds() throws POOBSoccerException {
+        return requireMatch().getGoalBounds();
+    }
+
+    /**
      * @return Nombre del personaje ganador.
      * @throws POOBSoccerException Si no hay partido o aun no termina.
      */
@@ -401,20 +410,6 @@ public final class HeadSoccer {
      */
     public double getGroundY() {
         return Field.GROUND_Y;
-    }
-
-    /**
-     * @return Ancho de cada arco.
-     */
-    public double getGoalWidth() {
-        return Goal.WIDTH;
-    }
-
-    /**
-     * @return Alto de cada arco, desde el suelo hasta lo alto del travesaño.
-     */
-    public double getGoalHeight() {
-        return Goal.HEIGHT;
     }
 
     /**

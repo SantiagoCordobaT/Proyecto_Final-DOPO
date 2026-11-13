@@ -41,6 +41,8 @@ final class PlayerHud implements Drawable {
     private final int number;
     private final int x;
     private final Color color;
+    /** Contorno de la barra de poder: no cambia entre cuadros. */
+    private final Rectangle2D bar;
 
     /**
      * @param number Jugador (1 o 2).
@@ -51,6 +53,7 @@ final class PlayerHud implements Drawable {
         this.number = number;
         this.x = x;
         this.color = color;
+        this.bar = new Rectangle2D.Double(x, BAR_Y, BAR_WIDTH, BAR_HEIGHT);
     }
 
     @Override
@@ -63,7 +66,6 @@ final class PlayerHud implements Drawable {
         g.setFont(GOALS_FONT);
         g.drawString(String.valueOf(game.getPlayerGoals(number)), x + GOALS_X, GOALS_Y);
 
-        Rectangle2D bar = new Rectangle2D.Double(x, BAR_Y, BAR_WIDTH, BAR_HEIGHT);
         g.setColor(color);
         g.fill(new Rectangle2D.Double(x, BAR_Y, BAR_WIDTH * game.getPlayerPowerBar(number), BAR_HEIGHT));
         if (game.isPlayerPowerArmed(number)) {
