@@ -6,7 +6,7 @@ package dominio.modalidades;
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-public class MvsM extends GameMode {
+class MvsM extends GameMode {
 
     /** Crea la modalidad MvsM; solo la crea {@link GameModeCatalog}. */
     MvsM() {

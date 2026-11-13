@@ -12,8 +12,8 @@ import dominio.personajes.Character;
  */
 public class PowerBar {
 
-    public static final double FULL = 100.0;
-    public static final double RECHARGE_PER_LEVEL = 2.0;
+    private static final double FULL = 100.0;
+    private static final double RECHARGE_PER_LEVEL = 2.0;
 
     private final Power power;
     private final int level;
@@ -24,7 +24,7 @@ public class PowerBar {
      * Crea una barra vacia y desarmada.
      *
      * @param power Poder que dispara la barra.
-     * @param level Nivel de "Poder Unico": la barra recarga {@code RECHARGE_PER_LEVEL * level} % por segundo.
+     * @param level Nivel de "Poder Unico": la barra recarga {@code 2 * level} % por segundo.
      */
     public PowerBar(Power power, int level) {
         this.power = power;

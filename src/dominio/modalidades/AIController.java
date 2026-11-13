@@ -11,7 +11,7 @@ import dominio.personajes.Character;
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-public class AIController extends Controller {
+class AIController extends Controller {
 
     private static final double BEHIND_BALL_OFFSET = 30.0;
     private static final double DEAD_ZONE = 8.0;

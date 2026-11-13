@@ -90,7 +90,7 @@ public final class HeadSoccer {
      * @throws POOBSoccerException Si el indice no existe.
      */
     public String getCharacterCountry(int index) throws POOBSoccerException {
-        return characters.get(index).getCountry();
+        return characters.getCountry(index);
     }
 
     /**
@@ -99,7 +99,7 @@ public final class HeadSoccer {
      * @throws POOBSoccerException Si el indice no existe.
      */
     public int getCharacterSpeed(int index) throws POOBSoccerException {
-        return characters.get(index).getSpeed();
+        return characters.getSpeed(index);
     }
 
     /**
@@ -108,7 +108,7 @@ public final class HeadSoccer {
      * @throws POOBSoccerException Si el indice no existe.
      */
     public int getCharacterJump(int index) throws POOBSoccerException {
-        return characters.get(index).getJump();
+        return characters.getJump(index);
     }
 
     /**
@@ -117,7 +117,7 @@ public final class HeadSoccer {
      * @throws POOBSoccerException Si el indice no existe.
      */
     public int getCharacterStrength(int index) throws POOBSoccerException {
-        return characters.get(index).getStrength();
+        return characters.getStrength(index);
     }
 
     /**
@@ -126,7 +126,7 @@ public final class HeadSoccer {
      * @throws POOBSoccerException Si el indice no existe.
      */
     public int getCharacterPowerLevel(int index) throws POOBSoccerException {
-        return characters.get(index).getPowerLevel();
+        return characters.getPowerLevel(index);
     }
 
     /**
@@ -135,7 +135,7 @@ public final class HeadSoccer {
      * @throws POOBSoccerException Si el indice no existe.
      */
     public String getCharacterPowerName(int index) throws POOBSoccerException {
-        return characters.get(index).getPowerName();
+        return characters.getPowerName(index);
     }
 
     /**
@@ -144,7 +144,7 @@ public final class HeadSoccer {
      * @throws POOBSoccerException Si el indice no existe.
      */
     public String getCharacterPowerDescription(int index) throws POOBSoccerException {
-        return characters.get(index).getPowerDescription();
+        return characters.getPowerDescription(index);
     }
 
     // ------------------------------------------------------------ selecciones

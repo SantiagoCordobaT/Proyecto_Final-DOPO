@@ -9,20 +9,16 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import dominio.efectos.FreezeEffect;
-import dominio.efectos.StunEffect;
 import dominio.excepciones.POOBSoccerException;
 import dominio.modalidades.Action;
 import dominio.modalidades.GameModeCatalog;
 import dominio.partidos.MatchContext;
 import dominio.partidos.MatchType;
 import dominio.partidos.MatchTypeCatalog;
-import dominio.partidos.TimeMatch;
 import dominio.personajes.Character;
 import dominio.personajes.CharacterCatalog;
 import dominio.poderes.ConfusionPower;
 import dominio.poderes.FreezePower;
-import dominio.poderes.PowerBar;
 import dominio.poderes.ShrinkPower;
 import dominio.poderes.StunPower;
 
@@ -41,6 +37,16 @@ public class HeadSoccerTest {
     private static final int GOALS_3 = 1;
     private static final int SURVIVAL = 4;
     private static final double TICK = 1.0 / 60.0;
+
+    // Valores esperados del enunciado y de las reglas del juego (el dominio los mantiene privados)
+    private static final double LEFT_HOME_X = 200.0;
+    private static final double RIGHT_HOME_X = 700.0;
+    private static final double MATCH_SECONDS = 60.0;
+    private static final String GOLDEN_GOAL = "GOL DE ORO";
+    private static final String FROZEN = "Congelado";
+    private static final String STUNNED = "Aturdido";
+    /** Fraccion de la barra que se recarga por segundo y por nivel de Poder Unico (2 %). */
+    private static final double RECHARGE_PER_LEVEL = 0.02;
 
     private HeadSoccer game;
 
@@ -197,7 +203,7 @@ public class HeadSoccerTest {
         assertFalse(m.isFinished());
         assertEquals("Balones 3-3 | Racha 1", m.getStatus());
         assertNotEquals(firstRival, m.getPlayerName(2));
-        assertEquals(Side.RIGHT.homeX, centerX(m.getPlayerBounds(2)), 1e-9);
+        assertEquals(RIGHT_HOME_X, centerX(m.getPlayerBounds(2)), 1e-9);
     }
 
     @Test
@@ -256,8 +262,7 @@ public class HeadSoccerTest {
     public void powerBarShouldRechargeOverTime() throws POOBSoccerException {
         start(PVSP, TIME);
         game.updateTick(1.0);
-        assertEquals(PowerBar.RECHARGE_PER_LEVEL * game.getCharacterPowerLevel(0) / PowerBar.FULL,
-                game.getPlayerPowerBar(1), 1e-6);
+        assertEquals(RECHARGE_PER_LEVEL * game.getCharacterPowerLevel(0), game.getPlayerPowerBar(1), 1e-6);
     }
 
     @Test
@@ -265,10 +270,10 @@ public class HeadSoccerTest {
         Character victim = new Character("B", "Canadá", 3, 3, 3, 3, new FreezePower());
         Character rival = new Character("C", "Japón", 3, 3, 3, 3, new StunPower());
         victim.enterAt(400.0, 1);
-        rival.enterAt(Side.RIGHT.homeX, -1);
+        rival.enterAt(RIGHT_HOME_X, -1);
         double top = victim.getTop();
         new FreezePower().applyEffect(victim);
-        assertTrue(hasEffect(victim.getEffectNames(), FreezeEffect.NAME));
+        assertTrue(hasEffect(victim.getEffectNames(), FROZEN));
         victim.requestKick();
         assertFalse(victim.tryKick(ballBeside(victim), rival));
         victim.jump();
@@ -301,13 +306,13 @@ public class HeadSoccerTest {
         Character kicker = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
         Character rival = new Character("B", "Japón", 3, 3, 3, 3, new StunPower());
         kicker.enterAt(400.0, 1);
-        rival.enterAt(Side.RIGHT.homeX, -1);
+        rival.enterAt(RIGHT_HOME_X, -1);
         kicker.update(17.0);
         kicker.armPower();
         assertTrue(kicker.isPowerArmed());
         kicker.requestKick();
         assertTrue(kicker.tryKick(ballBeside(kicker), rival));
-        assertTrue(hasEffect(rival.getEffectNames(), FreezeEffect.NAME));
+        assertTrue(hasEffect(rival.getEffectNames(), FROZEN));
         assertFalse(kicker.isPowerArmed());
         assertEquals(0.0, kicker.getPowerCharge(), 1e-9);
     }
@@ -316,7 +321,7 @@ public class HeadSoccerTest {
     public void stunPowerShouldStunOpponent() throws POOBSoccerException {
         Character victim = new Character("B", "Japón", 3, 3, 3, 3, new StunPower());
         new StunPower().applyEffect(victim);
-        assertTrue(hasEffect(victim.getEffectNames(), StunEffect.NAME));
+        assertTrue(hasEffect(victim.getEffectNames(), STUNNED));
     }
 
     // ---------------------------------------------------------------- aturdimiento
@@ -326,16 +331,16 @@ public class HeadSoccerTest {
         Character c = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
         Character rival = new Character("B", "Japón", 3, 3, 3, 3, new StunPower());
         c.enterAt(400.0, 1);
-        rival.enterAt(Side.RIGHT.homeX, -1);
+        rival.enterAt(RIGHT_HOME_X, -1);
         double top = c.getTop();
         c.stun();
-        assertTrue(hasEffect(c.getEffectNames(), StunEffect.NAME));
+        assertTrue(hasEffect(c.getEffectNames(), STUNNED));
         c.requestKick();
         assertFalse(c.tryKick(ballBeside(c), rival));
         c.jump();
         c.setMoveDirection(1);
         c.update(2.9);
-        assertTrue(hasEffect(c.getEffectNames(), StunEffect.NAME));
+        assertTrue(hasEffect(c.getEffectNames(), STUNNED));
         assertEquals(400.0, c.getX(), 1e-9);
         assertEquals(top, c.getTop(), 1e-9);
         c.update(0.2);
@@ -355,11 +360,11 @@ public class HeadSoccerTest {
         farBall.placeAt(Field.WIDTH - Goal.WIDTH, Ball.RADIUS);
         a.requestKick();
         assertFalse(a.tryKick(farBall, b));
-        assertTrue(hasEffect(b.getEffectNames(), StunEffect.NAME));
+        assertTrue(hasEffect(b.getEffectNames(), STUNNED));
         b.requestKick();
         assertFalse(b.tryKick(ballBeside(b), a));
         b.update(2.9);
-        assertTrue(hasEffect(b.getEffectNames(), StunEffect.NAME));
+        assertTrue(hasEffect(b.getEffectNames(), STUNNED));
         b.update(0.2);
         assertEquals(0, b.getEffectNames().length);
     }
@@ -392,10 +397,10 @@ public class HeadSoccerTest {
         Character c = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
         c.addGoal();
         c.update(1.0);
-        c.enterAt(Side.RIGHT.homeX, -1);
+        c.enterAt(RIGHT_HOME_X, -1);
         assertEquals(0, c.getGoals());
         assertEquals(0.0, c.getPowerCharge(), 1e-9);
-        assertEquals(Side.RIGHT.homeX, c.getX(), 1e-9);
+        assertEquals(RIGHT_HOME_X, c.getX(), 1e-9);
         assertEquals(-1, c.getFacing());
     }
 
@@ -455,11 +460,11 @@ public class HeadSoccerTest {
                 characters.get(1).copy(), characters);
         m.press(1, Action.RIGHT);
         m.updateTick(0.5);
-        assertTrue(centerX(m.getPlayerBounds(1)) > Side.LEFT.homeX);
+        assertTrue(centerX(m.getPlayerBounds(1)) > LEFT_HOME_X);
         player1.stun();
         m.scoreGoal(1);
-        assertEquals(Side.LEFT.homeX, centerX(m.getPlayerBounds(1)), 1e-9);
-        assertEquals(Side.RIGHT.homeX, centerX(m.getPlayerBounds(2)), 1e-9);
+        assertEquals(LEFT_HOME_X, centerX(m.getPlayerBounds(1)), 1e-9);
+        assertEquals(RIGHT_HOME_X, centerX(m.getPlayerBounds(2)), 1e-9);
         assertEquals(0, m.getPlayerEffects(1).length);
         assertEquals(Field.WIDTH / 2.0, m.getBallX(), 1e-9);
     }
@@ -506,7 +511,7 @@ public class HeadSoccerTest {
         m.scoreGoal(1);
         m.updateTick(TICK);
         assertFalse(m.isFinished());
-        m.updateTick(TimeMatch.MATCH_SECONDS);
+        m.updateTick(MATCH_SECONDS);
         assertTrue(m.isFinished());
         assertEquals("00:00", m.getStatus());
         assertEquals(m.getPlayerName(1), m.getWinnerName());
@@ -515,8 +520,8 @@ public class HeadSoccerTest {
     @Test
     public void tieShouldActivateGoldenGoal() throws POOBSoccerException {
         Match m = match(PVSP, TIME, 0, 1);
-        m.updateTick(TimeMatch.MATCH_SECONDS);
-        assertEquals(TimeMatch.GOLDEN_GOAL, m.getStatus());
+        m.updateTick(MATCH_SECONDS);
+        assertEquals(GOLDEN_GOAL, m.getStatus());
         assertFalse(m.isFinished());
 
         m.scoreGoal(2);
@@ -536,7 +541,7 @@ public class HeadSoccerTest {
         type.tick(0.5);
         assertEquals("00:59", type.getStatusText());
         context.goals[1] = 2;
-        type.tick(TimeMatch.MATCH_SECONDS);
+        type.tick(MATCH_SECONDS);
         assertTrue(type.isFinished());
         assertEquals(2, type.getWinner());
     }
@@ -602,7 +607,7 @@ public class HeadSoccerTest {
         assertEquals(0.0, game.getPlayerPowerBar(2), 1e-9);
         assertEquals("01:00", game.getMatchStatus());
         game.updateTick(TICK);
-        assertEquals(Side.LEFT.homeX, centerX(game.getPlayerBounds(1)), 1e-9);
+        assertEquals(LEFT_HOME_X, centerX(game.getPlayerBounds(1)), 1e-9);
     }
 
     @Test
@@ -626,7 +631,7 @@ public class HeadSoccerTest {
         game.pause();
         game.resume();
         game.updateTick(TICK);
-        assertEquals(Side.LEFT.homeX, centerX(game.getPlayerBounds(1)), 1e-9);
+        assertEquals(LEFT_HOME_X, centerX(game.getPlayerBounds(1)), 1e-9);
     }
 
     @Test
@@ -635,7 +640,7 @@ public class HeadSoccerTest {
         game.pressAction(1, "RIGHT");
         game.updateTick(TICK);
         double moved = centerX(game.getPlayerBounds(1));
-        assertTrue(moved > Side.LEFT.homeX);
+        assertTrue(moved > LEFT_HOME_X);
         game.releaseAction(1, "RIGHT");
         game.updateTick(TICK);
         assertEquals(moved, centerX(game.getPlayerBounds(1)), 1e-9);
@@ -652,7 +657,7 @@ public class HeadSoccerTest {
         game.pressAction(2, "LEFT");
         game.pressAction(2, "RIGHT");
         game.updateTick(TICK);
-        assertEquals(Side.RIGHT.homeX, centerX(game.getPlayerBounds(2)), 1e-9);
+        assertEquals(RIGHT_HOME_X, centerX(game.getPlayerBounds(2)), 1e-9);
     }
 
     @Test

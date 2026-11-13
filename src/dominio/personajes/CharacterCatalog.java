@@ -12,7 +12,9 @@ import dominio.poderes.StunPower;
 
 /**
  * Catalogo de personajes jugables (Creator): crea los cuatro personajes con sus
- * estadisticas y poder, y conoce el orden en que entran los rivales.
+ * estadisticas y poder, conoce el orden en que entran los rivales y responde los
+ * datos de cada personaje que muestra la seleccion (Information Expert: quien pide
+ * un dato no navega hasta el personaje).
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -43,5 +45,68 @@ public final class CharacterCatalog extends Catalog<Character> {
         List<String> names = Arrays.asList(names());
         int next = (names.indexOf(current.getName()) + 1) % names.size();
         return get(next).copy();
+    }
+
+    /**
+     * @param index Indice del personaje.
+     * @return Pais del personaje.
+     * @throws POOBSoccerException Si el indice no existe.
+     */
+    public String getCountry(int index) throws POOBSoccerException {
+        return get(index).getCountry();
+    }
+
+    /**
+     * @param index Indice del personaje.
+     * @return Velocidad del personaje (1 a 5).
+     * @throws POOBSoccerException Si el indice no existe.
+     */
+    public int getSpeed(int index) throws POOBSoccerException {
+        return get(index).getSpeed();
+    }
+
+    /**
+     * @param index Indice del personaje.
+     * @return Salto del personaje (1 a 5).
+     * @throws POOBSoccerException Si el indice no existe.
+     */
+    public int getJump(int index) throws POOBSoccerException {
+        return get(index).getJump();
+    }
+
+    /**
+     * @param index Indice del personaje.
+     * @return Fuerza del personaje (1 a 5).
+     * @throws POOBSoccerException Si el indice no existe.
+     */
+    public int getStrength(int index) throws POOBSoccerException {
+        return get(index).getStrength();
+    }
+
+    /**
+     * @param index Indice del personaje.
+     * @return Poder Unico del personaje (1 a 5).
+     * @throws POOBSoccerException Si el indice no existe.
+     */
+    public int getPowerLevel(int index) throws POOBSoccerException {
+        return get(index).getPowerLevel();
+    }
+
+    /**
+     * @param index Indice del personaje.
+     * @return Nombre del poder del personaje.
+     * @throws POOBSoccerException Si el indice no existe.
+     */
+    public String getPowerName(int index) throws POOBSoccerException {
+        return get(index).getPowerName();
+    }
+
+    /**
+     * @param index Indice del personaje.
+     * @return Descripcion del poder del personaje.
+     * @throws POOBSoccerException Si el indice no existe.
+     */
+    public String getPowerDescription(int index) throws POOBSoccerException {
+        return get(index).getPowerDescription();
     }
 }

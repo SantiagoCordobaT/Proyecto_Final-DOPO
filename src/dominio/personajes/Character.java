@@ -20,17 +20,17 @@ import dominio.poderes.PowerBar;
  */
 public class Character implements Named {
 
-    public static final int MIN_STAT = 1;
-    public static final int MAX_STAT = 5;
+    private static final int MIN_STAT = 1;
+    private static final int MAX_STAT = 5;
 
-    public static final double BASE_WIDTH = 60.0;
-    public static final double BASE_HEIGHT = 90.0;
-    public static final double SPEED_PER_POINT = 70.0;
-    public static final double BASE_JUMP_SPEED = 450.0;
-    public static final double JUMP_SPEED_PER_POINT = 70.0;
-    public static final double GRAVITY = 1800.0;
-    public static final double KICK_BUFFER_SECONDS = 0.15;
-    public static final double KICK_COOLDOWN_SECONDS = 0.4;
+    private static final double BASE_WIDTH = 60.0;
+    private static final double BASE_HEIGHT = 90.0;
+    private static final double SPEED_PER_POINT = 70.0;
+    private static final double BASE_JUMP_SPEED = 450.0;
+    private static final double JUMP_SPEED_PER_POINT = 70.0;
+    private static final double GRAVITY = 1800.0;
+    private static final double KICK_BUFFER_SECONDS = 0.15;
+    private static final double KICK_COOLDOWN_SECONDS = 0.4;
 
     // Alcance de la patada alrededor del hitbox y alcance cuerpo a cuerpo contra el rival
     private static final double KICK_REACH = 15.0;

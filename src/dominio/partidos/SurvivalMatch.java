@@ -12,7 +12,7 @@ import dominio.modalidades.GameMode;
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-public class SurvivalMatch extends MatchType {
+class SurvivalMatch extends MatchType {
 
     private static final int INITIAL_BALLS = 3;
 

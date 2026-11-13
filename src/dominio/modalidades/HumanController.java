@@ -11,7 +11,7 @@ import dominio.personajes.Character;
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-public class HumanController extends Controller {
+class HumanController extends Controller {
 
     @Override
     protected int direction(Character self, Ball ball) {

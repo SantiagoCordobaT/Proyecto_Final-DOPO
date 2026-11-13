@@ -9,10 +9,10 @@ import dominio.excepciones.POOBSoccerException;
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-public class TimeMatch extends MatchType {
+class TimeMatch extends MatchType {
 
-    public static final double MATCH_SECONDS = 60.0;
-    public static final String GOLDEN_GOAL = "GOL DE ORO";
+    private static final double MATCH_SECONDS = 60.0;
+    private static final String GOLDEN_GOAL = "GOL DE ORO";
 
     private boolean goldenGoal;
 

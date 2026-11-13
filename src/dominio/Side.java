@@ -15,7 +15,7 @@ enum Side {
     LEFT(200.0, 1),
     RIGHT(700.0, -1);
 
-    final double homeX;
+    private final double homeX;
     private final int facing;
 
     Side(double homeX, int facing) {

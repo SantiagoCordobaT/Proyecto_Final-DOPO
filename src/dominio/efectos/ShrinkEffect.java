@@ -8,7 +8,7 @@ package dominio.efectos;
  */
 public class ShrinkEffect extends Effect {
 
-    public static final String NAME = "Reducido";
+    private static final String NAME = "Reducido";
     private static final double SHRINK_SECONDS = 6.0;
     private static final double SHRINK_SCALE = 0.5;
 

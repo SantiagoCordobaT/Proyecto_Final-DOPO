@@ -11,7 +11,7 @@ package dominio;
  */
 public class Ball {
 
-    public static final double RADIUS = 15.0;
+    static final double RADIUS = 15.0;
 
     // Aceleración de caída vertical por paso de física
     private static final double GRAVITY = 0.45;

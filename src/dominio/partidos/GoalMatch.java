@@ -8,7 +8,7 @@ import dominio.excepciones.POOBSoccerException;
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-public class GoalMatch extends MatchType {
+class GoalMatch extends MatchType {
 
     private final int targetGoals;
 
