@@ -2,66 +2,58 @@ package presentation;
 
 import static presentation.Texts.text;
 
-import java.awt.BorderLayout;
-import java.awt.Font;
 import java.awt.Frame;
-import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-import javax.swing.WindowConstants;
+import javax.swing.JTextArea;
 
 /**
- * Pausa del partido (ventana modal): reanudar, abandonar o ver los controles. No se
- * cierra con la X: hay que elegir entre reanudar y abandonar.
+ * Dialogo de pausa: recuerda los controles y permite reanudar o abandonar.
+ * Cerrar la ventana equivale a reanudar, para no dejar el partido congelado.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
 @SuppressWarnings("serial")
-final class PauseD extends JDialog {
+final class PauseD extends StreetDialog {
 
-    private static final int MARGIN = 15;
-    private static final Font TITLE_FONT = new Font(Font.SANS_SERIF, Font.BOLD, 36);
+    private final MatchP match;
+    private final JTextArea controls;
 
     /**
-     * @param owner Ventana sobre la que se abre la pausa.
-     * @param panel Partido pausado, que reanuda o abandona.
+     * @param owner Ventana principal.
+     * @param match Pantalla del partido en pausa.
      */
-    PauseD(Frame owner, GamePanel panel) {
-        super(owner, text("pause.title"), true);
-        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-        JLabel title = new JLabel(text("pause.title"), SwingConstants.CENTER);
-        title.setFont(TITLE_FONT);
-        JButton resume = new JButton(text("pause.resume"));
-        JButton giveUp = new JButton(text("pause.giveUp"));
-        JButton help = new JButton(text("pause.help"));
-        resume.addActionListener(e -> {
-            dispose();
-            panel.resumeGame();
+    PauseD(Frame owner, MatchP match) {
+        super(owner, text("pause.title"));
+        this.match = match;
+        controls = new JTextArea(text("help.controls"));
+        controls.setEditable(false);
+        controls.setFont(Resources.TEXT_FONT);
+        controls.setBackground(Resources.CONCRETE);
+        controls.setForeground(Resources.TEXT);
+        controls.setBorder(BorderFactory.createEmptyBorder(Resources.GAP, Resources.GAP, Resources.GAP, Resources.GAP));
+        setBody(controls);
+        addButton(text("pause.resume"), new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                close();
+            }
         });
-        giveUp.addActionListener(e -> {
-            dispose();
-            panel.giveUp();
+        addButton(text("pause.giveUp"), new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+                match.giveUp();
+            }
         });
-        help.addActionListener(e -> JOptionPane.showMessageDialog(this, text("help.controls"),
-                text("pause.help"), JOptionPane.INFORMATION_MESSAGE));
+    }
 
-        JPanel buttons = new JPanel(new GridLayout(3, 1, MARGIN, MARGIN));
-        buttons.add(resume);
-        buttons.add(giveUp);
-        buttons.add(help);
-        JPanel content = new JPanel(new BorderLayout(MARGIN, MARGIN));
-        content.setBorder(BorderFactory.createEmptyBorder(MARGIN, MARGIN, MARGIN, MARGIN));
-        content.add(title, BorderLayout.NORTH);
-        content.add(buttons, BorderLayout.CENTER);
-        setContentPane(content);
-        pack();
-        setLocationRelativeTo(owner);
+    @Override
+    protected void close() {
+        super.close();
+        match.resumeGame();
     }
 }

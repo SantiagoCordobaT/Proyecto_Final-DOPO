@@ -1,18 +1,26 @@
 package presentation;
 
+import static presentation.Texts.text;
+
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Component;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 
 import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Ventana principal de POOBSoccer: un mazo de pantallas (CardLayout) por el que
- * se navega del menu a la configuracion del partido, a la seleccion de personajes
- * y al partido.
+ * Ventana principal de POOBSoccer. Mantiene la unica referencia de la vista al
+ * dominio (la fachada {@link HeadSoccer}), compone el menu y la pantalla del
+ * partido, y abre los dialogos de configuracion, seleccion y resultado.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -21,81 +29,90 @@ import dominio.excepciones.POOBSoccerException;
 public final class HeadSoccerGUI extends JFrame {
 
     private static final String TITLE = "POOBSoccer";
+    private static final String MENU = "menu";
+    private static final String MATCH = "match";
 
+    private final HeadSoccer model;
     private final CardLayout cards = new CardLayout();
     private final JPanel deck = new JPanel(cards);
     private final MainMenuP menu;
-    private final MatchSetupP setup;
-    private final CharacterSelectP characterSelect;
-    private final GamePanel match;
-    private final ResultP result;
+    private final MatchP match;
 
-    /**
-     * Crea la ventana y sus pantallas (Creator). La ventana toma el tamano de su
-     * pantalla mas grande, la del partido.
-     *
-     * @param game Fachada del juego que usan las pantallas.
-     */
-    private HeadSoccerGUI(HeadSoccer game) {
+    private HeadSoccerGUI(HeadSoccer model) {
         super(TITLE);
-        menu = register(new MainMenuP(this, game));
-        setup = register(new MatchSetupP(this, game));
-        characterSelect = register(new CharacterSelectP(this, game));
-        match = register(new GamePanel(this, game));
-        result = register(new ResultP(this, game));
-        setContentPane(deck);
+        this.model = model;
+        menu = new MainMenuP(this);
+        match = new MatchP(this, model);
+        deck.add(menu, MENU);
+        deck.add(match, MATCH);
+        setLayout(new BorderLayout());
+        add(deck, BorderLayout.CENTER);
         setResizable(false);
         pack();
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                close();
+            }
+        });
     }
 
     /** Muestra el menu principal. */
     void showMenu() {
-        display(menu);
+        cards.show(deck, MENU);
     }
 
-    /** Muestra la eleccion de modalidad y tipo de partido. */
-    void showSetup() {
-        display(setup);
+    /** Muestra la pantalla del partido ya iniciado en la fachada y arranca su ciclo. */
+    void showMatch() {
+        cards.show(deck, MATCH);
+        match.start();
     }
 
-    /** Muestra la seleccion de personajes. */
-    void showCharacterSelect() {
-        display(characterSelect);
+    /** Empieza una configuracion nueva y abre el dialogo de modalidad y tipo de partido. */
+    void openGameModes() {
+        model.newGame();
+        new GameModeD(this, model).open();
     }
 
-    /** Muestra el partido ya iniciado y arranca su ciclo de juego. */
-    void showGame() {
-        display(match);
+    /** Abre el dialogo de seleccion de personajes. */
+    void openCharacterSelect() {
+        new CharacterSelectD(this, model).open();
     }
 
-    /** Muestra el resultado del partido terminado. */
+    /** Abre la configuracion y, al cerrarla, rotula el menu en el idioma elegido. */
+    void openSettings() {
+        new SettingsD(this).open();
+        menu.refresh();
+    }
+
+    /** Abre el resultado del partido terminado. */
     void showResult() {
-        display(result);
+        new ResultD(this, model).open();
     }
 
-    private <S extends Screen> S register(S screen) {
-        deck.add(screen, screen.getName());
-        return screen;
-    }
-
-    private void display(Screen screen) {
-        cards.show(deck, screen.getName());
-        screen.enter();
+    /** Cierre seguro: detiene el ciclo del partido y libera la ventana. */
+    void close() {
+        match.stop();
+        dispose();
     }
 
     /**
-     * Abre la ventana en el menu principal. Si el juego no se puede crear, informa el
-     * error y no abre la ventana.
+     * Muestra al usuario un error reportado por el dominio.
+     *
+     * @param parent Componente sobre el que se centra el mensaje.
+     * @param e Excepcion del dominio.
      */
+    static void report(Component parent, POOBSoccerException e) {
+        JOptionPane.showMessageDialog(parent, e.getMessage(), text("error.title"), JOptionPane.ERROR_MESSAGE);
+    }
+
     private static void launch() {
         try {
-            HeadSoccerGUI gui = new HeadSoccerGUI(HeadSoccer.getInstance());
-            gui.showMenu();
-            gui.setVisible(true);
+            new HeadSoccerGUI(HeadSoccer.getInstance()).setVisible(true);
         } catch (POOBSoccerException e) {
-            Screen.report(null, e);
+            report(null, e);
         }
     }
 

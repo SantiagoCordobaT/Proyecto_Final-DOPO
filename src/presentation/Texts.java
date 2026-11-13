@@ -4,10 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Tabla de textos de la interfaz en cada idioma (Singleton). El idioma es una
- * preferencia de la vista: el dominio no lo conoce. Los nombres que vienen del
- * dominio (modalidades, personajes, paises, poderes y mensajes de error) no se
- * traducen.
+ * Tabla de textos de la interfaz en los idiomas disponibles (Singleton): toda la
+ * vista comparte un unico idioma activo.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -21,50 +19,49 @@ final class Texts {
     private final Map<String, String[]> table = new HashMap<String, String[]>();
     private int language;
 
-    /** Crea la tabla en espanol (idioma inicial) e ingles. */
     private Texts() {
+        put("menu.subtitle", "Fútbol callejero 1 contra 1", "1 v 1 street football");
         put("menu.play", "Jugar", "Play");
         put("menu.settings", "Configuración", "Settings");
-        put("setup.title", "Selecciona el modo de juego", "Choose the game mode");
-        put("setup.mode", "Modalidad:", "Mode:");
-        put("setup.type", "Tipo de partido:", "Match type:");
+        put("menu.exit", "Salir", "Exit");
+        put("setup.title", "Modo de juego", "Game mode");
+        put("setup.mode", "Modalidad", "Mode");
+        put("setup.type", "Tipo de partido", "Match type");
         put("common.select", "Seleccionar", "Select");
         put("common.back", "Volver", "Back");
         put("select.title", "Escoge tu personaje", "Choose your character");
-        put("select.player1", "Jugador 1", "Player 1");
-        put("select.player2", "Jugador 2", "Player 2");
-        put("card.country", "País:", "Country:");
-        put("card.speed", "Velocidad:", "Speed:");
-        put("card.jump", "Salto:", "Jump:");
-        put("card.strength", "Fuerza:", "Strength:");
-        put("card.power", "Poder Único:", "Unique Power:");
+        put("select.player", "Jugador", "Player");
+        put("select.play", "Jugar", "Play");
+        put("card.speed", "Velocidad", "Speed");
+        put("card.jump", "Salto", "Jump");
+        put("card.strength", "Fuerza", "Strength");
+        put("card.power", "Poder Único", "Unique Power");
         put("card.special", "Poder especial:", "Special power:");
         put("settings.title", "Configuración", "Settings");
-        put("settings.language", "Idioma:", "Language:");
+        put("settings.language", "Idioma", "Language");
         put("settings.save", "Guardar", "Save");
+        put("match.hint", "P / Esc: pausa", "P / Esc: pause");
         put("hud.armed", "¡PODER LISTO!", "POWER READY!");
         put("pause.title", "Pausa", "Pause");
         put("pause.resume", "Reanudar", "Resume");
         put("pause.giveUp", "Abandonar", "Give up");
-        put("pause.help", "Cómo jugar", "How to play");
         put("help.controls",
                 "Jugador 1: A y D mover, W saltar, S patear, Q poder.\n"
                         + "Jugador 2: flechas ← y → mover, ↑ saltar, ↓ patear, Ctrl derecho poder.\n"
-                        + "P o Esc: pausa.\n"
                         + "La barra de poder se llena con el tiempo. Llena, el poder se arma\n"
                         + "y la siguiente patada al balón lo lanza contra el rival.",
                 "Player 1: A and D move, W jump, S kick, Q power.\n"
                         + "Player 2: arrows ← and → move, ↑ jump, ↓ kick, right Ctrl power.\n"
-                        + "P or Esc: pause.\n"
                         + "The power bar fills over time. When full, the power is armed\n"
                         + "and the next kick of the ball fires it at the rival.");
         put("result.title", "Fin del partido", "Match over");
         put("result.winner", "Ganador:", "Winner:");
-        put("result.next", "Siguiente", "Next");
+        put("result.rematch", "Revancha", "Rematch");
+        put("result.menu", "Menú", "Menu");
         put("error.title", "Error", "Error");
     }
 
-    /** @return La unica tabla de textos; se crea en la primera llamada. */
+    /** @return La unica instancia de la tabla de textos. */
     static Texts getInstance() {
         if (instance == null) {
             instance = new Texts();
@@ -74,23 +71,23 @@ final class Texts {
 
     /**
      * @param key Clave del texto.
-     * @return El texto en el idioma elegido.
+     * @return El texto en el idioma activo.
      */
     static String text(String key) {
         return getInstance().translate(key);
     }
 
-    /** @return Nombres de los idiomas disponibles, en el orden de sus indices. */
+    /** @return Nombres de los idiomas disponibles. */
     String[] getLanguages() {
         return LANGUAGES.clone();
     }
 
-    /** @return Indice del idioma elegido. */
+    /** @return Indice del idioma activo. */
     int getLanguage() {
         return language;
     }
 
-    /** @param language Indice del idioma a usar desde ahora (de {@link #getLanguages()}). */
+    /** @param language Indice del idioma que pasa a estar activo. */
     void setLanguage(int language) {
         this.language = language;
     }

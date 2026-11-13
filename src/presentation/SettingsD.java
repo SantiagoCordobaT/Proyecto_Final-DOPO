@@ -3,49 +3,41 @@ package presentation;
 import static presentation.Texts.text;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 /**
- * Configuracion (ventana modal): el idioma de la interfaz. Guardar cambia el
- * idioma de {@link Texts}; cerrar la ventana lo deja como estaba.
+ * Dialogo de configuracion: elige el idioma de la interfaz.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
 @SuppressWarnings("serial")
-final class SettingsD extends JDialog {
+final class SettingsD extends StreetDialog {
 
-    private static final int MARGIN = 15;
+    private final Texts texts = Texts.getInstance();
+    private final JList<String> languages;
 
-    /** @param owner Ventana sobre la que se abre la configuracion. */
+    /** @param owner Ventana principal. */
     SettingsD(Frame owner) {
-        super(owner, text("settings.title"), true);
-        Texts texts = Texts.getInstance();
-        JComboBox<String> languages = new JComboBox<String>(texts.getLanguages());
+        super(owner, text("settings.title"));
+        languages = resources.list(texts.getLanguages());
         languages.setSelectedIndex(texts.getLanguage());
-        JButton save = new JButton(text("settings.save"));
-        save.addActionListener(e -> {
-            texts.setLanguage(languages.getSelectedIndex());
-            dispose();
+        JPanel body = resources.panel(new BorderLayout(0, Resources.GAP / 2));
+        body.add(resources.label(text("settings.language"), Resources.TEXT_FONT), BorderLayout.NORTH);
+        body.add(new JScrollPane(languages), BorderLayout.CENTER);
+        setBody(body);
+        addButton(text("settings.save"), new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                texts.setLanguage(languages.getSelectedIndex());
+                close();
+            }
         });
-
-        JPanel language = new JPanel(new FlowLayout());
-        language.add(new JLabel(text("settings.language")));
-        language.add(languages);
-        JPanel content = new JPanel(new BorderLayout(MARGIN, MARGIN));
-        content.setBorder(BorderFactory.createEmptyBorder(MARGIN, MARGIN, MARGIN, MARGIN));
-        content.add(language, BorderLayout.CENTER);
-        content.add(save, BorderLayout.SOUTH);
-        setContentPane(content);
-        pack();
-        setLocationRelativeTo(owner);
     }
 }
