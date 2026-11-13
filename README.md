@@ -203,12 +203,11 @@ La presentación (Swing) solo conoce la fachada `HeadSoccer` y `POOBSoccerExcept
 ```mermaid
 flowchart TB
   subgraph P["presentation (Swing)"]
-    GUI["HeadSoccerGUI: CardLayout de pantallas"]
-    SCR["Screen: MainMenuP, StepScreen (MatchSetupP, CharacterSelectP), GamePanel, ResultP"]
-    DLG["SettingsD, PauseD"]
-    DRW["Drawable: FieldDrawing, BallDrawing, PlayerDrawing, PlayerHud, StatusDrawing"]
-    KEY["KeyBindings: tabla de PlayerKey"]
-    TXT["Texts: idioma de la interfaz"]
+    GUI["HeadSoccerGUI (JFrame): model : HeadSoccer"]
+    PNL["Paneles (JPanel): MainMenuP, MatchP, HudP, PlayerPlateP, CourtP, CharacterCard, TeamBadge"]
+    DLG["Diálogos (JDialog) sobre StreetDialog: GameModeD, CharacterSelectD, SettingsD, PauseD, ResultD"]
+    KEY["MatchP.Keyboard (KeyAdapter): tabla de PlayerKey"]
+    RES["Singleton: Resources (recursos gráficos) y Texts (idioma)"]
   end
   subgraph D["dominio"]
     HS[["HeadSoccer: fachada"]]
@@ -222,12 +221,14 @@ flowchart TB
     PA["partidos: MatchType (Tiempo, Goles, Supervivencia), MatchContext, MatchTypeCatalog"]
     EX["excepciones: POOBSoccerException"]
   end
-  GUI --> SCR
+  GUI --> PNL
   GUI --> DLG
-  SCR --> DRW
-  SCR --> KEY
-  SCR --> HS
-  DRW --> HS
+  PNL --> KEY
+  PNL --> RES
+  DLG --> RES
+  GUI --> HS
+  PNL --> HS
+  DLG --> HS
   KEY --> HS
   HS --> CA
   HS --> MA
@@ -241,34 +242,39 @@ flowchart TB
   PO --> EF
 ```
 
-**Un cuadro del juego:** un `javax.swing.Timer` de 16 ms llama a `GamePanel.advance()`, que mide el tiempo real (con tope de 0,1 s para que una pausa de la ventana no haga saltar la física) y llama a `HeadSoccer.updateTick(dt)`. `Match` pide a cada `Controller` las intenciones de su personaje, actualiza los personajes con `dt`, avanza el balón en pasos fijos de 1/60 s, revisa los goles con `Field.scorerOf` y deja que el `MatchType` avance su reloj. Luego el panel redibuja su lista de `Drawable` y, si el partido terminó, muestra `ResultP`.
+**Un cuadro del juego:** un `javax.swing.Timer` de 16 ms llama a `MatchP.advance()`, que mide el tiempo real (con tope de 0,1 s para que una pausa de la ventana no haga saltar la física) y llama a `HeadSoccer.updateTick(dt)`. `Match` pide a cada `Controller` las intenciones de su personaje, actualiza los personajes con `dt`, avanza el balón en pasos fijos de 1/60 s, revisa los goles con `Field.scorerOf` y deja que el `MatchType` avance su reloj. Luego `MatchP` refresca el marcador (`HudP`), repinta el lienzo (`CourtP.paintComponent`, que llama primero a `super.paintComponent`) y, si el partido terminó, abre `ResultD`.
 
 ### Patrones aplicados
 
 | Patrón | Dónde y para qué |
 | :--- | :--- |
-| **Singleton** | Solo dos: `HeadSoccer.getInstance()` (una sesión de juego para toda la aplicación; `newGame()` la reinicia) y `Texts.getInstance()` (la tabla de textos y el idioma elegido). Los catálogos **no** son Singleton: los crea la fachada. |
-| **Facade / Controller (GRASP)** | `HeadSoccer` recibe todos los eventos del sistema (selecciones, inicio, tick, pausa, teclas) y valida antes de delegar en `Match` o en los catálogos. La vista solo traduce eventos de Swing: el `Timer` llama a `updateTick`, `KeyBindings` a `pressAction`/`releaseAction` y la pérdida de foco de `GamePanel` a `releaseAllActions`. |
-| **Template Method** | `Controller.control` (pasos `direction`, `wantsJump`, `wantsKick`, `wantsPower`); `MatchType.goalScored`, final, que ignora los goles de un partido terminado y delega en `onGoal`; `SurvivalMatch.Lives.lose` con el paso `exhausted()` (jugador o rival); `Power.applyEffect` con el paso `createEffect()`; `Screen.enter()` = `onShow()` + foco del teclado; `StepScreen.onShow()` rotula título y botones y delega en `refresh()`. |
+| **Singleton** | Tres: `HeadSoccer.getInstance()` (una sesión de juego para toda la aplicación; `newGame()` la reinicia), `Resources.getInstance()` (gestor de recursos gráficos: paleta, fuentes, colores de equipo, fábrica de componentes y el fondo de la cancha, que se pinta una sola vez) y `Texts.getInstance()` (la tabla de textos y el idioma elegido). Los catálogos **no** son Singleton: los crea la fachada. |
+| **Facade / Controller (GRASP)** | `HeadSoccer` recibe todos los eventos del sistema (selecciones, inicio, tick, pausa, teclas) y valida antes de delegar en `Match` o en los catálogos. La vista solo traduce eventos de Swing: el `Timer` llama a `updateTick`, `MatchP.Keyboard` a `pressAction`/`releaseAction` y la pérdida de foco de `MatchP` a `releaseAllActions`. `HeadSoccerGUI` guarda la única referencia al dominio (`model : HeadSoccer`) y la entrega a los contenedores que compone. |
+| **Template Method** | `Controller.control` (pasos `direction`, `wantsJump`, `wantsKick`, `wantsPower`); `MatchType.goalScored`, final, que ignora los goles de un partido terminado y delega en `onGoal`; `SurvivalMatch.Lives.lose` con el paso `exhausted()` (jugador o rival); `Power.applyEffect` con el paso `createEffect()`; `StreetDialog` fija el armazón de todo diálogo (título, cuerpo, botones y cierre por `close()`), y cada diálogo aporta su cuerpo y extiende `close()` cuando debe dejar el juego en un estado seguro. |
 | **Factory Method** | `Power.createEffect()` (cada poder crea su efecto) y `GameMode.createPlayer1Controller()` / `createPlayer2Controller()` (cada modalidad crea los controladores). |
-| **Polymorphism / Strategy** | En vez de condicionales por tipo: `GameMode` (quién controla y si admite Supervivencia), `MatchType` (`supports`, `onGoal`, `getStatusText`), los efectos redefinen `allowsActions`, `getScale` y `getHorizontalSign`, `Controller` humano o máquina, `Lives` del jugador o del rival, la lista de `Drawable`, `Screen.onShow`, el enum `Side` y la tabla de `KeyBindings` en vez de un `switch` de teclas. |
+| **Polymorphism / Strategy** | En vez de condicionales por tipo: `GameMode` (quién controla y si admite Supervivencia), `MatchType` (`supports`, `onGoal`, `getStatusText`), los efectos redefinen `allowsActions`, `getScale` y `getHorizontalSign`, `Controller` humano o máquina, `Lives` del jugador o del rival, `StreetDialog.close()`, el enum `Side` y la tabla de teclas de `MatchP` en vez de un `switch`. |
 | **Prototype** | `Character.copy()` (con `PowerBar.fresh()`): cada partido recibe copias de los personajes elegidos, así dos jugadores con el mismo personaje no comparten estado y una revancha empieza limpia. `CharacterCatalog.nextAfter` entrega una copia del siguiente rival. |
 | **Command** | `PlayerKey`: una tecla es el par (jugador, acción) que sabe presionarse y soltarse sobre la fachada. |
 | **Information Expert** | `Ball` resuelve sus rebotes, empujes y patadas; `Goal` decide si el balón está adentro y el rebote en el travesaño; `Field` sabe dónde están los arcos (la vista los dibuja con `getGoalBounds`), quién anota, desde dónde cae el balón y lo devuelve a la cancha si un empuje lo saca por un costado; `Character` patea, empuja y salta; `PowerBar` carga, arma y dispara; `StatusEffects` combina los efectos; cada `MatchType` arma su texto de estado; `CharacterCatalog` conoce el orden de los rivales y los datos de cada personaje; `Match.index` valida la numeración de jugadores. |
-| **Creator** | `HeadSoccer` crea los catálogos y cada `Match`; `Match` crea la cancha, el balón y (por la modalidad) los controladores; `Character` crea su `PowerBar` y sus `StatusEffects`; cada catálogo crea sus opciones; `SurvivalMatch` crea sus `Lives`; `HeadSoccerGUI` crea las pantallas y `GamePanel` sus `Drawable` y su `KeyBindings`. |
-| **Protected Variations** | Abstracciones `Power`, `Effect`, `Controller`, `GameMode`, `MatchType` e interfaces `MatchContext`, `Named`, `Drawable`. Las modalidades, los controladores y los tipos de partido concretos solo son visibles dentro de su paquete: fuera de él únicamente se conoce su catálogo y su clase abstracta. `MatchType` lee el partido solo por `MatchContext`, la vista solo ve tipos simples y `Texts` aísla el idioma. |
+| **Creator** | `HeadSoccer` crea los catálogos y cada `Match`; `Match` crea la cancha, el balón y (por la modalidad) los controladores; `Character` crea su `PowerBar` y sus `StatusEffects`; cada catálogo crea sus opciones; `SurvivalMatch` crea sus `Lives`; `HeadSoccerGUI` crea sus paneles y diálogos, `MatchP` su marcador, su lienzo y su tabla de teclas, y `Resources` los componentes con el estilo del juego. |
+| **Protected Variations** | Abstracciones `Power`, `Effect`, `Controller`, `GameMode`, `MatchType` e interfaces `MatchContext` y `Named`. Las modalidades, los controladores y los tipos de partido concretos solo son visibles dentro de su paquete: fuera de él únicamente se conoce su catálogo y su clase abstracta. `MatchType` lee el partido solo por `MatchContext`, la vista solo ve tipos simples, `Texts` aísla el idioma y `Resources` el estilo visual. |
 | **High Cohesion / Low Coupling** | La fachada solo valida y delega; la simulación vive en `Match`; `Character` reparte la barra y los efectos en `PowerBar` y `StatusEffects`; `Goal` no conoce personajes; la vista depende únicamente de `HeadSoccer`. |
 | **Law of Demeter** | Sin cadenas `a.getB().c()`: la fachada pregunta a `CharacterCatalog` los datos de un personaje y a `Match` los de un jugador, y `Character.getPowerName()` responde por su poder. |
+| **Composite (contenedores Swing)** | `JFrame` y `JDialog` contienen `JPanel` que contienen componentes. La disposición se delega en `BorderLayout` (ventana, diálogos, pantalla del partido), `GridLayout` (marcador, listas, estadísticas), `FlowLayout` (barras de botones) y `CardLayout` (menú o partido); nunca posición absoluta. Los componentes son atributos privados armados en el constructor. |
+| **Observer (delegación de eventos)** | Suscripción con `addXXXListener` y clases anónimas o internas: `ActionListener` en botones y en el `Timer`, `ListSelectionListener` en las listas de modalidad, tipo de partido y personajes, y `MatchP.Keyboard` para el teclado compartido. |
+| **Adapter (Swing)** | Nunca se implementa una interfaz de eventos con métodos vacíos: `WindowAdapter.windowClosing` en la ventana (detiene el ciclo y hace `dispose()`) y en los diálogos, `KeyAdapter` en `MatchP.Keyboard` y `FocusAdapter` para soltar las teclas. |
 
 ### Decisiones de diseño
 
 * **Teclas mantenidas en `Controller`.** `press`, `release` y `releaseAll` son el contrato de entrada de todo controlador: la fachada entrega las teclas a cualquier jugador y `AIController` las ignora a propósito, por eso el teclado no mueve a la máquina sin preguntar nunca si un jugador es humano. `HumanController` recibe el personaje y el balón sin usarlos porque es la firma común del método plantilla.
 * **Armar el poder con la barra incompleta no lanza excepción.** La tecla es una intención continua (se consulta en cada tick); la regla del 100 % la hace cumplir `PowerBar.arm()`.
 * **Lados de la cancha.** `Side` guarda las posiciones iniciales del enunciado (200 y 700) y el sentido de ataque; los arcos de `Field` guardan qué jugador anota en cada uno, y así el autogol se acredita sin código especial.
-* **Pausa y foco.** `pause()` suelta las teclas mantenidas. Mientras `PauseD` (modal) está abierta el `Timer` sigue corriendo, pero `updateTick` no avanza un partido en pausa. Si `GamePanel` pierde el foco (por ejemplo con Alt+Tab) llama a `releaseAllActions()`, que suelta las teclas sin pausar: una tecla soltada fuera de la ventana no llega al juego.
+* **Pausa y foco.** `pause()` suelta las teclas mantenidas. Mientras `PauseD` (modal) está abierta el `Timer` sigue corriendo, pero `updateTick` no avanza un partido en pausa. Si `MatchP` pierde el foco (por ejemplo con Alt+Tab) llama a `releaseAllActions()`, que suelta las teclas sin pausar: una tecla soltada fuera de la ventana no llega al juego.
 * **Marcador de Supervivencia.** Cada rival nuevo empieza un encuentro nuevo: `Match.replaceRival` pone en cero los goles de ambos lados (el jugador 1 conserva su barra de poder), así el marcador siempre enfrenta al jugador 1 con el rival actual; los balones y la racha cuentan la serie completa.
 * **Relojes.** La cuenta regresiva de Por Tiempo redondea hacia arriba (01:00 al empezar, 00:59 tras un segundo) y el tiempo jugado de Por Goles hacia abajo (00:00 hasta completar el primer segundo).
 * **Idioma.** Es una preferencia de la vista, guardada en `Texts`; los nombres del dominio (modalidades, personajes, poderes, efectos y mensajes de error) se muestran tal cual.
+* **Estilo visual.** Cancha callejera nocturna (muro con grafiti, malla, reflectores y piso de concreto) pintada con figuras de Java2D, sin archivos de imagen. El juego sigue siendo 2D de vista lateral con personajes cabezones: cada uno lleva los colores de su país, mira hacia el balón y tiene en el piso un aro del color de su jugador.
+* **Referencia al dominio en la vista.** Solo `HeadSoccerGUI` obtiene la fachada (`HeadSoccer.getInstance()`); los paneles y diálogos la reciben en su constructor y ninguno conoce otra clase del dominio aparte de `POOBSoccerException`.
 
 ---
 
