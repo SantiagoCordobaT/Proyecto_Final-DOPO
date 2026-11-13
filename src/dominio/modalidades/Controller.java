@@ -2,7 +2,6 @@ package dominio.modalidades;
 
 import dominio.Ball;
 import dominio.Field;
-import dominio.excepciones.POOBSoccerException;
 import dominio.personajes.Character;
 
 /**
@@ -21,7 +20,6 @@ public interface Controller {
      * @param opponent Rival.
      * @param ball Balon.
      * @param field Cancha.
-     * @throws POOBSoccerException Si una accion viola las reglas del juego.
      */
-    void control(Character self, Character opponent, Ball ball, Field field) throws POOBSoccerException;
+    void control(Character self, Character opponent, Ball ball, Field field);
 }

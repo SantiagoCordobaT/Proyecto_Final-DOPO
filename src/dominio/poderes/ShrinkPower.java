@@ -1,8 +1,7 @@
 package dominio.poderes;
 
-import dominio.Ball;
+import dominio.efectos.Effect;
 import dominio.efectos.ShrinkEffect;
-import dominio.personajes.Character;
 
 /**
  * Poder de reduccion: encoge al oponente a la mitad de su tamano.
@@ -12,15 +11,13 @@ import dominio.personajes.Character;
  */
 public class ShrinkPower extends Power {
 
-    public static final double SHRINK_SECONDS = 6.0;
-
     /** Crea el poder de reduccion. */
     public ShrinkPower() {
-        super("Reduccion", "Encoge al oponente a un tamaño diminuto.", SHRINK_SECONDS);
+        super("Reduccion", "Encoge al oponente a un tamaño diminuto.");
     }
 
     @Override
-    public void applyEffect(Character opponent, Ball ball) {
-        opponent.addEffect(new ShrinkEffect(getDurationSeconds()));
+    protected Effect createEffect() {
+        return new ShrinkEffect();
     }
 }

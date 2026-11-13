@@ -2,7 +2,8 @@ package dominio.efectos;
 
 /**
  * Efecto temporal sobre un personaje (aturdimiento, congelamiento, etc.).
- * Por defecto no altera nada; cada subclase redefine lo que modifica.
+ * Por defecto no altera nada; cada subclase redefine lo que modifica y fija
+ * su propia duracion.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -26,32 +27,40 @@ public abstract class Effect {
      *
      * @param deltaTimeSeconds Segundos transcurridos.
      */
-    public void tick(double deltaTimeSeconds) {
+    void tick(double deltaTimeSeconds) {
         remainingSeconds = Math.max(0.0, remainingSeconds - deltaTimeSeconds);
     }
 
     /** @return true si ya termino. */
-    public boolean isExpired() {
+    boolean isExpired() {
         return remainingSeconds <= 0.0;
     }
 
+    /**
+     * @param other Otro efecto.
+     * @return true si ambos efectos son del mismo tipo (mismo nombre).
+     */
+    boolean isSameKindAs(Effect other) {
+        return name.equals(other.name);
+    }
+
     /** @return Nombre del efecto. */
-    public String getName() {
+    String getName() {
         return name;
     }
 
     /** @return true si el personaje puede moverse, saltar y patear. */
-    public boolean allowsActions() {
+    boolean allowsActions() {
         return true;
     }
 
     /** @return Factor de escala del cuerpo (1.0 = normal). */
-    public double getScale() {
+    double getScale() {
         return 1.0;
     }
 
     /** @return 1 si el movimiento horizontal es normal, -1 si esta invertido. */
-    public int getHorizontalSign() {
+    int getHorizontalSign() {
         return 1;
     }
 }

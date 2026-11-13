@@ -1,8 +1,7 @@
 package dominio.poderes;
 
-import dominio.Ball;
 import dominio.efectos.ConfusionEffect;
-import dominio.personajes.Character;
+import dominio.efectos.Effect;
 
 /**
  * Poder de confusion: invierte los controles horizontales del oponente.
@@ -12,15 +11,13 @@ import dominio.personajes.Character;
  */
 public class ConfusionPower extends Power {
 
-    public static final double CONFUSION_SECONDS = 5.0;
-
     /** Crea el poder de confusion. */
     public ConfusionPower() {
-        super("Confusion", "Invierte los controles izquierda/derecha del oponente.", CONFUSION_SECONDS);
+        super("Confusion", "Invierte los controles izquierda/derecha del oponente.");
     }
 
     @Override
-    public void applyEffect(Character opponent, Ball ball) {
-        opponent.addEffect(new ConfusionEffect(getDurationSeconds()));
+    protected Effect createEffect() {
+        return new ConfusionEffect();
     }
 }

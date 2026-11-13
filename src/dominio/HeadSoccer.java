@@ -79,10 +79,10 @@ public class HeadSoccer {
         matchTypes.add(new SurvivalMatch());
 
         this.characters = new ArrayList<Character>();
-        characters.add(new Character("Jacob", "Canadá", 3, 3, 4, new FreezePower()));
-        characters.add(new Character("Kenji", "Japón", 5, 4, 2, new StunPower()));
-        characters.add(new Character("Mateo", "Colombia", 4, 3, 3, new ConfusionPower()));
-        characters.add(new Character("Rafael", "Brasil", 4, 5, 3, new ShrinkPower()));
+        characters.add(new Character("Jacob", "Canadá", 3, 3, 4, 3, new FreezePower()));
+        characters.add(new Character("Kenji", "Japón", 5, 4, 2, 2, new StunPower()));
+        characters.add(new Character("Mateo", "Colombia", 4, 3, 3, 4, new ConfusionPower()));
+        characters.add(new Character("Rafael", "Brasil", 4, 5, 3, 3, new ShrinkPower()));
     }
 
     // ------------------------------------------------------------ catalogos
@@ -157,11 +157,29 @@ public class HeadSoccer {
 
     /**
      * @param index Indice en el catalogo.
+     * @return Estadistica de Poder Unico del personaje (1 a 5).
+     * @throws POOBSoccerException Si el indice no existe.
+     */
+    public int getCharacterPowerLevel(int index) throws POOBSoccerException {
+        return catalogCharacter(index).getPowerLevel();
+    }
+
+    /**
+     * @param index Indice en el catalogo.
      * @return Nombre del poder del personaje.
      * @throws POOBSoccerException Si el indice no existe.
      */
     public String getCharacterPowerName(int index) throws POOBSoccerException {
-        return catalogCharacter(index).getPower().getName();
+        return catalogCharacter(index).getPowerName();
+    }
+
+    /**
+     * @param index Indice en el catalogo.
+     * @return Descripcion del poder del personaje.
+     * @throws POOBSoccerException Si el indice no existe.
+     */
+    public String getCharacterPowerDescription(int index) throws POOBSoccerException {
+        return catalogCharacter(index).getPowerDescription();
     }
 
     private Character catalogCharacter(int index) throws POOBSoccerException {
@@ -355,7 +373,7 @@ public class HeadSoccer {
         }
         if (ballInReach) {
             ball.kick(character.getStrength(), character.getFacing());
-            character.fireActivePower(opponent, ball);
+            character.firePowerOn(opponent);
             lastKicker = character;
         }
     }
@@ -455,11 +473,13 @@ public class HeadSoccer {
     }
 
     /**
+     * Arma el poder del jugador; con la barra incompleta no tiene efecto.
+     *
      * @param number Jugador (1 o 2).
-     * @throws POOBSoccerException Si la barra no esta llena, el jugador no es valido o no hay partido.
+     * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
     public void activatePlayerPower(int number) throws POOBSoccerException {
-        player(number).activatePower();
+        player(number).armPower();
     }
 
     // ------------------------------------------------------------ consultas para la vista
@@ -529,11 +549,11 @@ public class HeadSoccer {
 
     /**
      * @param number Jugador (1 o 2).
-     * @return Porcentaje de la barra de poder (0 a 100).
+     * @return Fraccion llena de la barra de poder (0.0 a 1.0).
      * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
     public double getPlayerPowerBar(int number) throws POOBSoccerException {
-        return player(number).getPowerBar();
+        return player(number).getPowerCharge();
     }
 
     /**
@@ -542,7 +562,7 @@ public class HeadSoccer {
      * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
     public String getPlayerPowerName(int number) throws POOBSoccerException {
-        return player(number).getPower().getName();
+        return player(number).getPowerName();
     }
 
     /**
@@ -550,8 +570,8 @@ public class HeadSoccer {
      * @return true si el jugador tiene su poder armado.
      * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
-    public boolean isPlayerPowerActive(int number) throws POOBSoccerException {
-        return player(number).isPowerActive();
+    public boolean isPlayerPowerArmed(int number) throws POOBSoccerException {
+        return player(number).isPowerArmed();
     }
 
     /**
@@ -560,12 +580,7 @@ public class HeadSoccer {
      * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
     public String[] getPlayerEffects(int number) throws POOBSoccerException {
-        List<String> effectNames = player(number).getActiveEffectNames();
-        String[] result = new String[effectNames.size()];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = effectNames.get(i);
-        }
-        return result;
+        return player(number).getEffectNames();
     }
 
     /**

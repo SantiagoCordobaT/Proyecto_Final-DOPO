@@ -1,7 +1,7 @@
 package dominio.efectos;
 
 /**
- * Reduccion: la escala y el hitbox del personaje se reducen a la mitad.
+ * Reduccion: la escala y el hitbox del personaje se reducen a la mitad durante 6 segundos.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -9,15 +9,16 @@ package dominio.efectos;
 public class ShrinkEffect extends Effect {
 
     public static final String NAME = "Reducido";
-    public static final double SHRINK_SCALE = 0.5;
+    private static final double SHRINK_SECONDS = 6.0;
+    private static final double SHRINK_SCALE = 0.5;
 
-    /** @param durationSeconds Duracion de la reduccion. */
-    public ShrinkEffect(double durationSeconds) {
-        super(NAME, durationSeconds);
+    /** Crea una reduccion de 6 segundos. */
+    public ShrinkEffect() {
+        super(NAME, SHRINK_SECONDS);
     }
 
     @Override
-    public double getScale() {
+    double getScale() {
         return SHRINK_SCALE;
     }
 }

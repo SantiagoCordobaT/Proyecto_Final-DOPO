@@ -1,7 +1,7 @@
 package dominio.efectos;
 
 /**
- * Confusion: invierte el movimiento horizontal (izquierda/derecha).
+ * Confusion: invierte el movimiento horizontal (izquierda/derecha) durante 5 segundos.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -9,14 +9,15 @@ package dominio.efectos;
 public class ConfusionEffect extends Effect {
 
     public static final String NAME = "Confundido";
+    private static final double CONFUSION_SECONDS = 5.0;
 
-    /** @param durationSeconds Duracion de la confusion. */
-    public ConfusionEffect(double durationSeconds) {
-        super(NAME, durationSeconds);
+    /** Crea una confusion de 5 segundos. */
+    public ConfusionEffect() {
+        super(NAME, CONFUSION_SECONDS);
     }
 
     @Override
-    public int getHorizontalSign() {
+    int getHorizontalSign() {
         return -1;
     }
 }

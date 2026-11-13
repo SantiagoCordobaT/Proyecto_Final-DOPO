@@ -2,17 +2,21 @@ package dominio;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import dominio.efectos.FreezeEffect;
+import dominio.efectos.StunEffect;
 import dominio.excepciones.POOBSoccerException;
 import dominio.partidos.TimeMatch;
 import dominio.personajes.Character;
 import dominio.poderes.ConfusionPower;
 import dominio.poderes.FreezePower;
+import dominio.poderes.PowerBar;
 import dominio.poderes.ShrinkPower;
 import dominio.poderes.StunPower;
 
@@ -47,6 +51,10 @@ public class HeadSoccerTest {
         game.startMatch();
     }
 
+    private static boolean hasEffect(String[] effectNames, String effectName) {
+        return Arrays.asList(effectNames).contains(effectName);
+    }
+
     private void putBallInLeftGoal() {
         game.getBall().resetPosition(Field.GOAL_WIDTH / 2.0, Field.GROUND_Y - Field.BALL_RADIUS - 5.0);
     }
@@ -59,7 +67,7 @@ public class HeadSoccerTest {
 
     @Test
     public void shouldAcceptStatsBetweenOneAndFive() throws POOBSoccerException {
-        Character c = new Character("A", "Canadá", 1, 3, 5, new FreezePower());
+        Character c = new Character("A", "Canadá", 1, 3, 5, 3, new FreezePower());
         assertEquals(1, c.getSpeed());
         assertEquals(3, c.getJump());
         assertEquals(5, c.getStrength());
@@ -68,10 +76,25 @@ public class HeadSoccerTest {
     @Test
     public void shouldRejectStatsOutOfRange() {
         POOBSoccerException e = assertThrows(POOBSoccerException.class,
-                () -> new Character("A", "Canadá", 0, 3, 3, new FreezePower()));
+                () -> new Character("A", "Canadá", 0, 3, 3, 3, new FreezePower()));
         assertEquals(POOBSoccerException.ESTADISTICAS_FUERA_DE_RANGO, e.getMessage());
-        assertThrows(POOBSoccerException.class, () -> new Character("A", "Canadá", 3, 6, 3, new FreezePower()));
-        assertThrows(POOBSoccerException.class, () -> new Character("A", "Canadá", 3, 3, -1, new FreezePower()));
+        assertThrows(POOBSoccerException.class, () -> new Character("A", "Canadá", 3, 6, 3, 3, new FreezePower()));
+        assertThrows(POOBSoccerException.class, () -> new Character("A", "Canadá", 3, 3, -1, 3, new FreezePower()));
+        assertThrows(POOBSoccerException.class, () -> new Character("A", "Canadá", 3, 3, 3, 6, new FreezePower()));
+    }
+
+    @Test
+    public void copyShouldNotShareState() throws POOBSoccerException {
+        Character original = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
+        Character copy = original.copy();
+        assertNotSame(original, copy);
+        copy.stun();
+        copy.addGoal();
+        copy.update(1.0, new Field());
+        assertEquals(0, original.getEffectNames().length);
+        assertEquals(0, original.getGoals());
+        assertEquals(0.0, original.getPowerCharge(), 1e-9);
+        assertTrue(copy.getPowerCharge() > 0.0);
     }
 
     // ---------------------------------------------------------------- supervivencia
@@ -122,47 +145,52 @@ public class HeadSoccerTest {
     @Test
     public void powerShouldOnlyActivateWhenBarIsFull() throws POOBSoccerException {
         start(PVSP, TIME);
-        Character p1 = game.getPlayer1();
-        assertEquals(0.0, p1.getPowerBar());
-        POOBSoccerException e = assertThrows(POOBSoccerException.class, () -> game.activatePlayerPower(1));
-        assertEquals(POOBSoccerException.BARRA_PODER_INCOMPLETA, e.getMessage());
-
-        p1.setPowerBar(Character.POWER_FULL);
+        assertEquals(0.0, game.getPlayerPowerBar(1), 1e-9);
         game.activatePlayerPower(1);
-        assertTrue(p1.isPowerActive());
+        assertFalse(game.isPlayerPowerArmed(1));
+
+        game.updateTick(17.0);
+        assertEquals(1.0, game.getPlayerPowerBar(1), 1e-9);
+        game.activatePlayerPower(1);
+        assertTrue(game.isPlayerPowerArmed(1));
     }
 
     @Test
     public void powerBarShouldRechargeOverTime() throws POOBSoccerException {
         start(PVSP, TIME);
         game.updateTick(1.0);
-        assertEquals(Character.POWER_RECHARGE_PER_SECOND, game.getPlayerPowerBar(1), 1e-6);
+        assertEquals(PowerBar.RECHARGE_PER_LEVEL * game.getCharacterPowerLevel(0) / PowerBar.FULL,
+                game.getPlayerPowerBar(1), 1e-6);
     }
 
     @Test
     public void freezePowerShouldBlockOpponentActions() throws POOBSoccerException {
-        Character attacker = new Character("A", "Canadá", 3, 3, 3, new FreezePower());
-        Character victim = new Character("B", "Canadá", 3, 3, 3, new FreezePower());
-        attacker.getPower().applyEffect(victim, new Ball(0, 0, 1));
-        assertFalse(victim.canAct());
-        assertFalse(victim.jump(Field.GROUND_Y));
+        Field field = new Field();
+        Character victim = new Character("B", "Canadá", 3, 3, 3, 3, new FreezePower());
+        victim.placeAt(400.0, field.getGroundY(), 1);
+        new FreezePower().applyEffect(victim);
+        assertTrue(hasEffect(victim.getEffectNames(), FreezeEffect.NAME));
+        assertFalse(victim.jump(field.getGroundY()));
         assertFalse(victim.requestKick());
+        victim.setMoveDirection(1);
+        victim.update(0.5, field);
+        assertEquals(400.0, victim.getX(), 1e-9);
     }
 
     @Test
     public void shrinkPowerShouldHalveOpponentSize() throws POOBSoccerException {
-        Character victim = new Character("B", "Japón", 3, 3, 3, new ShrinkPower());
+        Character victim = new Character("B", "Japón", 3, 3, 3, 3, new ShrinkPower());
         double width = victim.getWidth();
-        new ShrinkPower().applyEffect(victim, new Ball(0, 0, 1));
+        new ShrinkPower().applyEffect(victim);
         assertEquals(width / 2.0, victim.getWidth(), 1e-9);
     }
 
     @Test
     public void confusionPowerShouldInvertHorizontalControls() throws POOBSoccerException {
         Field field = new Field();
-        Character victim = new Character("B", "Brasil", 3, 3, 3, new ConfusionPower());
+        Character victim = new Character("B", "Brasil", 3, 3, 3, 3, new ConfusionPower());
         victim.placeAt(400.0, field.getGroundY(), 1);
-        new ConfusionPower().applyEffect(victim, new Ball(0, 0, 1));
+        new ConfusionPower().applyEffect(victim);
         victim.setMoveDirection(1);
         victim.update(0.5, field);
         assertTrue(victim.getX() < 400.0);
@@ -172,15 +200,14 @@ public class HeadSoccerTest {
     public void kickWithActivePowerShouldAffectOpponent() throws POOBSoccerException {
         start(PVSP, TIME);
         Character p1 = game.getPlayer1();
-        Character p2 = game.getPlayer2();
-        p1.setPowerBar(Character.POWER_FULL);
+        game.updateTick(17.0);
         game.activatePlayerPower(1);
         game.getBall().resetPosition(p1.getX() + 40.0, p1.getY() - 40.0);
         game.playerKick(1);
         game.updateTick(TICK);
-        assertFalse(p2.canAct());
-        assertFalse(p1.isPowerActive());
-        assertEquals(0.0, p1.getPowerBar(), 1e-9);
+        assertTrue(hasEffect(game.getPlayerEffects(2), FreezeEffect.NAME));
+        assertFalse(game.isPlayerPowerArmed(1));
+        assertEquals(0.0, game.getPlayerPowerBar(1), 1e-9);
     }
 
     // ---------------------------------------------------------------- aturdimiento
@@ -188,19 +215,19 @@ public class HeadSoccerTest {
     @Test
     public void stunShouldLastThreeSeconds() throws POOBSoccerException {
         Field field = new Field();
-        Character c = new Character("A", "Canadá", 3, 3, 3, new FreezePower());
+        Character c = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
         c.placeAt(400.0, field.getGroundY(), 1);
         c.stun();
-        assertTrue(c.isStunned());
+        assertTrue(hasEffect(c.getEffectNames(), StunEffect.NAME));
         assertFalse(c.jump(field.getGroundY()));
         assertFalse(c.requestKick());
         c.setMoveDirection(1);
         c.update(2.9, field);
-        assertTrue(c.isStunned());
+        assertTrue(hasEffect(c.getEffectNames(), StunEffect.NAME));
         assertEquals(400.0, c.getX(), 1e-9);
         c.update(0.2, field);
-        assertFalse(c.isStunned());
-        assertTrue(c.canAct());
+        assertEquals(0, c.getEffectNames().length);
+        assertTrue(c.requestKick());
     }
 
     // ---------------------------------------------------------------- goles
@@ -312,14 +339,6 @@ public class HeadSoccerTest {
     }
 
     @Test
-    public void playersShouldNotShareStateWhenPickingSameCharacter() throws POOBSoccerException {
-        start(PVSP, TIME);
-        assertNotSame(game.getPlayer1(), game.getPlayer2());
-        game.getPlayer1().setPowerBar(50.0);
-        assertEquals(0.0, game.getPlayer2().getPowerBar());
-    }
-
-    @Test
     public void pausedGameShouldNotAdvance() throws POOBSoccerException {
         start(PVSP, TIME);
         game.pause();
@@ -361,12 +380,12 @@ public class HeadSoccerTest {
         p2.placeAt(p1.getX() + Character.BASE_WIDTH + 5.0, Field.GROUND_Y, -1);
         game.playerKick(1);
         game.updateTick(TICK);
-        assertTrue(p2.isStunned());
-        assertFalse(p2.canAct());
+        assertTrue(hasEffect(game.getPlayerEffects(2), StunEffect.NAME));
+        assertFalse(p2.requestKick());
         game.updateTick(2.9);
-        assertTrue(p2.isStunned());
+        assertTrue(hasEffect(game.getPlayerEffects(2), StunEffect.NAME));
         game.updateTick(0.2);
-        assertFalse(p2.isStunned());
+        assertEquals(0, game.getPlayerEffects(2).length);
     }
 
     @Test
@@ -374,7 +393,7 @@ public class HeadSoccerTest {
         start(PVSP, TIME);
         game.playerKick(1);
         game.updateTick(TICK);
-        assertFalse(game.getPlayer2().isStunned());
+        assertEquals(0, game.getPlayerEffects(2).length);
     }
 
     @Test
@@ -386,18 +405,17 @@ public class HeadSoccerTest {
         game.startMatch();
         assertEquals(0, game.getSurvivalStreak());
         String firstRival = game.getPlayerName(2);
-        game.getPlayer2().setPowerBar(50.0);
 
         for (int i = 0; i < 3; i++) {
             putBallInRightGoal();
             game.updateTick(TICK);
         }
+        assertEquals(0.0, game.getPlayerPowerBar(2), 1e-9);
         assertFalse(game.isMatchFinished());
         assertEquals(1, game.getSurvivalStreak());
         assertEquals(3, game.getPlayerBalls(2));
         assertEquals(3, game.getPlayerBalls(1));
         assertNotEquals(firstRival, game.getPlayerName(2));
-        assertTrue(game.getPlayerPowerBar(2) < 50.0);
     }
 
     @Test
@@ -439,12 +457,20 @@ public class HeadSoccerTest {
         assertEquals(game.getCharacterPowerName(0), game.getPlayerPowerName(1));
     }
 
-    
+    @Test
+    public void facadeShouldExposeCharacterPowerData() throws POOBSoccerException {
+        assertEquals(3, game.getCharacterPowerLevel(0));
+        assertEquals(2, game.getCharacterPowerLevel(1));
+        assertEquals(4, game.getCharacterPowerLevel(2));
+        assertEquals(3, game.getCharacterPowerLevel(3));
+        assertFalse(game.getCharacterPowerDescription(0).isEmpty());
+        assertThrows(POOBSoccerException.class, () -> game.getCharacterPowerLevel(99));
+    }
 
     @Test
     public void stunPowerShouldStunOpponent() throws POOBSoccerException {
-        Character victim = new Character("B", "Japón", 3, 3, 3, new StunPower());
-        new StunPower().applyEffect(victim, new Ball(0, 0, 1));
-        assertTrue(victim.isStunned());
+        Character victim = new Character("B", "Japón", 3, 3, 3, 3, new StunPower());
+        new StunPower().applyEffect(victim);
+        assertTrue(hasEffect(victim.getEffectNames(), StunEffect.NAME));
     }
 }

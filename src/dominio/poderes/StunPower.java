@@ -1,8 +1,7 @@
 package dominio.poderes;
 
-import dominio.Ball;
+import dominio.efectos.Effect;
 import dominio.efectos.StunEffect;
-import dominio.personajes.Character;
 
 /**
  * Poder de aturdimiento (Japon): deja al oponente aturdido, sin moverse,
@@ -15,11 +14,11 @@ public class StunPower extends Power {
 
     /** Crea el poder de aturdimiento. */
     public StunPower() {
-        super("Aturdimiento", "Aturde al oponente: no puede moverse, saltar ni patear.", StunEffect.STUN_SECONDS);
+        super("Aturdimiento", "Aturde al oponente: no puede moverse, saltar ni patear.");
     }
 
     @Override
-    public void applyEffect(Character opponent, Ball ball) {
-        opponent.stun();
+    protected Effect createEffect() {
+        return new StunEffect();
     }
 }

@@ -9,7 +9,7 @@ package dominio.efectos;
 public class StunEffect extends Effect {
 
     public static final String NAME = "Aturdido";
-    public static final double STUN_SECONDS = 3.0;
+    private static final double STUN_SECONDS = 3.0;
 
     /** Crea un aturdimiento de 3 segundos. */
     public StunEffect() {
@@ -17,7 +17,7 @@ public class StunEffect extends Effect {
     }
 
     @Override
-    public boolean allowsActions() {
+    boolean allowsActions() {
         return false;
     }
 }
