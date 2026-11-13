@@ -449,6 +449,22 @@ public class HeadSoccerTest {
     }
 
     @Test
+    public void ballShouldBounceBackIntoPlayFromASideWall() {
+        Field field = new Field();
+        Ball ball = new Ball();
+        ball.placeAt(Field.WIDTH - 60.0, 100.0);
+        ball.kick(5, 1);
+        double maxX = 0.0;
+        for (int step = 0; step < 120; step++) {
+            field.updateBall(ball);
+            field.keepBallInside(ball);
+            maxX = Math.max(maxX, ball.getX());
+        }
+        assertEquals(Field.WIDTH - Ball.RADIUS, maxX, 1e-9);
+        assertTrue(ball.getX() < Field.WIDTH - 200.0, "El balon debe volver al juego tras rebotar en la pared");
+    }
+
+    @Test
     public void ballPartiallyInsideShouldNotBeGoal() {
         Goal goal = new Goal(0.0, Goal.WIDTH, 2);
         Ball partial = new Ball();

@@ -22,20 +22,20 @@ public class Field {
     private final Goal[] goals = { new Goal(LEFT_WALL_X, Goal.WIDTH, 2), new Goal(WIDTH, WIDTH - Goal.WIDTH, 1) };
 
     /**
-     * Avanza el balon un paso de fisica incluyendo el rebote en los travesaños.
+     * Avanza el balon un paso de fisica (gravedad, suelo, techo) y el rebote en los travesaños.
      *
      * @param ball Balon.
      */
     void updateBall(Ball ball) {
-        ball.updatePhysics(GROUND_Y, LEFT_WALL_X, WIDTH, CEILING_Y);
+        ball.updatePhysics(GROUND_Y, CEILING_Y);
         for (Goal goal : goals) {
             goal.resolveCrossbar(ball);
         }
     }
 
     /**
-     * Devuelve el balon a la cancha si un empuje lo saco por un costado: rebota contra
-     * la pared igual que en el paso de fisica.
+     * Rebota el balon contra las paredes laterales y lo deja dentro de la cancha. Se aplica
+     * una sola vez por paso, despues de los contactos, para cubrir tambien los empujes.
      *
      * @param ball Balon.
      */

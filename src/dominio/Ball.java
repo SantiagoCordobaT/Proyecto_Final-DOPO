@@ -50,14 +50,13 @@ public class Ball {
 
     /**
      * Actualiza la posición del balón aplicando gravedad en cada paso
-     * y resolviendo colisiones contra el suelo, techo y límites laterales.
+     * y resolviendo colisiones contra el suelo y el techo. Las paredes laterales se
+     * resuelven una sola vez por paso con {@link #bounceOffWalls}, despues de los contactos.
      *
      * @param groundY     Coordenada Y de la superficie del suelo.
-     * @param leftWallX   Coordenada X del límite lateral izquierdo.
-     * @param rightWallX  Coordenada X del límite lateral derecho.
      * @param ceilingY    Coordenada Y del límite superior de la cancha.
      */
-    void updatePhysics(double groundY, double leftWallX, double rightWallX, double ceilingY) {
+    void updatePhysics(double groundY, double ceilingY) {
         speedY += GRAVITY;
         x += speedX;
         y += speedY;
@@ -74,7 +73,6 @@ public class Ball {
             y = ceilingY + RADIUS;
             speedY = -speedY * BOUNCE;
         }
-        bounceOffWalls(leftWallX, rightWallX);
     }
 
     /**
