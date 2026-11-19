@@ -155,7 +155,7 @@ La estadística **Poder Único** fija la rapidez de la barra: se recarga $2 \tim
 
 ---
 
-## 👥 Autores y Colaboradores
+## Autores y Colaboradores
 
 * **Propuesta:**
   * Mateo Sánchez García
@@ -166,7 +166,7 @@ La estadística **Poder Único** fija la rapidez de la barra: se recarga $2 \tim
 
 ---
 
-## 📚 Referencias
+## Referencias
 
 * D&D Dream. (s. f.). *Head Soccer*. https://dnddream.com/dnddream_web/app_game_06.htm
 * TouchArcade. (s. f.). *Head Soccer*. https://toucharcade.com/games/head-soccer
