@@ -79,12 +79,10 @@ public class Ball {
     }
 
     /**
-     * Aplica el impacto de una patada: empuja en la dirección de ataque y levanta
-     * el balón.
+     * Aplica el impacto de una patada (lanza el balon en el sentido de vista).
      *
-     * @param fuerza    Estadística de fuerza del personaje (de 1 a 5).
-     * @param direccion Sentido horizontal: 1 (hacia la derecha) o -1 (hacia la
-     *                  izquierda).
+     * @param fuerza    Estadística de fuerza del personaje.
+     * @param direccion 1 derecha o -1 izquierda.
      */
     public void kick(int fuerza, int direccion) {
         double velocidadPatada = fuerza * VELOCIDAD_PATADA_POR_FUERZA;
@@ -93,11 +91,11 @@ public class Ball {
     }
 
     /**
-     * @param izquierda Borde izquierdo del rectángulo.
-     * @param arriba    Borde superior del rectángulo.
-     * @param derecha   Borde derecho del rectángulo.
-     * @param abajo     Borde inferior del rectángulo.
-     * @return true si el balón toca o se solapa con el rectángulo.
+     * @param izquierda Borde izquierdo del rectangulo.
+     * @param arriba    Borde superior del rectangulo.
+     * @param derecha   Borde derecho del rectangulo.
+     * @param abajo     Borde inferior del rectangulo.
+     * @return true si el balon toca o se solapa con el rectangulo.
      */
     public boolean overlaps(double izquierda, double arriba, double derecha, double abajo) {
         double dx = x - Math.max(izquierda, Math.min(x, derecha));
@@ -106,11 +104,11 @@ public class Ball {
     }
 
     /**
-     * @param izquierda Borde izquierdo del rectángulo.
-     * @param arriba    Borde superior del rectángulo.
-     * @param derecha   Borde derecho del rectángulo.
-     * @param abajo     Borde inferior del rectángulo.
-     * @return true solo si el balón está completamente dentro del rectángulo.
+     * @param izquierda Borde izquierdo del rectangulo.
+     * @param arriba    Borde superior del rectangulo.
+     * @param derecha   Borde derecho del rectangulo.
+     * @param abajo     Borde inferior del rectangulo.
+     * @return true solo si el balon esta completamente dentro del rectangulo.
      */
     boolean isInside(double izquierda, double arriba, double derecha, double abajo) {
         return x - RADIO >= izquierda - EPSILON
@@ -121,7 +119,7 @@ public class Ball {
 
     /**
      * @param superficieY Altura de referencia.
-     * @return true si el centro del balón está por encima de esa altura.
+     * @return true si el centro del balon esta por encima de esa altura.
      */
     public boolean isAbove(double superficieY) {
         return y < superficieY;
@@ -129,15 +127,15 @@ public class Ball {
 
     /**
      * @param superficieY Altura de referencia.
-     * @return true si el centro del balón está por debajo de esa altura.
+     * @return true si el centro del balon esta por debajo de esa altura.
      */
     boolean isBelow(double superficieY) {
         return y > superficieY;
     }
 
     /**
-     * Rebota hacia arriba sobre una superficie (cabeza de un personaje o
-     * travesaño).
+     * Rebota hacia arriba sobre una superficie (cabeza de un personaje o borde de
+     * la cancha).
      *
      * @param superficieY Altura de la superficie.
      */
@@ -147,7 +145,7 @@ public class Ball {
     }
 
     /**
-     * Rebota hacia abajo bajo una superficie (parte inferior del travesaño).
+     * Rebota hacia abajo segun una superficie.
      *
      * @param superficieY Altura de la superficie.
      */
@@ -157,7 +155,7 @@ public class Ball {
     }
 
     /**
-     * Rebota horizontalmente contra un borde vertical (frente del travesaño).
+     * Rebota horizontalmente contra un borde vertical.
      *
      * @param bordeX    Coordenada X del borde.
      * @param direccion Sentido de salida: 1 derecha, -1 izquierda.
@@ -181,29 +179,29 @@ public class Ball {
 
     /**
      * @param referenciaX Coordenada X de referencia.
-     * @return 1 si el balón está a la derecha de la referencia (o justo sobre
-     *         ella), -1 si está a la izquierda.
+     * @return 1 derecha de la referencia (o sobre ella) y -1 si esta a la
+     *         izquierda.
      */
     public int sideOf(double referenciaX) {
         return x >= referenciaX ? 1 : -1;
     }
 
     /**
-     * @return true si el balón va lo bastante rápido para aturdir a quien golpea.
+     * @return true si el balon va tan rapido como para aturdir a otro jugador.
      */
     boolean isHardHit() {
         return Math.sqrt(velocidadX * velocidadX + velocidadY * velocidadY) >= VELOCIDAD_GOLPE_FUERTE;
     }
 
-    /** Frena el balón tras golpear con fuerza a un personaje. */
+    /** Frena el balon tras golpear con fuerza a un personaje. */
     void slowDown() {
         velocidadX *= FRENADO_GOLPE_FUERTE;
         velocidadY *= FRENADO_GOLPE_FUERTE;
     }
 
     /**
-     * @param fraccion Fraccion (0 a 1) del siguiente paso de fisica ya
-     *                 transcurrida.
+     * @param fraccion Fraccion del siguiente paso. (horizontalmente)
+     * 
      * @return Coordenada horizontal que tendra el centro al avanzar esa fraccion de
      *         paso.
      */
@@ -212,8 +210,7 @@ public class Ball {
     }
 
     /**
-     * @param fraccion Fraccion (0 a 1) del siguiente paso de fisica ya
-     *                 transcurrida.
+     * @param fraccion Fraccion del siguiente paso. (verticalmente)
      * @return Coordenada vertical que tendra el centro al avanzar esa fraccion de
      *         paso.
      */
