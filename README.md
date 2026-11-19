@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚽ POOBSoccer (2026-2)
+# POOBSoccer (2026-2)
 ### Programación Orientada a Objetos
 **Escuela Colombiana de Ingeniería Julio Garavito**
 
@@ -15,7 +15,7 @@
 
 ---
 
-## 📑 Tabla de Contenidos
+## Tabla de Contenidos
 - [Inspiración: Head Soccer](#-inspiración-head-soccer)
 - [Propuesta: POOBSoccer](#-propuesta-poobsoccer)
 - [Mecánicas del Juego](#-mecánicas-del-juego)
