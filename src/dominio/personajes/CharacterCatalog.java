@@ -12,8 +12,10 @@ import dominio.poderes.StunPower;
 
 /**
  * Catalogo de personajes jugables (Creator): crea los cuatro personajes con sus
- * estadisticas y poder, conoce el orden en que entran los rivales y responde los
- * datos de cada personaje que muestra la seleccion (Information Expert: quien pide
+ * estadisticas y poder, conoce el orden en que entran los rivales y responde
+ * los
+ * datos de cada personaje que muestra la seleccion (Information Expert: quien
+ * pide
  * un dato no navega hasta el personaje).
  *
  * @author Santiago Cordoba - Camilo Rivas
@@ -28,23 +30,25 @@ public final class CharacterCatalog extends Catalog<Character> {
      */
     public CharacterCatalog() throws POOBSoccerException {
         super(POOBSoccerException.PERSONAJE_INVALIDO);
-        add(new Character("Jacob", "Canadá", 3, 3, 4, 3, new FreezePower()));
-        add(new Character("Kenji", "Japón", 5, 4, 2, 2, new StunPower()));
-        add(new Character("Mateo", "Colombia", 4, 3, 3, 4, new ConfusionPower()));
-        add(new Character("Rafael", "Brasil", 4, 5, 3, 3, new ShrinkPower()));
+        agregar(new Character("Jacob", "Canadá", 3, 3, 4, 3, new FreezePower()));
+        agregar(new Character("Kenji", "Japón", 5, 4, 2, 2, new StunPower()));
+        agregar(new Character("Mateo", "Colombia", 4, 3, 3, 4, new ConfusionPower()));
+        agregar(new Character("Rafael", "Brasil", 4, 5, 3, 3, new ShrinkPower()));
     }
 
     /**
-     * Prototipo del rival que sigue al actual en el catalogo (vuelve al primero despues del ultimo).
-     *
+     * Prototipo del rival que sigue al actual en el catalogo (vuelve al primero
+     * despues del ultimo).
+     * 
+     * 
      * @param actual Personaje actual, copia de uno del catalogo.
      * @return Copia nueva del siguiente personaje.
      * @throws POOBSoccerException Si el catalogo no pudiera entregar el personaje.
      */
-    public Character nextAfter(Character actual) throws POOBSoccerException {
-        List<String> nombres = Arrays.asList(names());
-        int siguiente = (nombres.indexOf(actual.getName()) + 1) % nombres.size();
-        return get(siguiente).copy();
+    public Character siguienteDespuesDe(Character actual) throws POOBSoccerException {
+        List<String> nombres = Arrays.asList(obtenerNombres());
+        int siguiente = (nombres.indexOf(actual.obtenerNombre()) + 1) % nombres.size();
+        return obtener(siguiente).copiar();
     }
 
     /**
@@ -52,8 +56,8 @@ public final class CharacterCatalog extends Catalog<Character> {
      * @return Pais del personaje.
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public String getCountry(int indice) throws POOBSoccerException {
-        return get(indice).getCountry();
+    public String obtenerPais(int indice) throws POOBSoccerException {
+        return obtener(indice).obtenerPais();
     }
 
     /**
@@ -61,8 +65,8 @@ public final class CharacterCatalog extends Catalog<Character> {
      * @return Velocidad del personaje (1 a 5).
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public int getSpeed(int indice) throws POOBSoccerException {
-        return get(indice).getSpeed();
+    public int obtenerVelocidad(int indice) throws POOBSoccerException {
+        return obtener(indice).obtenerVelocidad();
     }
 
     /**
@@ -70,8 +74,8 @@ public final class CharacterCatalog extends Catalog<Character> {
      * @return Salto del personaje (1 a 5).
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public int getJump(int indice) throws POOBSoccerException {
-        return get(indice).getJump();
+    public int obtenerSalto(int indice) throws POOBSoccerException {
+        return obtener(indice).obtenerSalto();
     }
 
     /**
@@ -79,8 +83,8 @@ public final class CharacterCatalog extends Catalog<Character> {
      * @return Fuerza del personaje (1 a 5).
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public int getStrength(int indice) throws POOBSoccerException {
-        return get(indice).getStrength();
+    public int obtenerFuerza(int indice) throws POOBSoccerException {
+        return obtener(indice).obtenerFuerza();
     }
 
     /**
@@ -88,8 +92,8 @@ public final class CharacterCatalog extends Catalog<Character> {
      * @return Poder Unico del personaje (1 a 5).
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public int getPowerLevel(int indice) throws POOBSoccerException {
-        return get(indice).getPowerLevel();
+    public int obtenerNivelPoder(int indice) throws POOBSoccerException {
+        return obtener(indice).obtenerNivelPoder();
     }
 
     /**
@@ -97,8 +101,8 @@ public final class CharacterCatalog extends Catalog<Character> {
      * @return Nombre del poder del personaje.
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public String getPowerName(int indice) throws POOBSoccerException {
-        return get(indice).getPowerName();
+    public String obtenerNombrePoder(int indice) throws POOBSoccerException {
+        return obtener(indice).obtenerNombrePoder();
     }
 
     /**
@@ -106,7 +110,7 @@ public final class CharacterCatalog extends Catalog<Character> {
      * @return Descripcion del poder del personaje.
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public String getPowerDescription(int indice) throws POOBSoccerException {
-        return get(indice).getPowerDescription();
+    public String obtenerDescripcionPoder(int indice) throws POOBSoccerException {
+        return obtener(indice).obtenerDescripcionPoder();
     }
 }

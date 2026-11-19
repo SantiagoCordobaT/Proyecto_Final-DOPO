@@ -17,7 +17,7 @@ public class ConfusionPower extends Power {
     }
 
     @Override
-    protected Effect createEffect() {
+    protected Effect crearEfecto() {
         return new ConfusionEffect();
     }
 }

@@ -4,9 +4,8 @@ import dominio.efectos.Effect;
 import dominio.personajes.Character;
 
 /**
- * Poder especial de un personaje (depende de su pais). Metodo plantilla:
- * aplicar el poder siempre agrega un efecto al oponente, y cada subclase solo
- * decide que efecto crea (metodo fabrica).
+ * Poder especial de un personaje (depende de su pais). (plantilla cada subclase
+ * solo decide que efecto crea (factory)).
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -30,20 +29,20 @@ public abstract class Power {
      *
      * @param oponente Personaje rival que recibe el efecto.
      */
-    public final void applyEffect(Character oponente) {
-        oponente.addEffect(createEffect());
+    public final void aplicarEfecto(Character oponente) {
+        oponente.agregarEfecto(crearEfecto());
     }
 
     /** @return Nuevo efecto que este poder produce en el oponente. */
-    protected abstract Effect createEffect();
+    protected abstract Effect crearEfecto();
 
     /** @return Nombre del poder. */
-    String getName() {
+    String obtenerNombre() {
         return nombre;
     }
 
     /** @return Descripcion del poder. */
-    String getDescription() {
+    String obtenerDescripcion() {
         return descripcion;
     }
 }

@@ -10,9 +10,12 @@ import dominio.personajes.Character;
 import dominio.personajes.CharacterCatalog;
 
 /**
- * Simulacion de un partido (High Cohesion): cancha, balon, los dos jugadores con
- * sus controladores y el tipo de partido. Los personajes se mueven con el tiempo
- * real y el balon avanza en pasos fijos de 1/60 s para que la fisica sea estable.
+ * Simulacion de un partido (High Cohesion): cancha, balon, los dos jugadores
+ * con
+ * sus controladores y el tipo de partido. Los personajes se mueven con el
+ * tiempo
+ * real y el balon avanza en pasos fijos de 1/60 s para que la fisica sea
+ * estable.
  * Es el {@link MatchContext} de su tipo de partido.
  *
  * @author Santiago Cordoba - Camilo Rivas
@@ -50,13 +53,13 @@ final class Match implements MatchContext {
      */
     Match(GameMode modo, MatchType tipo, Character jugador1, Character jugador2, CharacterCatalog rivales) {
         this.jugadores = new Character[] { jugador1, jugador2 };
-        this.controladores = new Controller[] { modo.createPlayer1Controller(), modo.createPlayer2Controller() };
+        this.controladores = new Controller[] { modo.crearControladorJugador1(), modo.crearControladorJugador2() };
         this.tipo = tipo;
         this.rivales = rivales;
-        Side.LEFT.place(jugador1);
-        Side.RIGHT.place(jugador2);
-        cancha.dropBall(balon);
-        tipo.begin(this);
+        Side.LEFT.ubicar(jugador1);
+        Side.RIGHT.ubicar(jugador2);
+        cancha.soltarBalon(balon);
+        tipo.iniciar(this);
     }
 
     /**
@@ -66,55 +69,56 @@ final class Match implements MatchContext {
      * @param segundosTranscurridos Segundos transcurridos desde el tick anterior.
      * @throws POOBSoccerException Si el tiempo es negativo.
      */
-    void updateTick(double segundosTranscurridos) throws POOBSoccerException {
+    void actualizarTick(double segundosTranscurridos) throws POOBSoccerException {
         if (segundosTranscurridos < 0.0) {
             throw new POOBSoccerException(POOBSoccerException.TIEMPO_INVALIDO);
         }
-        if (pausado || tipo.isFinished()) {
+        if (pausado || tipo.estaTerminado()) {
             return;
         }
         for (int i = 0; i < jugadores.length; i++) {
-            controladores[i].control(jugadores[i], balon);
-            jugadores[i].update(segundosTranscurridos);
+            controladores[i].controlar(jugadores[i], balon);
+            jugadores[i].actualizar(segundosTranscurridos);
         }
         acumulador += segundosTranscurridos;
         while (acumulador >= SEGUNDOS_PASO - TOLERANCIA) {
             acumulador -= SEGUNDOS_PASO;
-            stepBall();
-            int anotador = cancha.scorerOf(balon);
+            avanzarBalon();
+            int anotador = cancha.anotadorDe(balon);
             if (anotador != Field.SIN_GOL) {
-                scoreGoal(anotador);
+                anotarGol(anotador);
                 acumulador = 0.0;
             }
         }
-        tipo.tick(segundosTranscurridos);
+        tipo.avanzar(segundosTranscurridos);
     }
 
-    private void stepBall() {
-        cancha.updateBall(balon);
-        resolveContact(jugadores[JUGADOR_IZQUIERDO], jugadores[JUGADOR_DERECHO]);
-        resolveContact(jugadores[JUGADOR_DERECHO], jugadores[JUGADOR_IZQUIERDO]);
-        cancha.keepBallInside(balon);
+    private void avanzarBalon() {
+        cancha.actualizarBalon(balon);
+        resolverContacto(jugadores[JUGADOR_IZQUIERDO], jugadores[JUGADOR_DERECHO]);
+        resolverContacto(jugadores[JUGADOR_DERECHO], jugadores[JUGADOR_IZQUIERDO]);
+        cancha.mantenerBalonDentro(balon);
     }
 
     /**
-     * Resuelve la patada y el contacto de un personaje con el balon: si lo patea queda
+     * Resuelve la patada y el contacto de un personaje con el balon: si lo patea
+     * queda
      * como ultimo pateador; si solo lo toca, un balonazo fuerte de otro lo aturde y
      * frena el balon, y luego el cuerpo lo empuja.
      */
-    private void resolveContact(Character personaje, Character oponente) {
-        if (personaje.tryKick(balon, oponente)) {
+    private void resolverContacto(Character personaje, Character oponente) {
+        if (personaje.intentarPatear(balon, oponente)) {
             ultimoPateador = personaje;
             return;
         }
-        if (!personaje.touches(balon)) {
+        if (!personaje.toca(balon)) {
             return;
         }
-        if (personaje != ultimoPateador && balon.isHardHit()) {
-            personaje.stun();
-            balon.slowDown();
+        if (personaje != ultimoPateador && balon.esGolpeFuerte()) {
+            personaje.aturdir();
+            balon.frenar();
         }
-        personaje.push(balon);
+        personaje.empujar(balon);
     }
 
     /**
@@ -124,47 +128,52 @@ final class Match implements MatchContext {
      * @param anotador Jugador (1 o 2) que anota.
      * @throws POOBSoccerException Si el jugador no es 1 ni 2.
      */
-    void scoreGoal(int anotador) throws POOBSoccerException {
-        player(anotador).addGoal();
-        tipo.goalScored(anotador);
-        restartPlay();
+    void anotarGol(int anotador) throws POOBSoccerException {
+        jugador(anotador).sumarGol();
+        tipo.golAnotado(anotador);
+        reiniciarJugada();
     }
 
-    private void restartPlay() {
+    private void reiniciarJugada() {
         for (Character jugador : jugadores) {
-            jugador.restart();
+            jugador.reiniciarJugada();
         }
-        cancha.dropBall(balon);
+        cancha.soltarBalon(balon);
         ultimoPateador = null;
     }
 
     /**
-     * Supervivencia: entra el siguiente rival del catalogo, en su lado y con la barra
-     * vacia. Contra el nuevo rival empieza un encuentro nuevo, asi que el marcador del
+     * Supervivencia: entra el siguiente rival del catalogo, en su lado y con la
+     * barra
+     * vacia. Contra el nuevo rival empieza un encuentro nuevo, asi que el marcador
+     * del
      * jugador 1 tambien vuelve a cero.
      */
     @Override
-    public void replaceRival() throws POOBSoccerException {
-        jugadores[JUGADOR_DERECHO] = rivales.nextAfter(jugadores[JUGADOR_DERECHO]);
-        Side.RIGHT.place(jugadores[JUGADOR_DERECHO]);
-        jugadores[JUGADOR_IZQUIERDO].resetGoals();
+    public void reemplazarRival() throws POOBSoccerException {
+        jugadores[JUGADOR_DERECHO] = rivales.siguienteDespuesDe(jugadores[JUGADOR_DERECHO]);
+        Side.RIGHT.ubicar(jugadores[JUGADOR_DERECHO]);
+        jugadores[JUGADOR_IZQUIERDO].reiniciarGoles();
     }
 
-    /** Pausa el partido y suelta las acciones mantenidas, para que nadie siga moviendose al reanudar. */
-    void pause() {
+    /**
+     * Pausa el partido y suelta las acciones mantenidas, para que nadie siga
+     * moviendose al reanudar.
+     */
+    void pausar() {
         pausado = true;
-        releaseAll();
+        soltarTodo();
     }
 
     /** Suelta las acciones que los jugadores mantenian presionadas. */
-    void releaseAll() {
+    void soltarTodo() {
         for (Controller controlador : controladores) {
-            controlador.releaseAll();
+            controlador.soltarTodo();
         }
     }
 
     /** Reanuda el partido. */
-    void resume() {
+    void reanudar() {
         pausado = false;
     }
 
@@ -173,8 +182,8 @@ final class Match implements MatchContext {
      * @param accion Accion que empieza a mantenerse presionada.
      * @throws POOBSoccerException Si el jugador no es 1 ni 2.
      */
-    void press(int numero, Action accion) throws POOBSoccerException {
-        controladores[index(numero)].press(accion);
+    void presionar(int numero, Action accion) throws POOBSoccerException {
+        controladores[indiceJugador(numero)].presionar(accion);
     }
 
     /**
@@ -182,99 +191,104 @@ final class Match implements MatchContext {
      * @param accion Accion que deja de mantenerse presionada.
      * @throws POOBSoccerException Si el jugador no es 1 ni 2.
      */
-    void release(int numero, Action accion) throws POOBSoccerException {
-        controladores[index(numero)].release(accion);
+    void soltar(int numero, Action accion) throws POOBSoccerException {
+        controladores[indiceJugador(numero)].soltar(accion);
     }
 
     /**
-     * Traduce el numero de jugador a su posicion en los arreglos (Information Expert de
+     * Traduce el numero de jugador a su posicion en los arreglos (Information
+     * Expert de
      * la numeracion; la fachada tambien la usa al elegir los personajes).
      *
      * @param numero Jugador (1 o 2).
      * @return Posicion del jugador en los arreglos.
      * @throws POOBSoccerException Si el jugador no es 1 ni 2.
      */
-    static int index(int numero) throws POOBSoccerException {
+    static int indiceJugador(int numero) throws POOBSoccerException {
         if (numero < 1 || numero > JUGADORES) {
             throw new POOBSoccerException(POOBSoccerException.JUGADOR_INVALIDO);
         }
         return numero - 1;
     }
 
-    private Character player(int numero) throws POOBSoccerException {
-        return jugadores[index(numero)];
+    private Character jugador(int numero) throws POOBSoccerException {
+        return jugadores[indiceJugador(numero)];
     }
 
     @Override
-    public int getGoals(int jugador) throws POOBSoccerException {
-        return player(jugador).getGoals();
+    public int obtenerGoles(int jugador) throws POOBSoccerException {
+        return jugador(jugador).obtenerGoles();
     }
 
-    String getPlayerName(int numero) throws POOBSoccerException {
-        return player(numero).getName();
+    String obtenerNombreJugador(int numero) throws POOBSoccerException {
+        return jugador(numero).obtenerNombre();
     }
 
-    String getPlayerCountry(int numero) throws POOBSoccerException {
-        return player(numero).getCountry();
+    String obtenerPaisJugador(int numero) throws POOBSoccerException {
+        return jugador(numero).obtenerPais();
     }
 
-    double[] getPlayerBounds(int numero) throws POOBSoccerException {
-        return player(numero).getBounds();
+    double[] obtenerLimitesJugador(int numero) throws POOBSoccerException {
+        return jugador(numero).obtenerLimites();
     }
 
-    double getPlayerPowerCharge(int numero) throws POOBSoccerException {
-        return player(numero).getPowerCharge();
+    double obtenerCargaPoderJugador(int numero) throws POOBSoccerException {
+        return jugador(numero).obtenerCargaPoder();
     }
 
-    String getPlayerPowerName(int numero) throws POOBSoccerException {
-        return player(numero).getPowerName();
+    String obtenerNombrePoderJugador(int numero) throws POOBSoccerException {
+        return jugador(numero).obtenerNombrePoder();
     }
 
-    boolean isPlayerPowerArmed(int numero) throws POOBSoccerException {
-        return player(numero).isPowerArmed();
+    boolean estaPoderJugadorArmado(int numero) throws POOBSoccerException {
+        return jugador(numero).estaPoderArmado();
     }
 
-    String[] getPlayerEffects(int numero) throws POOBSoccerException {
-        return player(numero).getEffectNames();
+    String[] obtenerEfectosJugador(int numero) throws POOBSoccerException {
+        return jugador(numero).obtenerNombresEfectos();
     }
 
-    double[][] getGoalBounds() {
-        return cancha.getGoalBounds();
+    double[][] obtenerLimitesArcos() {
+        return cancha.obtenerLimitesArcos();
     }
 
-    int getPlayerFacing(int numero) throws POOBSoccerException {
-        return player(numero).getFacing();
+    int obtenerOrientacionJugador(int numero) throws POOBSoccerException {
+        return jugador(numero).obtenerOrientacion();
     }
 
-    boolean isPlayerKicking(int numero) throws POOBSoccerException {
-        return player(numero).isKicking();
+    boolean estaJugadorPateando(int numero) throws POOBSoccerException {
+        return jugador(numero).estaPateando();
     }
 
     /**
-     * @return Centro visible del balon como {x, y}: su posicion adelantada por la fraccion
+     * @return Centro visible del balon como {x, y}: su posicion adelantada por la
+     *         fraccion
      *         de paso de fisica pendiente, para que se vea fluido entre pasos.
      */
-    double[] getBallPosition() {
-        return cancha.visibleBall(balon, Math.max(0.0, acumulador / SEGUNDOS_PASO));
+    double[] obtenerPosicionBalon() {
+        return cancha.balonVisible(balon, Math.max(0.0, acumulador / SEGUNDOS_PASO));
     }
 
-    /** @return Estado que muestra el tipo de partido (reloj, meta, balones y racha...). */
-    String getStatus() {
-        return tipo.getStatusText();
+    /**
+     * @return Estado que muestra el tipo de partido (reloj, meta, balones y
+     *         racha...).
+     */
+    String obtenerEstado() {
+        return tipo.obtenerTextoEstado();
     }
 
-    boolean isFinished() {
-        return tipo.isFinished();
+    boolean estaTerminado() {
+        return tipo.estaTerminado();
     }
 
     /**
      * @return Nombre del personaje ganador.
      * @throws POOBSoccerException Si el partido aun no termina.
      */
-    String getWinnerName() throws POOBSoccerException {
-        if (!tipo.isFinished()) {
+    String obtenerNombreGanador() throws POOBSoccerException {
+        if (!tipo.estaTerminado()) {
             throw new POOBSoccerException(POOBSoccerException.PARTIDO_EN_CURSO);
         }
-        return getPlayerName(tipo.getWinner());
+        return obtenerNombreJugador(tipo.obtenerGanador());
     }
 }

@@ -29,7 +29,7 @@ final class CourtP extends JPanel {
 
     private static final double SEGUNDOS_FUNDIDO = 0.6;
 
-    private final Resources recursos = Resources.getInstance();
+    private final Resources recursos = Resources.obtenerInstancia();
     private final GoalCelebration celebracion;
     private final List<Actor> actores;
     private final Dimension tamano;
@@ -42,7 +42,7 @@ final class CourtP extends JPanel {
         celebracion = new GoalCelebration(modelo, particulas, arcos);
         actores = Arrays.asList(new PlayerSprite(modelo, 1, particulas), new PlayerSprite(modelo, 2, particulas),
                 new BallSprite(modelo, particulas), arcos, particulas, celebracion);
-        tamano = new Dimension((int) modelo.getFieldWidth(), recursos.courtHeight(modelo.getGroundY()));
+        tamano = new Dimension((int) modelo.obtenerAnchoCancha(), recursos.altoCancha(modelo.obtenerSueloY()));
         setPreferredSize(tamano);
         setBackground(Color.BLACK);
     }
@@ -51,9 +51,9 @@ final class CourtP extends JPanel {
      * Prepara el lienzo para un partido nuevo: entra con un fundido y sin
      * celebraciones pendientes.
      */
-    void enter() {
+    void entrar() {
         fundido = SEGUNDOS_FUNDIDO;
-        celebracion.forget();
+        celebracion.olvidar();
     }
 
     /**
@@ -62,9 +62,9 @@ final class CourtP extends JPanel {
      * @param segundos Segundos reales transcurridos desde el cuadro anterior.
      * @throws POOBSoccerException Si no hay un partido iniciado.
      */
-    void animate(double segundos) throws POOBSoccerException {
+    void animar(double segundos) throws POOBSoccerException {
         for (Actor actor : actores) {
-            actor.update(segundos);
+            actor.actualizar(segundos);
         }
         fundido = Math.max(0.0, fundido - segundos);
         repaint();
@@ -78,12 +78,12 @@ final class CourtP extends JPanel {
         g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
         g.setComposite(AlphaComposite.SrcOver.derive((float) (1.0 - fundido / SEGUNDOS_FUNDIDO)));
         double escala = Math.min(getWidth() / (double) tamano.width, getHeight() / (double) tamano.height);
-        g.translate((getWidth() - tamano.width * escala) / 2.0 + celebracion.getShake(),
+        g.translate((getWidth() - tamano.width * escala) / 2.0 + celebracion.obtenerSacudida(),
                 (getHeight() - tamano.height * escala) / 2.0);
-        recursos.paintBackdrop(g, (int) Math.round(tamano.width * escala), (int) Math.round(tamano.height * escala));
+        recursos.dibujarFondo(g, (int) Math.round(tamano.width * escala), (int) Math.round(tamano.height * escala));
         g.scale(escala, escala);
         for (Actor actor : actores) {
-            actor.paint(g);
+            actor.dibujar(g);
         }
         g.dispose();
         Toolkit.getDefaultToolkit().sync();

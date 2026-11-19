@@ -29,15 +29,15 @@ public abstract class Catalog<T extends Named> {
      *
      * @param elemento Opcion a agregar.
      */
-    protected final void add(T elemento) {
+    protected final void agregar(T elemento) {
         elementos.add(elemento);
     }
 
     /** @return Nombres de las opciones ordenadas. */
-    public final String[] names() {
+    public final String[] obtenerNombres() {
         String[] nombres = new String[elementos.size()];
         for (int i = 0; i < nombres.length; i++) {
-            nombres[i] = elementos.get(i).getName();
+            nombres[i] = elementos.get(i).obtenerNombre();
         }
         return nombres;
     }
@@ -47,7 +47,7 @@ public abstract class Catalog<T extends Named> {
      * @return Opcion en ese indice.
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public final T get(int indice) throws POOBSoccerException {
+    public final T obtener(int indice) throws POOBSoccerException {
         if (indice < 0 || indice >= elementos.size()) {
             throw new POOBSoccerException(mensajeIndiceInvalido);
         }

@@ -18,10 +18,10 @@ public final class MatchTypeCatalog extends Catalog<MatchType> {
     /** Crea el catalogo con los cinco tipos de partido. */
     public MatchTypeCatalog() {
         super(POOBSoccerException.MODO_INVALIDO);
-        add(new TimeMatch());
+        agregar(new TimeMatch());
         for (int meta : METAS_GOLES) {
-            add(new GoalMatch(meta));
+            agregar(new GoalMatch(meta));
         }
-        add(new SurvivalMatch());
+        agregar(new SurvivalMatch());
     }
 }

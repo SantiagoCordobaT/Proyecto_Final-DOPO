@@ -55,28 +55,28 @@ public class HeadSoccerTest {
     private HeadSoccer juego;
 
     @BeforeEach
-    public void setUp() throws POOBSoccerException {
-        juego = HeadSoccer.getInstance();
-        juego.newGame();
+    public void preparar() throws POOBSoccerException {
+        juego = HeadSoccer.obtenerInstancia();
+        juego.nuevoJuego();
     }
 
-    private void start(int modo, int tipoPartido) throws POOBSoccerException {
-        start(modo, tipoPartido, 0, 0);
+    private void iniciar(int modo, int tipoPartido) throws POOBSoccerException {
+        iniciar(modo, tipoPartido, 0, 0);
     }
 
-    private void start(int modo, int tipoPartido, int personaje1, int personaje2) throws POOBSoccerException {
-        juego.selectMode(modo);
-        juego.selectMatchType(tipoPartido);
-        juego.selectPlayer(1, personaje1);
-        juego.selectPlayer(2, personaje2);
-        juego.startMatch();
+    private void iniciar(int modo, int tipoPartido, int personaje1, int personaje2) throws POOBSoccerException {
+        juego.seleccionarModo(modo);
+        juego.seleccionarTipoPartido(tipoPartido);
+        juego.seleccionarJugador(1, personaje1);
+        juego.seleccionarJugador(2, personaje2);
+        juego.iniciarPartido();
     }
 
-    private static boolean hasEffect(String[] nombresEfectos, String nombreEfecto) {
+    private static boolean tieneEfecto(String[] nombresEfectos, String nombreEfecto) {
         return Arrays.asList(nombresEfectos).contains(nombreEfecto);
     }
 
-    private static double centerX(double[] limites) {
+    private static double centroX(double[] limites) {
         return limites[0] + limites[2] / 2.0;
     }
 
@@ -84,10 +84,10 @@ public class HeadSoccerTest {
      * @return Balon quieto pegado al costado derecho del personaje, a media altura
      *         (al alcance de su patada).
      */
-    private static Ball ballBeside(Character personaje) {
-        double[] limites = personaje.getBounds();
+    private static Ball balonAlLado(Character personaje) {
+        double[] limites = personaje.obtenerLimites();
         Ball balon = new Ball();
-        balon.placeAt(limites[0] + limites[2] + 10.0, personaje.getCenterY());
+        balon.ubicarEn(limites[0] + limites[2] + 10.0, personaje.obtenerCentroY());
         return balon;
     }
 
@@ -95,15 +95,16 @@ public class HeadSoccerTest {
      * @return Partido creado directamente desde los catalogos, con copias de los
      *         personajes indicados.
      */
-    private static Match match(int modo, int tipoPartido, int personaje1, int personaje2) throws POOBSoccerException {
+    private static Match crearPartido(int modo, int tipoPartido, int personaje1, int personaje2)
+            throws POOBSoccerException {
         CharacterCatalog personajes = new CharacterCatalog();
-        return new Match(new GameModeCatalog().get(modo), new MatchTypeCatalog().get(tipoPartido),
-                personajes.get(personaje1).copy(), personajes.get(personaje2).copy(), personajes);
+        return new Match(new GameModeCatalog().obtener(modo), new MatchTypeCatalog().obtener(tipoPartido),
+                personajes.obtener(personaje1).copiar(), personajes.obtener(personaje2).copiar(), personajes);
     }
 
-    private static void score(Match partido, int anotador, int veces) throws POOBSoccerException {
+    private static void anotar(Match partido, int anotador, int veces) throws POOBSoccerException {
         for (int i = 0; i < veces; i++) {
-            partido.scoreGoal(anotador);
+            partido.anotarGol(anotador);
         }
     }
 
@@ -117,12 +118,12 @@ public class HeadSoccerTest {
         private int rivalesReemplazados;
 
         @Override
-        public int getGoals(int jugador) {
+        public int obtenerGoles(int jugador) {
             return goles[jugador - 1];
         }
 
         @Override
-        public void replaceRival() {
+        public void reemplazarRival() {
             rivalesReemplazados++;
         }
     }
@@ -130,15 +131,15 @@ public class HeadSoccerTest {
     // ---------------------------------------------------------------- estadisticas
 
     @Test
-    public void shouldAcceptStatsBetweenOneAndFive() throws POOBSoccerException {
+    public void deberiaAceptarEstadisticasEntreUnoYCinco() throws POOBSoccerException {
         Character personaje = new Character("A", "Canadá", 1, 3, 5, 3, new FreezePower());
-        assertEquals(1, personaje.getSpeed());
-        assertEquals(3, personaje.getJump());
-        assertEquals(5, personaje.getStrength());
+        assertEquals(1, personaje.obtenerVelocidad());
+        assertEquals(3, personaje.obtenerSalto());
+        assertEquals(5, personaje.obtenerFuerza());
     }
 
     @Test
-    public void shouldRejectStatsOutOfRange() {
+    public void deberiaRechazarEstadisticasFueraDeRango() {
         POOBSoccerException excepcion = assertThrows(POOBSoccerException.class,
                 () -> new Character("A", "Canadá", 0, 3, 3, 3, new FreezePower()));
         assertEquals(POOBSoccerException.ESTADISTICAS_FUERA_DE_RANGO, excepcion.getMessage());
@@ -148,741 +149,745 @@ public class HeadSoccerTest {
     }
 
     @Test
-    public void copyShouldNotShareState() throws POOBSoccerException {
+    public void copiarNoDeberiaCompartirEstado() throws POOBSoccerException {
         Character original = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
-        Character copia = original.copy();
+        Character copia = original.copiar();
         assertNotSame(original, copia);
-        copia.stun();
-        copia.addGoal();
-        copia.update(1.0);
-        assertEquals(0, original.getEffectNames().length);
-        assertEquals(0, original.getGoals());
-        assertEquals(0.0, original.getPowerCharge(), 1e-9);
-        assertTrue(copia.getPowerCharge() > 0.0);
+        copia.aturdir();
+        copia.sumarGol();
+        copia.actualizar(1.0);
+        assertEquals(0, original.obtenerNombresEfectos().length);
+        assertEquals(0, original.obtenerGoles());
+        assertEquals(0.0, original.obtenerCargaPoder(), 1e-9);
+        assertTrue(copia.obtenerCargaPoder() > 0.0);
     }
 
     // ----------------------------------------------------------------
     // supervivencia
 
     @Test
-    public void survivalShouldOnlyBeAllowedInPvsM() throws POOBSoccerException {
-        juego.selectMode(MODO_PVSP);
+    public void supervivenciaSoloDeberiaPermitirseEnPvsM() throws POOBSoccerException {
+        juego.seleccionarModo(MODO_PVSP);
         POOBSoccerException excepcion = assertThrows(POOBSoccerException.class,
-                () -> juego.selectMatchType(SUPERVIVENCIA));
+                () -> juego.seleccionarTipoPartido(SUPERVIVENCIA));
         assertEquals(POOBSoccerException.SUPERVIVENCIA_SOLO_PVSM, excepcion.getMessage());
 
-        juego.selectMode(MODO_MVSM);
-        assertThrows(POOBSoccerException.class, () -> juego.selectMatchType(SUPERVIVENCIA));
+        juego.seleccionarModo(MODO_MVSM);
+        assertThrows(POOBSoccerException.class, () -> juego.seleccionarTipoPartido(SUPERVIVENCIA));
 
-        start(MODO_PVSM, SUPERVIVENCIA, 0, 1);
-        assertFalse(juego.isMatchFinished());
-        assertEquals("Balones 3-3 | Racha 0", juego.getMatchStatus());
+        iniciar(MODO_PVSM, SUPERVIVENCIA, 0, 1);
+        assertFalse(juego.estaPartidoTerminado());
+        assertEquals("Balones 3-3 | Racha 0", juego.obtenerEstadoPartido());
     }
 
     @Test
-    public void selectingModeShouldClearMatchType() throws POOBSoccerException {
-        juego.selectMode(MODO_PVSM);
-        juego.selectMatchType(SUPERVIVENCIA);
-        juego.selectMode(MODO_PVSP);
-        juego.selectPlayer(1, 0);
-        juego.selectPlayer(2, 1);
-        POOBSoccerException excepcion = assertThrows(POOBSoccerException.class, () -> juego.startMatch());
+    public void seleccionarModoDeberiaLimpiarTipoPartido() throws POOBSoccerException {
+        juego.seleccionarModo(MODO_PVSM);
+        juego.seleccionarTipoPartido(SUPERVIVENCIA);
+        juego.seleccionarModo(MODO_PVSP);
+        juego.seleccionarJugador(1, 0);
+        juego.seleccionarJugador(2, 1);
+        POOBSoccerException excepcion = assertThrows(POOBSoccerException.class, () -> juego.iniciarPartido());
         assertEquals(POOBSoccerException.MODO_INVALIDO, excepcion.getMessage());
     }
 
     @Test
-    public void matchTypeShouldRequireMode() {
+    public void tipoPartidoDeberiaRequerirModo() {
         POOBSoccerException excepcion = assertThrows(POOBSoccerException.class,
-                () -> juego.selectMatchType(POR_TIEMPO));
+                () -> juego.seleccionarTipoPartido(POR_TIEMPO));
         assertEquals(POOBSoccerException.MODO_INVALIDO, excepcion.getMessage());
     }
 
     @Test
-    public void survivalShouldEndWhenPlayerOneRunsOutOfBalls() throws POOBSoccerException {
-        Match partido = match(MODO_PVSM, SUPERVIVENCIA, 0, 1);
-        score(partido, 2, 3);
-        assertEquals("Balones 0-3 | Racha 0", partido.getStatus());
-        assertTrue(partido.isFinished());
-        assertEquals(partido.getPlayerName(2), partido.getWinnerName());
+    public void supervivenciaDeberiaTerminarCuandoJugadorUnoPierdeBalones() throws POOBSoccerException {
+        Match partido = crearPartido(MODO_PVSM, SUPERVIVENCIA, 0, 1);
+        anotar(partido, 2, 3);
+        assertEquals("Balones 0-3 | Racha 0", partido.obtenerEstado());
+        assertTrue(partido.estaTerminado());
+        assertEquals(partido.obtenerNombreJugador(2), partido.obtenerNombreGanador());
     }
 
     @Test
-    public void survivalShouldContinueSeriesWhenMachineLosesAllBalls() throws POOBSoccerException {
-        Match partido = match(MODO_PVSM, SUPERVIVENCIA, 0, 0);
-        String primerRival = partido.getPlayerName(2);
-        partido.updateTick(PASO_TICK);
-        assertTrue(partido.getPlayerPowerCharge(2) > 0.0);
+    public void supervivenciaDeberiaContinuarSerieCuandoMaquinaPierdeBalones() throws POOBSoccerException {
+        Match partido = crearPartido(MODO_PVSM, SUPERVIVENCIA, 0, 0);
+        String primerRival = partido.obtenerNombreJugador(2);
+        partido.actualizarTick(PASO_TICK);
+        assertTrue(partido.obtenerCargaPoderJugador(2) > 0.0);
 
-        score(partido, 1, 3);
-        assertEquals(0.0, partido.getPlayerPowerCharge(2), 1e-9);
-        assertEquals(0, partido.getGoals(2));
-        assertFalse(partido.isFinished());
-        assertEquals("Balones 3-3 | Racha 1", partido.getStatus());
-        assertNotEquals(primerRival, partido.getPlayerName(2));
-        assertEquals(X_INICIAL_DERECHA, centerX(partido.getPlayerBounds(2)), 1e-9);
+        anotar(partido, 1, 3);
+        assertEquals(0.0, partido.obtenerCargaPoderJugador(2), 1e-9);
+        assertEquals(0, partido.obtenerGoles(2));
+        assertFalse(partido.estaTerminado());
+        assertEquals("Balones 3-3 | Racha 1", partido.obtenerEstado());
+        assertNotEquals(primerRival, partido.obtenerNombreJugador(2));
+        assertEquals(X_INICIAL_DERECHA, centroX(partido.obtenerLimitesJugador(2)), 1e-9);
     }
 
     @Test
-    public void survivalScoreShouldRestartAgainstEachNewRival() throws POOBSoccerException {
-        Match partido = match(MODO_PVSM, SUPERVIVENCIA, 0, 1);
-        partido.scoreGoal(2);
-        partido.updateTick(PASO_TICK);
-        double cargaJugadorUno = partido.getPlayerPowerCharge(1);
-        score(partido, 1, 3);
-        assertEquals(0, partido.getGoals(1));
-        assertEquals(0, partido.getGoals(2));
-        assertEquals("Balones 2-3 | Racha 1", partido.getStatus());
-        assertEquals(cargaJugadorUno, partido.getPlayerPowerCharge(1), 1e-9);
-        partido.scoreGoal(1);
-        assertEquals(1, partido.getGoals(1));
+    public void marcadorSupervivenciaDeberiaReiniciarseContraNuevoRival() throws POOBSoccerException {
+        Match partido = crearPartido(MODO_PVSM, SUPERVIVENCIA, 0, 1);
+        partido.anotarGol(2);
+        partido.actualizarTick(PASO_TICK);
+        double cargaJugadorUno = partido.obtenerCargaPoderJugador(1);
+        anotar(partido, 1, 3);
+        assertEquals(0, partido.obtenerGoles(1));
+        assertEquals(0, partido.obtenerGoles(2));
+        assertEquals("Balones 2-3 | Racha 1", partido.obtenerEstado());
+        assertEquals(cargaJugadorUno, partido.obtenerCargaPoderJugador(1), 1e-9);
+        partido.anotarGol(1);
+        assertEquals(1, partido.obtenerGoles(1));
     }
 
     @Test
-    public void survivalShouldEndOnlyWhenPlayerOneLosesAllBalls() throws POOBSoccerException {
-        Match partido = match(MODO_PVSM, SUPERVIVENCIA, 0, 1);
-        score(partido, 1, 3);
-        assertEquals("Balones 3-3 | Racha 1", partido.getStatus());
-        score(partido, 2, 2);
-        assertFalse(partido.isFinished());
-        partido.scoreGoal(2);
-        assertTrue(partido.isFinished());
-        assertEquals("Balones 0-3 | Racha 1", partido.getStatus());
+    public void supervivenciaSoloDeberiaTerminarCuandoJugadorUnoSeQuedaSinBalones() throws POOBSoccerException {
+        Match partido = crearPartido(MODO_PVSM, SUPERVIVENCIA, 0, 1);
+        anotar(partido, 1, 3);
+        assertEquals("Balones 3-3 | Racha 1", partido.obtenerEstado());
+        anotar(partido, 2, 2);
+        assertFalse(partido.estaTerminado());
+        partido.anotarGol(2);
+        assertTrue(partido.estaTerminado());
+        assertEquals("Balones 0-3 | Racha 1", partido.obtenerEstado());
     }
 
     @Test
-    public void survivalShouldAskContextForNewRival() throws POOBSoccerException {
-        MatchType tipo = new MatchTypeCatalog().get(SUPERVIVENCIA);
+    public void supervivenciaDeberiaPedirNuevoRivalAlContexto() throws POOBSoccerException {
+        MatchType tipo = new MatchTypeCatalog().obtener(SUPERVIVENCIA);
         StubContext contexto = new StubContext();
-        tipo.begin(contexto);
+        tipo.iniciar(contexto);
         for (int i = 0; i < 3; i++) {
-            tipo.goalScored(1);
+            tipo.golAnotado(1);
         }
         assertEquals(1, contexto.rivalesReemplazados);
-        assertEquals("Balones 3-3 | Racha 1", tipo.getStatusText());
-        assertFalse(tipo.isFinished());
+        assertEquals("Balones 3-3 | Racha 1", tipo.obtenerTextoEstado());
+        assertFalse(tipo.estaTerminado());
     }
 
     @Test
-    public void catalogShouldCycleRivals() throws POOBSoccerException {
-        String[] nombres = juego.getCharacterNames();
-        Match partido = match(MODO_PVSM, SUPERVIVENCIA, 0, nombres.length - 1);
+    public void catalogoDeberiaRotarRivales() throws POOBSoccerException {
+        String[] nombres = juego.obtenerNombresPersonajes();
+        Match partido = crearPartido(MODO_PVSM, SUPERVIVENCIA, 0, nombres.length - 1);
         for (int rival = 0; rival < 2; rival++) {
-            score(partido, 1, 3);
-            assertEquals(nombres[rival], partido.getPlayerName(2));
+            anotar(partido, 1, 3);
+            assertEquals(nombres[rival], partido.obtenerNombreJugador(2));
         }
-        assertEquals("Balones 3-3 | Racha 2", partido.getStatus());
+        assertEquals("Balones 3-3 | Racha 2", partido.obtenerEstado());
     }
 
     // ---------------------------------------------------------------- poderes
 
     @Test
-    public void powerShouldOnlyActivateWhenBarIsFull() throws POOBSoccerException {
-        start(MODO_PVSP, POR_TIEMPO);
-        assertEquals(0.0, juego.getPlayerPowerBar(1), 1e-9);
-        juego.pressAction(1, "POWER");
-        juego.updateTick(PASO_TICK);
-        assertFalse(juego.isPlayerPowerArmed(1));
+    public void poderSoloDeberiaActivarseConBarraLlena() throws POOBSoccerException {
+        iniciar(MODO_PVSP, POR_TIEMPO);
+        assertEquals(0.0, juego.obtenerBarraPoderJugador(1), 1e-9);
+        juego.presionarAccion(1, "POWER");
+        juego.actualizarTick(PASO_TICK);
+        assertFalse(juego.estaPoderJugadorArmado(1));
 
-        juego.updateTick(17.0);
-        assertEquals(1.0, juego.getPlayerPowerBar(1), 1e-9);
-        juego.updateTick(PASO_TICK);
-        assertTrue(juego.isPlayerPowerArmed(1));
+        juego.actualizarTick(17.0);
+        assertEquals(1.0, juego.obtenerBarraPoderJugador(1), 1e-9);
+        juego.actualizarTick(PASO_TICK);
+        assertTrue(juego.estaPoderJugadorArmado(1));
     }
 
     @Test
-    public void powerBarShouldRechargeOverTime() throws POOBSoccerException {
-        start(MODO_PVSP, POR_TIEMPO);
-        juego.updateTick(1.0);
-        assertEquals(RECARGA_POR_NIVEL * juego.getCharacterPowerLevel(0), juego.getPlayerPowerBar(1), 1e-6);
+    public void barraPoderDeberiaRecargarseConElTiempo() throws POOBSoccerException {
+        iniciar(MODO_PVSP, POR_TIEMPO);
+        juego.actualizarTick(1.0);
+        assertEquals(RECARGA_POR_NIVEL * juego.obtenerNivelPoderPersonaje(0), juego.obtenerBarraPoderJugador(1),
+                1e-6);
     }
 
     @Test
-    public void freezePowerShouldBlockOpponentActions() throws POOBSoccerException {
+    public void poderCongelamientoDeberiaBloquearAccionesDelOponente() throws POOBSoccerException {
         Character victima = new Character("B", "Canadá", 3, 3, 3, 3, new FreezePower());
         Character rival = new Character("C", "Japón", 3, 3, 3, 3, new StunPower());
-        victima.enterAt(400.0, 1);
-        rival.enterAt(X_INICIAL_DERECHA, -1);
-        double arriba = victima.getTop();
-        new FreezePower().applyEffect(victima);
-        assertTrue(hasEffect(victima.getEffectNames(), CONGELADO));
-        victima.requestKick();
-        assertFalse(victima.tryKick(ballBeside(victima), rival));
-        victima.jump();
-        victima.setMoveDirection(1);
-        victima.update(0.5);
-        assertEquals(400.0, victima.getX(), 1e-9);
-        assertEquals(arriba, victima.getTop(), 1e-9);
+        victima.entrarEn(400.0, 1);
+        rival.entrarEn(X_INICIAL_DERECHA, -1);
+        double arriba = victima.obtenerBordeSuperior();
+        new FreezePower().aplicarEfecto(victima);
+        assertTrue(tieneEfecto(victima.obtenerNombresEfectos(), CONGELADO));
+        victima.solicitarPatada();
+        assertFalse(victima.intentarPatear(balonAlLado(victima), rival));
+        victima.saltar();
+        victima.establecerDireccionMovimiento(1);
+        victima.actualizar(0.5);
+        assertEquals(400.0, victima.obtenerX(), 1e-9);
+        assertEquals(arriba, victima.obtenerBordeSuperior(), 1e-9);
     }
 
     @Test
-    public void shrinkPowerShouldHalveOpponentSize() throws POOBSoccerException {
+    public void poderReduccionDeberiaReducirTamanoALaMitad() throws POOBSoccerException {
         Character victima = new Character("B", "Japón", 3, 3, 3, 3, new ShrinkPower());
-        double ancho = victima.getBounds()[2];
-        new ShrinkPower().applyEffect(victima);
-        assertEquals(ancho / 2.0, victima.getBounds()[2], 1e-9);
+        double ancho = victima.obtenerLimites()[2];
+        new ShrinkPower().aplicarEfecto(victima);
+        assertEquals(ancho / 2.0, victima.obtenerLimites()[2], 1e-9);
     }
 
     @Test
-    public void confusionPowerShouldInvertHorizontalControls() throws POOBSoccerException {
+    public void poderConfusionDeberiaInvertirControlesHorizontales() throws POOBSoccerException {
         Character victima = new Character("B", "Brasil", 3, 3, 3, 3, new ConfusionPower());
-        victima.enterAt(400.0, 1);
-        new ConfusionPower().applyEffect(victima);
-        victima.setMoveDirection(1);
-        victima.update(0.5);
-        assertTrue(victima.getX() < 400.0);
+        victima.entrarEn(400.0, 1);
+        new ConfusionPower().aplicarEfecto(victima);
+        victima.establecerDireccionMovimiento(1);
+        victima.actualizar(0.5);
+        assertTrue(victima.obtenerX() < 400.0);
     }
 
     @Test
-    public void kickWithActivePowerShouldAffectOpponent() throws POOBSoccerException {
+    public void patadaConPoderArmadoDeberiaAfectarAlOponente() throws POOBSoccerException {
         Character pateador = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
         Character rival = new Character("B", "Japón", 3, 3, 3, 3, new StunPower());
-        pateador.enterAt(400.0, 1);
-        rival.enterAt(X_INICIAL_DERECHA, -1);
-        pateador.update(17.0);
-        pateador.armPower();
-        assertTrue(pateador.isPowerArmed());
-        pateador.requestKick();
-        assertTrue(pateador.tryKick(ballBeside(pateador), rival));
-        assertTrue(hasEffect(rival.getEffectNames(), CONGELADO));
-        assertFalse(pateador.isPowerArmed());
-        assertEquals(0.0, pateador.getPowerCharge(), 1e-9);
+        pateador.entrarEn(400.0, 1);
+        rival.entrarEn(X_INICIAL_DERECHA, -1);
+        pateador.actualizar(17.0);
+        pateador.armarPoder();
+        assertTrue(pateador.estaPoderArmado());
+        pateador.solicitarPatada();
+        assertTrue(pateador.intentarPatear(balonAlLado(pateador), rival));
+        assertTrue(tieneEfecto(rival.obtenerNombresEfectos(), CONGELADO));
+        assertFalse(pateador.estaPoderArmado());
+        assertEquals(0.0, pateador.obtenerCargaPoder(), 1e-9);
     }
 
     @Test
-    public void stunPowerShouldStunOpponent() throws POOBSoccerException {
+    public void poderAturdimientoDeberiaAturdirAlOponente() throws POOBSoccerException {
         Character victima = new Character("B", "Japón", 3, 3, 3, 3, new StunPower());
-        new StunPower().applyEffect(victima);
-        assertTrue(hasEffect(victima.getEffectNames(), ATURDIDO));
+        new StunPower().aplicarEfecto(victima);
+        assertTrue(tieneEfecto(victima.obtenerNombresEfectos(), ATURDIDO));
     }
 
     // ---------------------------------------------------------------- aturdimiento
 
     @Test
-    public void stunShouldLastThreeSeconds() throws POOBSoccerException {
+    public void aturdimientoDeberiaDurarTresSegundos() throws POOBSoccerException {
         Character personaje = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
         Character rival = new Character("B", "Japón", 3, 3, 3, 3, new StunPower());
-        personaje.enterAt(400.0, 1);
-        rival.enterAt(X_INICIAL_DERECHA, -1);
-        double arriba = personaje.getTop();
-        personaje.stun();
-        assertTrue(hasEffect(personaje.getEffectNames(), ATURDIDO));
-        personaje.requestKick();
-        assertFalse(personaje.tryKick(ballBeside(personaje), rival));
-        personaje.jump();
-        personaje.setMoveDirection(1);
-        personaje.update(2.9);
-        assertTrue(hasEffect(personaje.getEffectNames(), ATURDIDO));
-        assertEquals(400.0, personaje.getX(), 1e-9);
-        assertEquals(arriba, personaje.getTop(), 1e-9);
-        personaje.update(0.2);
-        assertEquals(0, personaje.getEffectNames().length);
-        personaje.requestKick();
-        assertTrue(personaje.tryKick(ballBeside(personaje), rival));
+        personaje.entrarEn(400.0, 1);
+        rival.entrarEn(X_INICIAL_DERECHA, -1);
+        double arriba = personaje.obtenerBordeSuperior();
+        personaje.aturdir();
+        assertTrue(tieneEfecto(personaje.obtenerNombresEfectos(), ATURDIDO));
+        personaje.solicitarPatada();
+        assertFalse(personaje.intentarPatear(balonAlLado(personaje), rival));
+        personaje.saltar();
+        personaje.establecerDireccionMovimiento(1);
+        personaje.actualizar(2.9);
+        assertTrue(tieneEfecto(personaje.obtenerNombresEfectos(), ATURDIDO));
+        assertEquals(400.0, personaje.obtenerX(), 1e-9);
+        assertEquals(arriba, personaje.obtenerBordeSuperior(), 1e-9);
+        personaje.actualizar(0.2);
+        assertEquals(0, personaje.obtenerNombresEfectos().length);
+        personaje.solicitarPatada();
+        assertTrue(personaje.intentarPatear(balonAlLado(personaje), rival));
     }
 
     @Test
-    public void meleeKickShouldStunOpponentForThreeSeconds() throws POOBSoccerException {
+    public void patadaCuerpoACuerpoDeberiaAturdirTresSegundos() throws POOBSoccerException {
         Character personajeA = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
         Character personajeB = new Character("B", "Japón", 3, 3, 3, 3, new StunPower());
-        personajeA.enterAt(400.0, 1);
-        double[] limitesA = personajeA.getBounds();
-        personajeB.enterAt(limitesA[0] + limitesA[2] + 5.0 + personajeB.getBounds()[2] / 2.0, -1);
+        personajeA.entrarEn(400.0, 1);
+        double[] limitesA = personajeA.obtenerLimites();
+        personajeB.entrarEn(limitesA[0] + limitesA[2] + 5.0 + personajeB.obtenerLimites()[2] / 2.0, -1);
         Ball balonLejano = new Ball();
-        balonLejano.placeAt(Field.ANCHO - Goal.ANCHO, Ball.RADIO);
-        personajeA.requestKick();
-        assertFalse(personajeA.tryKick(balonLejano, personajeB));
-        assertTrue(hasEffect(personajeB.getEffectNames(), ATURDIDO));
-        personajeB.requestKick();
-        assertFalse(personajeB.tryKick(ballBeside(personajeB), personajeA));
-        personajeB.update(2.9);
-        assertTrue(hasEffect(personajeB.getEffectNames(), ATURDIDO));
-        personajeB.update(0.2);
-        assertEquals(0, personajeB.getEffectNames().length);
+        balonLejano.ubicarEn(Field.ANCHO - Goal.ANCHO, Ball.RADIO);
+        personajeA.solicitarPatada();
+        assertFalse(personajeA.intentarPatear(balonLejano, personajeB));
+        assertTrue(tieneEfecto(personajeB.obtenerNombresEfectos(), ATURDIDO));
+        personajeB.solicitarPatada();
+        assertFalse(personajeB.intentarPatear(balonAlLado(personajeB), personajeA));
+        personajeB.actualizar(2.9);
+        assertTrue(tieneEfecto(personajeB.obtenerNombresEfectos(), ATURDIDO));
+        personajeB.actualizar(0.2);
+        assertEquals(0, personajeB.obtenerNombresEfectos().length);
     }
 
     @Test
-    public void meleeKickOutOfRangeShouldNotStun() throws POOBSoccerException {
-        start(MODO_PVSP, POR_TIEMPO);
-        juego.pressAction(1, "KICK");
-        juego.updateTick(PASO_TICK);
-        assertEquals(0, juego.getPlayerEffects(2).length);
+    public void patadaCuerpoACuerpoFueraDeRangoNoDeberiaAturdir() throws POOBSoccerException {
+        iniciar(MODO_PVSP, POR_TIEMPO);
+        juego.presionarAccion(1, "KICK");
+        juego.actualizarTick(PASO_TICK);
+        assertEquals(0, juego.obtenerEfectosJugador(2).length);
     }
 
     @Test
-    public void kickShouldBeVisibleWhileItLasts() throws POOBSoccerException {
+    public void patadaDeberiaSerVisibleMientrasDura() throws POOBSoccerException {
         Character personajeA = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
         Character personajeB = new Character("B", "Japón", 3, 3, 3, 3, new StunPower());
-        personajeA.enterAt(400.0, 1);
-        personajeB.enterAt(400.0, -1);
-        assertFalse(personajeA.isKicking());
-        personajeA.requestKick();
-        personajeA.tryKick(ballBeside(personajeA), personajeB);
-        assertTrue(personajeA.isKicking());
-        personajeA.update(1.0);
-        assertFalse(personajeA.isKicking());
+        personajeA.entrarEn(400.0, 1);
+        personajeB.entrarEn(400.0, -1);
+        assertFalse(personajeA.estaPateando());
+        personajeA.solicitarPatada();
+        personajeA.intentarPatear(balonAlLado(personajeA), personajeB);
+        assertTrue(personajeA.estaPateando());
+        personajeA.actualizar(1.0);
+        assertFalse(personajeA.estaPateando());
     }
 
     @Test
-    public void facadeShouldExposeFacingAndKicking() throws POOBSoccerException {
-        start(MODO_PVSP, POR_TIEMPO);
-        assertEquals(1, juego.getPlayerFacing(1));
-        assertEquals(-1, juego.getPlayerFacing(2));
-        assertFalse(juego.isPlayerKicking(1));
+    public void fachadaDeberiaExponerOrientacionYPatada() throws POOBSoccerException {
+        iniciar(MODO_PVSP, POR_TIEMPO);
+        assertEquals(1, juego.obtenerOrientacionJugador(1));
+        assertEquals(-1, juego.obtenerOrientacionJugador(2));
+        assertFalse(juego.estaJugadorPateando(1));
     }
 
     @Test
-    public void ballShouldLookAheadBetweenPhysicsStepsWithoutLeavingTheField() {
+    public void balonDeberiaAdelantarseEntrePasosSinSalirDeLaCancha() {
         Field cancha = new Field();
         Ball balon = new Ball();
-        balon.placeAt(450.0, 100.0);
-        balon.kick(5, 1);
-        assertArrayEquals(new double[] { 450.0, 100.0 }, cancha.visibleBall(balon, 0.0), 1e-9);
-        assertArrayEquals(new double[] { 455.0, 95.0 }, cancha.visibleBall(balon, 0.5), 1e-9);
-        balon.placeAt(Field.ANCHO - Ball.RADIO, 100.0);
-        balon.kick(5, 1);
-        assertEquals(Field.ANCHO - Ball.RADIO, cancha.visibleBall(balon, 0.5)[0], 1e-9);
+        balon.ubicarEn(450.0, 100.0);
+        balon.patear(5, 1);
+        assertArrayEquals(new double[] { 450.0, 100.0 }, cancha.balonVisible(balon, 0.0), 1e-9);
+        assertArrayEquals(new double[] { 455.0, 95.0 }, cancha.balonVisible(balon, 0.5), 1e-9);
+        balon.ubicarEn(Field.ANCHO - Ball.RADIO, 100.0);
+        balon.patear(5, 1);
+        assertEquals(Field.ANCHO - Ball.RADIO, cancha.balonVisible(balon, 0.5)[0], 1e-9);
     }
 
     @Test
-    public void restartShouldClearEffectsAndReturnHome() throws POOBSoccerException {
+    public void reiniciarJugadaDeberiaLimpiarEfectosYVolverAlInicio() throws POOBSoccerException {
         Character personaje = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
-        personaje.enterAt(400.0, 1);
-        personaje.setMoveDirection(1);
-        personaje.update(0.5);
-        personaje.stun();
-        personaje.addGoal();
-        personaje.restart();
-        assertEquals(0, personaje.getEffectNames().length);
-        assertEquals(400.0, personaje.getX(), 1e-9);
-        assertEquals(1, personaje.getGoals());
-        assertTrue(personaje.getPowerCharge() > 0.0);
+        personaje.entrarEn(400.0, 1);
+        personaje.establecerDireccionMovimiento(1);
+        personaje.actualizar(0.5);
+        personaje.aturdir();
+        personaje.sumarGol();
+        personaje.reiniciarJugada();
+        assertEquals(0, personaje.obtenerNombresEfectos().length);
+        assertEquals(400.0, personaje.obtenerX(), 1e-9);
+        assertEquals(1, personaje.obtenerGoles());
+        assertTrue(personaje.obtenerCargaPoder() > 0.0);
     }
 
     @Test
-    public void enterAtShouldResetGoalsAndPowerBar() throws POOBSoccerException {
+    public void entrarEnDeberiaReiniciarGolesYBarraPoder() throws POOBSoccerException {
         Character personaje = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
-        personaje.addGoal();
-        personaje.update(1.0);
-        personaje.enterAt(X_INICIAL_DERECHA, -1);
-        assertEquals(0, personaje.getGoals());
-        assertEquals(0.0, personaje.getPowerCharge(), 1e-9);
-        assertEquals(X_INICIAL_DERECHA, personaje.getX(), 1e-9);
-        assertEquals(-1, personaje.getFacing());
+        personaje.sumarGol();
+        personaje.actualizar(1.0);
+        personaje.entrarEn(X_INICIAL_DERECHA, -1);
+        assertEquals(0, personaje.obtenerGoles());
+        assertEquals(0.0, personaje.obtenerCargaPoder(), 1e-9);
+        assertEquals(X_INICIAL_DERECHA, personaje.obtenerX(), 1e-9);
+        assertEquals(-1, personaje.obtenerOrientacion());
     }
 
     // ---------------------------------------------------------------- goles
 
     @Test
-    public void fieldShouldCreditTheAttackerOfEachGoal() {
+    public void canchaDeberiaAcreditarAlAtacanteDeCadaArco() {
         Field cancha = new Field();
         Ball balon = new Ball();
-        balon.placeAt(Goal.ANCHO / 2.0, Field.SUELO_Y - Ball.RADIO);
-        assertEquals(2, cancha.scorerOf(balon));
-        balon.placeAt(Field.ANCHO - Goal.ANCHO / 2.0, Field.SUELO_Y - Ball.RADIO);
-        assertEquals(1, cancha.scorerOf(balon));
-        cancha.dropBall(balon);
-        assertEquals(Field.SIN_GOL, cancha.scorerOf(balon));
-        assertEquals(Field.ANCHO / 2.0, balon.getX(), 1e-9);
+        balon.ubicarEn(Goal.ANCHO / 2.0, Field.SUELO_Y - Ball.RADIO);
+        assertEquals(2, cancha.anotadorDe(balon));
+        balon.ubicarEn(Field.ANCHO - Goal.ANCHO / 2.0, Field.SUELO_Y - Ball.RADIO);
+        assertEquals(1, cancha.anotadorDe(balon));
+        cancha.soltarBalon(balon);
+        assertEquals(Field.SIN_GOL, cancha.anotadorDe(balon));
+        assertEquals(Field.ANCHO / 2.0, balon.obtenerX(), 1e-9);
     }
 
     @Test
-    public void bodyPushAgainstAWallShouldKeepTheBallInsideTheField() throws POOBSoccerException {
+    public void empujeContraParedDeberiaMantenerBalonEnLaCancha() throws POOBSoccerException {
         Field cancha = new Field();
         Character personaje = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
-        personaje.enterAt(personaje.getBounds()[2] / 2.0, 1);
+        personaje.entrarEn(personaje.obtenerLimites()[2] / 2.0, 1);
         Ball balon = new Ball();
-        balon.placeAt(Ball.RADIO, Field.SUELO_Y - Ball.RADIO);
-        assertTrue(personaje.touches(balon));
-        personaje.push(balon);
-        assertTrue(balon.getX() < Ball.RADIO);
-        cancha.keepBallInside(balon);
-        assertEquals(Ball.RADIO, balon.getX(), 1e-9);
+        balon.ubicarEn(Ball.RADIO, Field.SUELO_Y - Ball.RADIO);
+        assertTrue(personaje.toca(balon));
+        personaje.empujar(balon);
+        assertTrue(balon.obtenerX() < Ball.RADIO);
+        cancha.mantenerBalonDentro(balon);
+        assertEquals(Ball.RADIO, balon.obtenerX(), 1e-9);
     }
 
     @Test
-    public void ballShouldBounceBackIntoPlayFromASideWall() {
+    public void balonDeberiaRebotarAlJuegoDesdeParedLateral() {
         Field cancha = new Field();
         Ball balon = new Ball();
-        balon.placeAt(Field.ANCHO - 60.0, 100.0);
-        balon.kick(5, 1);
+        balon.ubicarEn(Field.ANCHO - 60.0, 100.0);
+        balon.patear(5, 1);
         double maximoX = 0.0;
         for (int paso = 0; paso < 120; paso++) {
-            cancha.updateBall(balon);
-            cancha.keepBallInside(balon);
-            maximoX = Math.max(maximoX, balon.getX());
+            cancha.actualizarBalon(balon);
+            cancha.mantenerBalonDentro(balon);
+            maximoX = Math.max(maximoX, balon.obtenerX());
         }
         assertEquals(Field.ANCHO - Ball.RADIO, maximoX, 1e-9);
-        assertTrue(balon.getX() < Field.ANCHO - 200.0, "El balon debe volver al juego tras rebotar en la pared");
+        assertTrue(balon.obtenerX() < Field.ANCHO - 200.0, "El balon debe volver al juego tras rebotar en la pared");
     }
 
     @Test
-    public void ballPartiallyInsideShouldNotBeGoal() {
+    public void balonParcialmenteDentroNoDeberiaSerGol() {
         Goal arco = new Goal(0.0, Goal.ANCHO, 2);
         Ball parcial = new Ball();
-        parcial.placeAt(Goal.ANCHO, Field.SUELO_Y - Ball.RADIO - 5.0);
-        assertFalse(arco.isBallInside(parcial));
+        parcial.ubicarEn(Goal.ANCHO, Field.SUELO_Y - Ball.RADIO - 5.0);
+        assertFalse(arco.contieneBalon(parcial));
         Ball adentro = new Ball();
-        adentro.placeAt(Goal.ANCHO - Ball.RADIO, Field.SUELO_Y - Ball.RADIO - 5.0);
-        assertTrue(arco.isBallInside(adentro));
+        adentro.ubicarEn(Goal.ANCHO - Ball.RADIO, Field.SUELO_Y - Ball.RADIO - 5.0);
+        assertTrue(arco.contieneBalon(adentro));
     }
 
     @Test
-    public void ballShouldBounceOnCrossbar() {
+    public void balonDeberiaRebotarEnTravesano() {
         Goal arco = new Goal(0.0, Goal.ANCHO, 2);
         double travesanoArriba = Field.SUELO_Y - Goal.ALTO;
         Ball balon = new Ball();
-        balon.placeAt(Goal.ANCHO / 2.0, travesanoArriba - Ball.RADIO + 3.0);
-        arco.resolveCrossbar(balon);
-        assertEquals(travesanoArriba - Ball.RADIO, balon.getY(), 1e-9);
+        balon.ubicarEn(Goal.ANCHO / 2.0, travesanoArriba - Ball.RADIO + 3.0);
+        arco.resolverTravesano(balon);
+        assertEquals(travesanoArriba - Ball.RADIO, balon.obtenerY(), 1e-9);
     }
 
     @Test
-    public void goalShouldOnlyCountForTheScorer() throws POOBSoccerException {
-        Match partido = match(MODO_PVSP, GOLES_3, 0, 0);
-        partido.scoreGoal(1);
-        assertEquals(1, partido.getGoals(1));
-        assertEquals(0, partido.getGoals(2));
-        partido.scoreGoal(2);
-        assertEquals(1, partido.getGoals(2));
-        POOBSoccerException excepcion = assertThrows(POOBSoccerException.class, () -> partido.scoreGoal(3));
+    public void golSoloDeberiaContarParaElAnotador() throws POOBSoccerException {
+        Match partido = crearPartido(MODO_PVSP, GOLES_3, 0, 0);
+        partido.anotarGol(1);
+        assertEquals(1, partido.obtenerGoles(1));
+        assertEquals(0, partido.obtenerGoles(2));
+        partido.anotarGol(2);
+        assertEquals(1, partido.obtenerGoles(2));
+        POOBSoccerException excepcion = assertThrows(POOBSoccerException.class, () -> partido.anotarGol(3));
         assertEquals(POOBSoccerException.JUGADOR_INVALIDO, excepcion.getMessage());
     }
 
     @Test
-    public void shouldRestartPlayAfterGoal() throws POOBSoccerException {
+    public void deberiaReiniciarJugadaDespuesDeGol() throws POOBSoccerException {
         CharacterCatalog personajes = new CharacterCatalog();
-        Character jugador1 = personajes.get(0).copy();
-        Match partido = new Match(new GameModeCatalog().get(MODO_PVSP), new MatchTypeCatalog().get(GOLES_3), jugador1,
-                personajes.get(1).copy(), personajes);
-        partido.press(1, Action.RIGHT);
-        partido.updateTick(0.5);
-        assertTrue(centerX(partido.getPlayerBounds(1)) > X_INICIAL_IZQUIERDA);
-        jugador1.stun();
-        partido.scoreGoal(1);
-        assertEquals(X_INICIAL_IZQUIERDA, centerX(partido.getPlayerBounds(1)), 1e-9);
-        assertEquals(X_INICIAL_DERECHA, centerX(partido.getPlayerBounds(2)), 1e-9);
-        assertEquals(0, partido.getPlayerEffects(1).length);
-        assertEquals(Field.ANCHO / 2.0, partido.getBallPosition()[0], 1e-9);
+        Character jugador1 = personajes.obtener(0).copiar();
+        Match partido = new Match(new GameModeCatalog().obtener(MODO_PVSP),
+                new MatchTypeCatalog().obtener(GOLES_3), jugador1, personajes.obtener(1).copiar(), personajes);
+        partido.presionar(1, Action.RIGHT);
+        partido.actualizarTick(0.5);
+        assertTrue(centroX(partido.obtenerLimitesJugador(1)) > X_INICIAL_IZQUIERDA);
+        jugador1.aturdir();
+        partido.anotarGol(1);
+        assertEquals(X_INICIAL_IZQUIERDA, centroX(partido.obtenerLimitesJugador(1)), 1e-9);
+        assertEquals(X_INICIAL_DERECHA, centroX(partido.obtenerLimitesJugador(2)), 1e-9);
+        assertEquals(0, partido.obtenerEfectosJugador(1).length);
+        assertEquals(Field.ANCHO / 2.0, partido.obtenerPosicionBalon()[0], 1e-9);
     }
 
     @Test
-    public void goalMatchShouldEndAtTarget() throws POOBSoccerException {
-        Match partido = match(MODO_PVSP, GOLES_3, 0, 0);
-        score(partido, 1, 2);
-        assertFalse(partido.isFinished());
-        partido.scoreGoal(1);
-        assertTrue(partido.isFinished());
-        assertEquals(partido.getPlayerName(1), partido.getWinnerName());
+    public void partidoPorGolesDeberiaTerminarAlAlcanzarMeta() throws POOBSoccerException {
+        Match partido = crearPartido(MODO_PVSP, GOLES_3, 0, 0);
+        anotar(partido, 1, 2);
+        assertFalse(partido.estaTerminado());
+        partido.anotarGol(1);
+        assertTrue(partido.estaTerminado());
+        assertEquals(partido.obtenerNombreJugador(1), partido.obtenerNombreGanador());
     }
 
     @Test
-    public void goalMatchStatusShouldShowTarget() throws POOBSoccerException {
-        start(MODO_PVSP, GOLES_3);
-        assertEquals("Meta: 3 goles | 00:00", juego.getMatchStatus());
-        juego.updateTick(0.5);
-        assertEquals("Meta: 3 goles | 00:00", juego.getMatchStatus());
-        juego.updateTick(0.5);
-        assertEquals("Meta: 3 goles | 00:01", juego.getMatchStatus());
-        juego.updateTick(0.99);
-        assertEquals("Meta: 3 goles | 00:01", juego.getMatchStatus());
+    public void estadoPartidoPorGolesDeberiaMostrarMeta() throws POOBSoccerException {
+        iniciar(MODO_PVSP, GOLES_3);
+        assertEquals("Meta: 3 goles | 00:00", juego.obtenerEstadoPartido());
+        juego.actualizarTick(0.5);
+        assertEquals("Meta: 3 goles | 00:00", juego.obtenerEstadoPartido());
+        juego.actualizarTick(0.5);
+        assertEquals("Meta: 3 goles | 00:01", juego.obtenerEstadoPartido());
+        juego.actualizarTick(0.99);
+        assertEquals("Meta: 3 goles | 00:01", juego.obtenerEstadoPartido());
     }
 
     @Test
-    public void goalScoredAfterTheEndShouldBeIgnored() throws POOBSoccerException {
-        MatchType tipo = new MatchTypeCatalog().get(GOLES_3);
+    public void golAnotadoDespuesDelFinalDeberiaIgnorarse() throws POOBSoccerException {
+        MatchType tipo = new MatchTypeCatalog().obtener(GOLES_3);
         StubContext contexto = new StubContext();
-        tipo.begin(contexto);
+        tipo.iniciar(contexto);
         contexto.goles[0] = 3;
-        tipo.goalScored(1);
+        tipo.golAnotado(1);
         contexto.goles[1] = 3;
-        tipo.goalScored(2);
-        assertTrue(tipo.isFinished());
-        assertEquals(1, tipo.getWinner());
+        tipo.golAnotado(2);
+        assertTrue(tipo.estaTerminado());
+        assertEquals(1, tipo.obtenerGanador());
 
-        tipo.begin(new StubContext());
-        assertFalse(tipo.isFinished());
+        tipo.iniciar(new StubContext());
+        assertFalse(tipo.estaTerminado());
     }
 
     // ---------------------------------------------------------------- tiempo y gol
     // de oro
 
     @Test
-    public void timeMatchShouldGiveWinToLeaderAfterSixtySeconds() throws POOBSoccerException {
-        Match partido = match(MODO_PVSP, POR_TIEMPO, 0, 0);
-        partido.scoreGoal(1);
-        partido.updateTick(PASO_TICK);
-        assertFalse(partido.isFinished());
-        partido.updateTick(SEGUNDOS_PARTIDO);
-        assertTrue(partido.isFinished());
-        assertEquals("00:00", partido.getStatus());
-        assertEquals(partido.getPlayerName(1), partido.getWinnerName());
+    public void partidoPorTiempoDeberiaDarVictoriaAlLiderTrasSesentaSegundos() throws POOBSoccerException {
+        Match partido = crearPartido(MODO_PVSP, POR_TIEMPO, 0, 0);
+        partido.anotarGol(1);
+        partido.actualizarTick(PASO_TICK);
+        assertFalse(partido.estaTerminado());
+        partido.actualizarTick(SEGUNDOS_PARTIDO);
+        assertTrue(partido.estaTerminado());
+        assertEquals("00:00", partido.obtenerEstado());
+        assertEquals(partido.obtenerNombreJugador(1), partido.obtenerNombreGanador());
     }
 
     @Test
-    public void tieShouldActivateGoldenGoal() throws POOBSoccerException {
-        Match partido = match(MODO_PVSP, POR_TIEMPO, 0, 1);
-        partido.updateTick(SEGUNDOS_PARTIDO);
-        assertEquals(GOL_DE_ORO, partido.getStatus());
-        assertFalse(partido.isFinished());
+    public void empateDeberiaActivarGolDeOro() throws POOBSoccerException {
+        Match partido = crearPartido(MODO_PVSP, POR_TIEMPO, 0, 1);
+        partido.actualizarTick(SEGUNDOS_PARTIDO);
+        assertEquals(GOL_DE_ORO, partido.obtenerEstado());
+        assertFalse(partido.estaTerminado());
 
-        partido.scoreGoal(2);
-        assertTrue(partido.isFinished());
-        assertEquals(1, partido.getGoals(2));
-        assertEquals(partido.getPlayerName(2), partido.getWinnerName());
+        partido.anotarGol(2);
+        assertTrue(partido.estaTerminado());
+        assertEquals(1, partido.obtenerGoles(2));
+        assertEquals(partido.obtenerNombreJugador(2), partido.obtenerNombreGanador());
     }
 
     @Test
-    public void timeMatchShouldCountDownAgainstAnyContext() throws POOBSoccerException {
-        MatchType tipo = new MatchTypeCatalog().get(POR_TIEMPO);
+    public void partidoPorTiempoDeberiaContarHaciaAtrasConCualquierContexto() throws POOBSoccerException {
+        MatchType tipo = new MatchTypeCatalog().obtener(POR_TIEMPO);
         StubContext contexto = new StubContext();
-        tipo.begin(contexto);
-        assertEquals("01:00", tipo.getStatusText());
-        tipo.tick(0.5);
-        assertEquals("01:00", tipo.getStatusText());
-        tipo.tick(0.5);
-        assertEquals("00:59", tipo.getStatusText());
+        tipo.iniciar(contexto);
+        assertEquals("01:00", tipo.obtenerTextoEstado());
+        tipo.avanzar(0.5);
+        assertEquals("01:00", tipo.obtenerTextoEstado());
+        tipo.avanzar(0.5);
+        assertEquals("00:59", tipo.obtenerTextoEstado());
         contexto.goles[1] = 2;
-        tipo.tick(SEGUNDOS_PARTIDO);
-        assertTrue(tipo.isFinished());
-        assertEquals(2, tipo.getWinner());
+        tipo.avanzar(SEGUNDOS_PARTIDO);
+        assertTrue(tipo.estaTerminado());
+        assertEquals(2, tipo.obtenerGanador());
     }
 
     // ---------------------------------------------------------------- facade,
     // entrada, pausa e IA
 
     @Test
-    public void shouldNotStartWithoutBothPlayers() throws POOBSoccerException {
-        juego.selectMode(MODO_PVSP);
-        juego.selectMatchType(POR_TIEMPO);
-        juego.selectPlayer(1, 0);
-        POOBSoccerException excepcion = assertThrows(POOBSoccerException.class, () -> juego.startMatch());
+    public void noDeberiaIniciarSinAmbosJugadores() throws POOBSoccerException {
+        juego.seleccionarModo(MODO_PVSP);
+        juego.seleccionarTipoPartido(POR_TIEMPO);
+        juego.seleccionarJugador(1, 0);
+        POOBSoccerException excepcion = assertThrows(POOBSoccerException.class, () -> juego.iniciarPartido());
         assertEquals(POOBSoccerException.JUGADORES_INCOMPLETOS, excepcion.getMessage());
     }
 
     @Test
-    public void shouldRejectInvalidSelections() throws POOBSoccerException {
-        POOBSoccerException excepcion = assertThrows(POOBSoccerException.class, () -> juego.selectPlayer(1, 99));
+    public void deberiaRechazarSeleccionesInvalidas() throws POOBSoccerException {
+        POOBSoccerException excepcion = assertThrows(POOBSoccerException.class,
+                () -> juego.seleccionarJugador(1, 99));
         assertEquals(POOBSoccerException.PERSONAJE_INVALIDO, excepcion.getMessage());
-        excepcion = assertThrows(POOBSoccerException.class, () -> juego.selectPlayer(3, 0));
+        excepcion = assertThrows(POOBSoccerException.class, () -> juego.seleccionarJugador(3, 0));
         assertEquals(POOBSoccerException.JUGADOR_INVALIDO, excepcion.getMessage());
-        assertThrows(POOBSoccerException.class, () -> juego.selectPlayer(0, 0));
-        assertThrows(POOBSoccerException.class, () -> juego.selectMode(-1));
-        juego.selectMode(MODO_PVSP);
-        excepcion = assertThrows(POOBSoccerException.class, () -> juego.selectMatchType(99));
+        assertThrows(POOBSoccerException.class, () -> juego.seleccionarJugador(0, 0));
+        assertThrows(POOBSoccerException.class, () -> juego.seleccionarModo(-1));
+        juego.seleccionarModo(MODO_PVSP);
+        excepcion = assertThrows(POOBSoccerException.class, () -> juego.seleccionarTipoPartido(99));
         assertEquals(POOBSoccerException.MODO_INVALIDO, excepcion.getMessage());
-        excepcion = assertThrows(POOBSoccerException.class, () -> juego.updateTick(PASO_TICK));
+        excepcion = assertThrows(POOBSoccerException.class, () -> juego.actualizarTick(PASO_TICK));
         assertEquals(POOBSoccerException.PARTIDO_NO_INICIADO, excepcion.getMessage());
-        assertThrows(POOBSoccerException.class, () -> juego.pressAction(1, "KICK"));
-        assertThrows(POOBSoccerException.class, () -> juego.getMatchStatus());
+        assertThrows(POOBSoccerException.class, () -> juego.presionarAccion(1, "KICK"));
+        assertThrows(POOBSoccerException.class, () -> juego.obtenerEstadoPartido());
     }
 
     @Test
-    public void singletonShouldBeUnique() throws POOBSoccerException {
-        assertSame(juego, HeadSoccer.getInstance());
+    public void singletonDeberiaSerUnico() throws POOBSoccerException {
+        assertSame(juego, HeadSoccer.obtenerInstancia());
     }
 
     @Test
-    public void newGameShouldClearSession() throws POOBSoccerException {
-        start(MODO_PVSP, POR_TIEMPO);
-        juego.newGame();
-        POOBSoccerException excepcion = assertThrows(POOBSoccerException.class, () -> juego.getMatchStatus());
+    public void nuevoJuegoDeberiaLimpiarSesion() throws POOBSoccerException {
+        iniciar(MODO_PVSP, POR_TIEMPO);
+        juego.nuevoJuego();
+        POOBSoccerException excepcion = assertThrows(POOBSoccerException.class, () -> juego.obtenerEstadoPartido());
         assertEquals(POOBSoccerException.PARTIDO_NO_INICIADO, excepcion.getMessage());
-        excepcion = assertThrows(POOBSoccerException.class, () -> juego.startMatch());
+        excepcion = assertThrows(POOBSoccerException.class, () -> juego.iniciarPartido());
         assertEquals(POOBSoccerException.MODO_INVALIDO, excepcion.getMessage());
-        juego.selectMode(MODO_PVSP);
-        juego.selectMatchType(POR_TIEMPO);
-        excepcion = assertThrows(POOBSoccerException.class, () -> juego.startMatch());
+        juego.seleccionarModo(MODO_PVSP);
+        juego.seleccionarTipoPartido(POR_TIEMPO);
+        excepcion = assertThrows(POOBSoccerException.class, () -> juego.iniciarPartido());
         assertEquals(POOBSoccerException.JUGADORES_INCOMPLETOS, excepcion.getMessage());
     }
 
     @Test
-    public void rematchShouldStartFreshWithTheChosenCharacters() throws POOBSoccerException {
-        String[] nombres = juego.getCharacterNames();
-        start(MODO_PVSP, POR_TIEMPO, 0, 1);
-        juego.pressAction(1, "RIGHT");
-        juego.updateTick(1.0);
-        assertTrue(juego.getPlayerPowerBar(2) > 0.0);
+    public void revanchaDeberiaEmpezarDeCeroConLosMismosPersonajes() throws POOBSoccerException {
+        String[] nombres = juego.obtenerNombresPersonajes();
+        iniciar(MODO_PVSP, POR_TIEMPO, 0, 1);
+        juego.presionarAccion(1, "RIGHT");
+        juego.actualizarTick(1.0);
+        assertTrue(juego.obtenerBarraPoderJugador(2) > 0.0);
 
-        juego.startMatch();
-        assertEquals(nombres[0], juego.getPlayerName(1));
-        assertEquals(nombres[1], juego.getPlayerName(2));
-        assertEquals(0.0, juego.getPlayerPowerBar(2), 1e-9);
-        assertEquals("01:00", juego.getMatchStatus());
-        juego.updateTick(PASO_TICK);
-        assertEquals(X_INICIAL_IZQUIERDA, centerX(juego.getPlayerBounds(1)), 1e-9);
+        juego.iniciarPartido();
+        assertEquals(nombres[0], juego.obtenerNombreJugador(1));
+        assertEquals(nombres[1], juego.obtenerNombreJugador(2));
+        assertEquals(0.0, juego.obtenerBarraPoderJugador(2), 1e-9);
+        assertEquals("01:00", juego.obtenerEstadoPartido());
+        juego.actualizarTick(PASO_TICK);
+        assertEquals(X_INICIAL_IZQUIERDA, centroX(juego.obtenerLimitesJugador(1)), 1e-9);
     }
 
     @Test
-    public void pausedGameShouldNotAdvance() throws POOBSoccerException {
-        start(MODO_PVSP, POR_TIEMPO);
-        assertEquals("01:00", juego.getMatchStatus());
-        juego.pause();
-        double y = juego.getBallPosition()[1];
-        juego.updateTick(1.0);
-        assertEquals(y, juego.getBallPosition()[1], 1e-9);
-        assertEquals("01:00", juego.getMatchStatus());
-        juego.resume();
-        juego.updateTick(1.0);
-        assertEquals("00:59", juego.getMatchStatus());
+    public void partidoPausadoNoDeberiaAvanzar() throws POOBSoccerException {
+        iniciar(MODO_PVSP, POR_TIEMPO);
+        assertEquals("01:00", juego.obtenerEstadoPartido());
+        juego.pausar();
+        double y = juego.obtenerPosicionBalon()[1];
+        juego.actualizarTick(1.0);
+        assertEquals(y, juego.obtenerPosicionBalon()[1], 1e-9);
+        assertEquals("01:00", juego.obtenerEstadoPartido());
+        juego.reanudar();
+        juego.actualizarTick(1.0);
+        assertEquals("00:59", juego.obtenerEstadoPartido());
     }
 
     @Test
-    public void pauseShouldReleaseHeldKeys() throws POOBSoccerException {
-        start(MODO_PVSP, POR_TIEMPO);
-        juego.pressAction(1, "RIGHT");
-        juego.pause();
-        juego.resume();
-        juego.updateTick(PASO_TICK);
-        assertEquals(X_INICIAL_IZQUIERDA, centerX(juego.getPlayerBounds(1)), 1e-9);
+    public void pausarDeberiaSoltarTeclasMantenidas() throws POOBSoccerException {
+        iniciar(MODO_PVSP, POR_TIEMPO);
+        juego.presionarAccion(1, "RIGHT");
+        juego.pausar();
+        juego.reanudar();
+        juego.actualizarTick(PASO_TICK);
+        assertEquals(X_INICIAL_IZQUIERDA, centroX(juego.obtenerLimitesJugador(1)), 1e-9);
     }
 
     @Test
-    public void releasingAllActionsShouldStopHeldKeysWithoutPausing() throws POOBSoccerException {
-        start(MODO_PVSP, POR_TIEMPO);
-        juego.pressAction(1, "RIGHT");
-        juego.pressAction(2, "LEFT");
-        juego.releaseAllActions();
-        juego.updateTick(1.0);
-        assertEquals(X_INICIAL_IZQUIERDA, centerX(juego.getPlayerBounds(1)), 1e-9);
-        assertEquals(X_INICIAL_DERECHA, centerX(juego.getPlayerBounds(2)), 1e-9);
-        assertEquals("00:59", juego.getMatchStatus());
+    public void soltarTodasLasAccionesDeberiaDetenerTeclasSinPausar() throws POOBSoccerException {
+        iniciar(MODO_PVSP, POR_TIEMPO);
+        juego.presionarAccion(1, "RIGHT");
+        juego.presionarAccion(2, "LEFT");
+        juego.soltarTodasLasAcciones();
+        juego.actualizarTick(1.0);
+        assertEquals(X_INICIAL_IZQUIERDA, centroX(juego.obtenerLimitesJugador(1)), 1e-9);
+        assertEquals(X_INICIAL_DERECHA, centroX(juego.obtenerLimitesJugador(2)), 1e-9);
+        assertEquals("00:59", juego.obtenerEstadoPartido());
     }
 
     @Test
-    public void heldKeysShouldDriveHumanPlayer() throws POOBSoccerException {
-        start(MODO_PVSP, POR_TIEMPO);
-        juego.pressAction(1, "RIGHT");
-        juego.updateTick(PASO_TICK);
-        double desplazado = centerX(juego.getPlayerBounds(1));
+    public void teclasMantenidasDeberianControlarJugadorHumano() throws POOBSoccerException {
+        iniciar(MODO_PVSP, POR_TIEMPO);
+        juego.presionarAccion(1, "RIGHT");
+        juego.actualizarTick(PASO_TICK);
+        double desplazado = centroX(juego.obtenerLimitesJugador(1));
         assertTrue(desplazado > X_INICIAL_IZQUIERDA);
-        juego.releaseAction(1, "RIGHT");
-        juego.updateTick(PASO_TICK);
-        assertEquals(desplazado, centerX(juego.getPlayerBounds(1)), 1e-9);
+        juego.soltarAccion(1, "RIGHT");
+        juego.actualizarTick(PASO_TICK);
+        assertEquals(desplazado, centroX(juego.obtenerLimitesJugador(1)), 1e-9);
 
-        double arriba = juego.getPlayerBounds(1)[1];
-        juego.pressAction(1, "JUMP");
-        juego.updateTick(PASO_TICK);
-        assertTrue(juego.getPlayerBounds(1)[1] < arriba);
+        double arriba = juego.obtenerLimitesJugador(1)[1];
+        juego.presionarAccion(1, "JUMP");
+        juego.actualizarTick(PASO_TICK);
+        assertTrue(juego.obtenerLimitesJugador(1)[1] < arriba);
     }
 
     @Test
-    public void oppositeHeldKeysShouldCancel() throws POOBSoccerException {
-        start(MODO_PVSP, POR_TIEMPO);
-        juego.pressAction(2, "LEFT");
-        juego.pressAction(2, "RIGHT");
-        juego.updateTick(PASO_TICK);
-        assertEquals(X_INICIAL_DERECHA, centerX(juego.getPlayerBounds(2)), 1e-9);
+    public void teclasOpuestasMantenidasDeberianCancelarse() throws POOBSoccerException {
+        iniciar(MODO_PVSP, POR_TIEMPO);
+        juego.presionarAccion(2, "LEFT");
+        juego.presionarAccion(2, "RIGHT");
+        juego.actualizarTick(PASO_TICK);
+        assertEquals(X_INICIAL_DERECHA, centroX(juego.obtenerLimitesJugador(2)), 1e-9);
     }
 
     @Test
-    public void keyboardShouldNotDriveMachine() throws POOBSoccerException {
-        start(MODO_PVSM, GOLES_3);
-        double antes = centerX(juego.getPlayerBounds(2));
-        assertTrue(juego.getBallPosition()[0] < antes);
-        juego.pressAction(2, "RIGHT");
-        juego.pressAction(2, "POWER");
-        juego.updateTick(PASO_TICK);
-        assertTrue(centerX(juego.getPlayerBounds(2)) < antes, "La IA debe seguir yendo hacia el balon");
+    public void tecladoNoDeberiaControlarMaquina() throws POOBSoccerException {
+        iniciar(MODO_PVSM, GOLES_3);
+        double antes = centroX(juego.obtenerLimitesJugador(2));
+        assertTrue(juego.obtenerPosicionBalon()[0] < antes);
+        juego.presionarAccion(2, "RIGHT");
+        juego.presionarAccion(2, "POWER");
+        juego.actualizarTick(PASO_TICK);
+        assertTrue(centroX(juego.obtenerLimitesJugador(2)) < antes, "La IA debe seguir yendo hacia el balon");
     }
 
     @Test
-    public void invalidActionShouldBeRejected() throws POOBSoccerException {
-        start(MODO_PVSP, POR_TIEMPO);
-        POOBSoccerException excepcion = assertThrows(POOBSoccerException.class, () -> juego.pressAction(1, "FLY"));
+    public void accionInvalidaDeberiaSerRechazada() throws POOBSoccerException {
+        iniciar(MODO_PVSP, POR_TIEMPO);
+        POOBSoccerException excepcion = assertThrows(POOBSoccerException.class,
+                () -> juego.presionarAccion(1, "FLY"));
         assertEquals(POOBSoccerException.ACCION_INVALIDA, excepcion.getMessage());
-        excepcion = assertThrows(POOBSoccerException.class, () -> juego.releaseAction(1, null));
+        excepcion = assertThrows(POOBSoccerException.class, () -> juego.soltarAccion(1, null));
         assertEquals(POOBSoccerException.ACCION_INVALIDA, excepcion.getMessage());
-        excepcion = assertThrows(POOBSoccerException.class, () -> juego.pressAction(3, "KICK"));
+        excepcion = assertThrows(POOBSoccerException.class, () -> juego.presionarAccion(3, "KICK"));
         assertEquals(POOBSoccerException.JUGADOR_INVALIDO, excepcion.getMessage());
     }
 
     @Test
-    public void winnerBeforeTheEndShouldThrow() throws POOBSoccerException {
-        start(MODO_PVSP, POR_TIEMPO);
-        POOBSoccerException excepcion = assertThrows(POOBSoccerException.class, () -> juego.getWinnerName());
+    public void ganadorAntesDelFinalDeberiaLanzarExcepcion() throws POOBSoccerException {
+        iniciar(MODO_PVSP, POR_TIEMPO);
+        POOBSoccerException excepcion = assertThrows(POOBSoccerException.class, () -> juego.obtenerNombreGanador());
         assertEquals(POOBSoccerException.PARTIDO_EN_CURSO, excepcion.getMessage());
     }
 
     @Test
-    public void aiShouldChaseTheBall() throws POOBSoccerException {
-        start(MODO_PVSM, GOLES_3);
-        double antes = centerX(juego.getPlayerBounds(2));
-        juego.updateTick(PASO_TICK);
-        assertTrue(centerX(juego.getPlayerBounds(2)) < antes);
+    public void iaDeberiaPerseguirElBalon() throws POOBSoccerException {
+        iniciar(MODO_PVSM, GOLES_3);
+        double antes = centroX(juego.obtenerLimitesJugador(2));
+        juego.actualizarTick(PASO_TICK);
+        assertTrue(centroX(juego.obtenerLimitesJugador(2)) < antes);
     }
 
     @Test
-    public void machineVsMachineShouldRunWithoutErrors() throws POOBSoccerException {
-        start(MODO_MVSM, POR_TIEMPO);
+    public void maquinaVsMaquinaDeberiaEjecutarseSinErrores() throws POOBSoccerException {
+        iniciar(MODO_MVSM, POR_TIEMPO);
         for (int i = 0; i < 600; i++) {
-            juego.updateTick(PASO_TICK);
+            juego.actualizarTick(PASO_TICK);
         }
-        assertTrue(juego.getBallPosition()[0] >= 0.0 && juego.getBallPosition()[0] <= Field.ANCHO);
+        assertTrue(juego.obtenerPosicionBalon()[0] >= 0.0 && juego.obtenerPosicionBalon()[0] <= Field.ANCHO);
     }
 
     // ---------------------------------------------------------------- catalogos
 
     @Test
-    public void everyCharacterShouldHaveAUniquePower() throws POOBSoccerException {
+    public void cadaPersonajeDeberiaTenerPoderUnico() throws POOBSoccerException {
         Set<String> poderes = new HashSet<String>();
-        int cantidad = juego.getCharacterNames().length;
+        int cantidad = juego.obtenerNombresPersonajes().length;
         for (int i = 0; i < cantidad; i++) {
-            assertTrue(poderes.add(juego.getCharacterPowerName(i)),
-                    "Poder repetido: " + juego.getCharacterPowerName(i));
+            assertTrue(poderes.add(juego.obtenerNombrePoderPersonaje(i)),
+                    "Poder repetido: " + juego.obtenerNombrePoderPersonaje(i));
         }
         assertEquals(cantidad, poderes.size());
     }
 
     @Test
-    public void catalogsShouldListOptionsInOrder() throws POOBSoccerException {
-        assertEquals(3, juego.getModeNames().length);
-        assertEquals(5, juego.getMatchTypeNames().length);
-        assertEquals("Por Goles (3)", juego.getMatchTypeNames()[GOLES_3]);
-        assertEquals("Jacob", juego.getCharacterNames()[0]);
+    public void catalogosDeberianListarOpcionesEnOrden() throws POOBSoccerException {
+        assertEquals(3, juego.obtenerNombresModos().length);
+        assertEquals(5, juego.obtenerNombresTiposPartido().length);
+        assertEquals("Por Goles (3)", juego.obtenerNombresTiposPartido()[GOLES_3]);
+        assertEquals("Jacob", juego.obtenerNombresPersonajes()[0]);
         CharacterCatalog catalogo = new CharacterCatalog();
-        POOBSoccerException excepcion = assertThrows(POOBSoccerException.class, () -> catalogo.get(99));
+        POOBSoccerException excepcion = assertThrows(POOBSoccerException.class, () -> catalogo.obtener(99));
         assertEquals(POOBSoccerException.PERSONAJE_INVALIDO, excepcion.getMessage());
     }
 
     @Test
-    public void facadeShouldExposeActivePowerName() throws POOBSoccerException {
-        start(MODO_PVSP, POR_TIEMPO);
-        assertEquals(juego.getCharacterPowerName(0), juego.getPlayerPowerName(1));
+    public void fachadaDeberiaExponerNombrePoderActivo() throws POOBSoccerException {
+        iniciar(MODO_PVSP, POR_TIEMPO);
+        assertEquals(juego.obtenerNombrePoderPersonaje(0), juego.obtenerNombrePoderJugador(1));
     }
 
     @Test
-    public void facadeShouldExposeCharacterPowerData() throws POOBSoccerException {
-        assertEquals(3, juego.getCharacterPowerLevel(0));
-        assertEquals(2, juego.getCharacterPowerLevel(1));
-        assertEquals(4, juego.getCharacterPowerLevel(2));
-        assertEquals(3, juego.getCharacterPowerLevel(3));
-        assertFalse(juego.getCharacterPowerDescription(0).isEmpty());
-        assertThrows(POOBSoccerException.class, () -> juego.getCharacterPowerLevel(99));
+    public void fachadaDeberiaExponerDatosPoderPersonaje() throws POOBSoccerException {
+        assertEquals(3, juego.obtenerNivelPoderPersonaje(0));
+        assertEquals(2, juego.obtenerNivelPoderPersonaje(1));
+        assertEquals(4, juego.obtenerNivelPoderPersonaje(2));
+        assertEquals(3, juego.obtenerNivelPoderPersonaje(3));
+        assertFalse(juego.obtenerDescripcionPoderPersonaje(0).isEmpty());
+        assertThrows(POOBSoccerException.class, () -> juego.obtenerNivelPoderPersonaje(99));
     }
 
     @Test
-    public void facadeShouldExposeCharacterCardData() throws POOBSoccerException {
-        assertEquals("Canadá", juego.getCharacterCountry(0));
-        assertEquals(3, juego.getCharacterSpeed(0));
-        assertEquals(3, juego.getCharacterJump(0));
-        assertEquals(4, juego.getCharacterStrength(0));
-        POOBSoccerException excepcion = assertThrows(POOBSoccerException.class, () -> juego.getCharacterCountry(-1));
+    public void fachadaDeberiaExponerDatosFichaPersonaje() throws POOBSoccerException {
+        assertEquals("Canadá", juego.obtenerPaisPersonaje(0));
+        assertEquals(3, juego.obtenerVelocidadPersonaje(0));
+        assertEquals(3, juego.obtenerSaltoPersonaje(0));
+        assertEquals(4, juego.obtenerFuerzaPersonaje(0));
+        POOBSoccerException excepcion = assertThrows(POOBSoccerException.class,
+                () -> juego.obtenerPaisPersonaje(-1));
         assertEquals(POOBSoccerException.PERSONAJE_INVALIDO, excepcion.getMessage());
     }
 
     @Test
-    public void facadeShouldExposeTheGeometryThePhysicsUses() {
-        assertEquals(Field.ANCHO, juego.getFieldWidth(), 1e-9);
-        assertEquals(Field.SUELO_Y, juego.getGroundY(), 1e-9);
-        assertEquals(Ball.RADIO, juego.getBallRadius(), 1e-9);
-        assertEquals(Goal.GROSOR_BORDE, juego.getCrossbarThickness(), 1e-9);
+    public void fachadaDeberiaExponerGeometriaDeLaFisica() {
+        assertEquals(Field.ANCHO, juego.obtenerAnchoCancha(), 1e-9);
+        assertEquals(Field.SUELO_Y, juego.obtenerSueloY(), 1e-9);
+        assertEquals(Ball.RADIO, juego.obtenerRadioBalon(), 1e-9);
+        assertEquals(Goal.GROSOR_BORDE, juego.obtenerGrosorTravesano(), 1e-9);
     }
 
     @Test
-    public void facadeShouldExposeWhereTheFieldPlacesEachGoal() throws POOBSoccerException {
-        start(MODO_PVSP, POR_TIEMPO);
+    public void fachadaDeberiaExponerUbicacionArcosEnLaCancha() throws POOBSoccerException {
+        iniciar(MODO_PVSP, POR_TIEMPO);
         double arriba = Field.SUELO_Y - Goal.ALTO;
-        double[][] arcos = juego.getGoalBounds();
+        double[][] arcos = juego.obtenerLimitesArcos();
         assertEquals(2, arcos.length);
         assertArrayEquals(new double[] { 0.0, arriba, Goal.ANCHO, Goal.ALTO }, arcos[0], 1e-9);
         assertArrayEquals(new double[] { Field.ANCHO - Goal.ANCHO, arriba, Goal.ANCHO, Goal.ALTO }, arcos[1], 1e-9);

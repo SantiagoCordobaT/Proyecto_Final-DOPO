@@ -1,6 +1,6 @@
 package presentacion;
 
-import static presentacion.Texts.text;
+import static presentacion.Texts.texto;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -35,15 +35,15 @@ final class HudP extends JPanel {
     /** @param modelo Fachada del dominio. */
     HudP(HeadSoccer modelo) {
         super(new GridLayout(1, 3));
-        Resources recursos = Resources.getInstance();
+        Resources recursos = Resources.obtenerInstancia();
         this.modelo = modelo;
         izquierda = new PlayerPlateP(modelo, 1, BorderLayout.WEST);
         derecha = new PlayerPlateP(modelo, 2, BorderLayout.EAST);
-        estado = recursos.label("", Resources.FUENTE_TEXTO);
-        marcador = recursos.label("", Resources.FUENTE_MARCADOR);
-        ayuda = recursos.label("", Resources.FUENTE_AYUDA);
+        estado = recursos.crearEtiqueta("", Resources.FUENTE_TEXTO);
+        marcador = recursos.crearEtiqueta("", Resources.FUENTE_MARCADOR);
+        ayuda = recursos.crearEtiqueta("", Resources.FUENTE_AYUDA);
         estado.setForeground(Resources.LISTO);
-        JPanel centro = recursos.panel(new BorderLayout());
+        JPanel centro = recursos.crearPanel(new BorderLayout());
         centro.add(estado, BorderLayout.NORTH);
         centro.add(marcador, BorderLayout.CENTER);
         centro.add(ayuda, BorderLayout.SOUTH);
@@ -53,8 +53,8 @@ final class HudP extends JPanel {
     }
 
     /** Rotula la ayuda del marcador en el idioma actual. */
-    void relabel() {
-        ayuda.setText(text("match.hint"));
+    void rotular() {
+        ayuda.setText(texto("match.hint"));
     }
 
     /**
@@ -64,16 +64,16 @@ final class HudP extends JPanel {
      * @param segundos Segundos reales transcurridos desde el cuadro anterior.
      * @throws POOBSoccerException Si no hay un partido iniciado.
      */
-    void refresh(double segundos) throws POOBSoccerException {
-        String actual = modelo.getPlayerGoals(1) + SEPARADOR_MARCADOR + modelo.getPlayerGoals(2);
+    void refrescar(double segundos) throws POOBSoccerException {
+        String actual = modelo.obtenerGolesJugador(1) + SEPARADOR_MARCADOR + modelo.obtenerGolesJugador(2);
         if (!actual.equals(marcador.getText())) {
             destello = SEGUNDOS_DESTELLO;
             marcador.setText(actual);
         }
         destello = Math.max(0.0, destello - segundos);
         marcador.setForeground(destello > 0.0 ? Resources.LISTO : Resources.TEXTO);
-        izquierda.refresh(segundos);
-        derecha.refresh(segundos);
-        estado.setText(modelo.getMatchStatus());
+        izquierda.refrescar(segundos);
+        derecha.refrescar(segundos);
+        estado.setText(modelo.obtenerEstadoPartido());
     }
 }

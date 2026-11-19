@@ -12,5 +12,5 @@ package dominio;
 public interface Named {
 
     /** @return Nombre visible del elemento. */
-    String getName();
+    String obtenerNombre();
 }

@@ -1,6 +1,6 @@
 package presentacion;
 
-import static presentacion.Texts.text;
+import static presentacion.Texts.texto;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -44,12 +44,12 @@ final class PlayerPlateP extends JPanel {
      */
     PlayerPlateP(HeadSoccer modelo, int numero, String ladoEscudo) {
         super(new BorderLayout(Resources.ESPACIO, 0));
-        Resources recursos = Resources.getInstance();
+        Resources recursos = Resources.obtenerInstancia();
         this.modelo = modelo;
         this.numero = numero;
-        this.color = recursos.playerColor(numero);
-        nombre = recursos.label("", Resources.FUENTE_ENCABEZADO);
-        poder = recursos.bar(PORCENTAJE, color);
+        this.color = recursos.colorJugador(numero);
+        nombre = recursos.crearEtiqueta("", Resources.FUENTE_ENCABEZADO);
+        poder = recursos.crearBarra(PORCENTAJE, color);
         poder.setStringPainted(true);
         JPanel datos = new JPanel(new GridLayout(2, 1, 0, Resources.ESPACIO / 3));
         datos.setOpaque(false);
@@ -70,12 +70,12 @@ final class PlayerPlateP extends JPanel {
      * @param segundos Segundos reales transcurridos desde el cuadro anterior.
      * @throws POOBSoccerException Si no hay un partido iniciado.
      */
-    void refresh(double segundos) throws POOBSoccerException {
-        boolean armado = modelo.isPlayerPowerArmed(numero);
-        escudo.setCountry(modelo.getPlayerCountry(numero));
-        nombre.setText(modelo.getPlayerName(numero).toUpperCase());
-        poder.setValue((int) Math.round(modelo.getPlayerPowerBar(numero) * PORCENTAJE));
-        poder.setString(armado ? text("hud.armed") : modelo.getPlayerPowerName(numero));
+    void refrescar(double segundos) throws POOBSoccerException {
+        boolean armado = modelo.estaPoderJugadorArmado(numero);
+        escudo.establecerPais(modelo.obtenerPaisJugador(numero));
+        nombre.setText(modelo.obtenerNombreJugador(numero).toUpperCase());
+        poder.setValue((int) Math.round(modelo.obtenerBarraPoderJugador(numero) * PORCENTAJE));
+        poder.setString(armado ? texto("hud.armed") : modelo.obtenerNombrePoderJugador(numero));
         pulso = (pulso + segundos) % SEGUNDOS_PULSO;
         poder.setForeground(armado ? COLORES_PULSO[(int) (pulso * COLORES_PULSO.length / SEGUNDOS_PULSO)] : color);
     }

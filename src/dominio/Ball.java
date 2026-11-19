@@ -29,7 +29,7 @@ public class Ball {
      * @param x Coordenada horizontal del centro.
      * @param y Coordenada vertical del centro.
      */
-    void placeAt(double x, double y) {
+    void ubicarEn(double x, double y) {
         this.x = x;
         this.y = y;
         this.velocidadX = 0.0;
@@ -43,7 +43,7 @@ public class Ball {
      * @param sueloY Coordenada Y de la superficie del suelo.
      * @param techoY Coordenada Y del limite superior de la cancha.
      */
-    void updatePhysics(double sueloY, double techoY) {
+    void actualizarFisica(double sueloY, double techoY) {
         velocidadY += GRAVEDAD;
         x += velocidadX;
         y += velocidadY;
@@ -67,7 +67,7 @@ public class Ball {
      * @param paredIzquierdaX Coordenada X del límite lateral izquierdo.
      * @param paredDerechaX   Coordenada X del límite lateral derecho.
      */
-    void bounceOffWalls(double paredIzquierdaX, double paredDerechaX) {
+    void rebotarEnParedes(double paredIzquierdaX, double paredDerechaX) {
         if (x - RADIO <= paredIzquierdaX) {
             x = paredIzquierdaX + RADIO;
             velocidadX = -velocidadX * REBOTE;
@@ -84,7 +84,7 @@ public class Ball {
      * @param fuerza    Estadística de fuerza del personaje.
      * @param direccion 1 derecha o -1 izquierda.
      */
-    public void kick(int fuerza, int direccion) {
+    public void patear(int fuerza, int direccion) {
         double velocidadPatada = fuerza * VELOCIDAD_PATADA_POR_FUERZA;
         velocidadX += direccion * velocidadPatada;
         velocidadY -= velocidadPatada;
@@ -97,7 +97,7 @@ public class Ball {
      * @param abajo     Borde inferior del rectangulo.
      * @return true si el balon toca o se solapa con el rectangulo.
      */
-    public boolean overlaps(double izquierda, double arriba, double derecha, double abajo) {
+    public boolean seSolapaCon(double izquierda, double arriba, double derecha, double abajo) {
         double dx = x - Math.max(izquierda, Math.min(x, derecha));
         double dy = y - Math.max(arriba, Math.min(y, abajo));
         return dx * dx + dy * dy <= RADIO * RADIO;
@@ -110,7 +110,7 @@ public class Ball {
      * @param abajo     Borde inferior del rectangulo.
      * @return true solo si el balon esta completamente dentro del rectangulo.
      */
-    boolean isInside(double izquierda, double arriba, double derecha, double abajo) {
+    boolean estaDentroDe(double izquierda, double arriba, double derecha, double abajo) {
         return x - RADIO >= izquierda - EPSILON
                 && x + RADIO <= derecha + EPSILON
                 && y - RADIO >= arriba - EPSILON
@@ -121,7 +121,7 @@ public class Ball {
      * @param superficieY Altura de referencia.
      * @return true si el centro del balon esta por encima de esa altura.
      */
-    public boolean isAbove(double superficieY) {
+    public boolean estaPorEncimaDe(double superficieY) {
         return y < superficieY;
     }
 
@@ -129,7 +129,7 @@ public class Ball {
      * @param superficieY Altura de referencia.
      * @return true si el centro del balon esta por debajo de esa altura.
      */
-    boolean isBelow(double superficieY) {
+    boolean estaPorDebajoDe(double superficieY) {
         return y > superficieY;
     }
 
@@ -139,7 +139,7 @@ public class Ball {
      *
      * @param superficieY Altura de la superficie.
      */
-    public void bounceUp(double superficieY) {
+    public void rebotarArriba(double superficieY) {
         y = superficieY - RADIO;
         velocidadY = -Math.abs(velocidadY) * REBOTE;
     }
@@ -149,7 +149,7 @@ public class Ball {
      *
      * @param superficieY Altura de la superficie.
      */
-    void bounceDown(double superficieY) {
+    void rebotarAbajo(double superficieY) {
         y = superficieY + RADIO;
         velocidadY = Math.abs(velocidadY) * REBOTE;
     }
@@ -160,7 +160,7 @@ public class Ball {
      * @param bordeX    Coordenada X del borde.
      * @param direccion Sentido de salida: 1 derecha, -1 izquierda.
      */
-    void bounceSideways(double bordeX, int direccion) {
+    void rebotarDeLado(double bordeX, int direccion) {
         x = bordeX + direccion * RADIO;
         velocidadX = direccion * Math.abs(velocidadX) * REBOTE;
     }
@@ -172,7 +172,7 @@ public class Ball {
      * @param bordeX    Coordenada X del borde del cuerpo que empuja.
      * @param direccion Sentido de salida: 1 derecha, -1 izquierda.
      */
-    public void pushSideways(double bordeX, int direccion) {
+    public void empujarDeLado(double bordeX, int direccion) {
         x = bordeX + direccion * RADIO;
         velocidadX = direccion * Math.max(Math.abs(velocidadX), VELOCIDAD_EMPUJE);
     }
@@ -182,19 +182,19 @@ public class Ball {
      * @return 1 derecha de la referencia (o sobre ella) y -1 si esta a la
      *         izquierda.
      */
-    public int sideOf(double referenciaX) {
+    public int ladoRespectoA(double referenciaX) {
         return x >= referenciaX ? 1 : -1;
     }
 
     /**
      * @return true si el balon va tan rapido como para aturdir a otro jugador.
      */
-    boolean isHardHit() {
+    boolean esGolpeFuerte() {
         return Math.sqrt(velocidadX * velocidadX + velocidadY * velocidadY) >= VELOCIDAD_GOLPE_FUERTE;
     }
 
     /** Frena el balon tras golpear con fuerza a un personaje. */
-    void slowDown() {
+    void frenar() {
         velocidadX *= FRENADO_GOLPE_FUERTE;
         velocidadY *= FRENADO_GOLPE_FUERTE;
     }
@@ -205,7 +205,7 @@ public class Ball {
      * @return Coordenada horizontal que tendra el centro al avanzar esa fraccion de
      *         paso.
      */
-    double xAfter(double fraccion) {
+    double xDespuesDe(double fraccion) {
         return x + velocidadX * fraccion;
     }
 
@@ -214,17 +214,17 @@ public class Ball {
      * @return Coordenada vertical que tendra el centro al avanzar esa fraccion de
      *         paso.
      */
-    double yAfter(double fraccion) {
+    double yDespuesDe(double fraccion) {
         return y + velocidadY * fraccion;
     }
 
     /** @return Coordenada horizontal del centro. */
-    public double getX() {
+    public double obtenerX() {
         return x;
     }
 
     /** @return Coordenada vertical del centro. */
-    public double getY() {
+    public double obtenerY() {
         return y;
     }
 }

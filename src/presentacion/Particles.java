@@ -43,7 +43,7 @@ final class Particles implements Actor {
      * @param cantidad  Cantidad de particulas.
      * @param rapidez   Rapidez maxima de salida, en pixeles por segundo.
      */
-    void burst(double origenX, double origenY, Color tinte, int cantidad, double rapidez) {
+    void lanzarRafaga(double origenX, double origenY, Color tinte, int cantidad, double rapidez) {
         for (int i = 0; i < cantidad; i++) {
             double angulo = Math.PI * aleatorio.nextDouble();
             double impulso = rapidez * (0.3 + 0.7 * aleatorio.nextDouble());
@@ -60,7 +60,7 @@ final class Particles implements Actor {
     }
 
     @Override
-    public void update(double segundos) {
+    public void actualizar(double segundos) {
         for (int i = 0; i < CAPACIDAD; i++) {
             if (vida[i] > 0.0) {
                 vida[i] -= segundos;
@@ -72,7 +72,7 @@ final class Particles implements Actor {
     }
 
     @Override
-    public void paint(Graphics2D g) {
+    public void dibujar(Graphics2D g) {
         for (int i = 0; i < CAPACIDAD; i++) {
             if (vida[i] > 0.0) {
                 double diametro = tamano[i] * vida[i] / duracion[i];

@@ -47,7 +47,7 @@ final class BallSprite implements Actor {
     private static final Ellipse2D ESFERA = new Ellipse2D.Double(-15.0, -15.0, 30.0, 30.0);
     private static final Polygon PARCHE_CENTRAL = new Polygon(new int[] { 0, 5, 3, -3, -5 },
             new int[] { -5, -2, 4, 4, -2 }, 5);
-    private static final Polygon PARCHE_BORDE = new Polygon(new int[] { -4, 4, 6, -6 }, new int[] { -10, -10, -14, -14 },
+    private static final Polygon PARCHE_BORDE=new Polygon(new int[]{-4,4,6,-6},new int[]{-10,-10,-14,-14},
             4);
     private static final RadialGradientPaint VOLUMEN = new RadialGradientPaint(new Point2D.Double(-5.0, -6.0), 22f,
             new float[] { 0f, 0.4f, 1f },
@@ -75,13 +75,13 @@ final class BallSprite implements Actor {
     BallSprite(HeadSoccer modelo, Particles particulas) {
         this.modelo = modelo;
         this.particulas = particulas;
-        this.escala = modelo.getBallRadius() / RADIO_NOMINAL;
-        this.suelo = modelo.getGroundY();
+        this.escala = modelo.obtenerRadioBalon() / RADIO_NOMINAL;
+        this.suelo = modelo.obtenerSueloY();
     }
 
     @Override
-    public void update(double segundos) throws POOBSoccerException {
-        double[] posicion = modelo.getBallPosition();
+    public void actualizar(double segundos) throws POOBSoccerException {
+        double[] posicion = modelo.obtenerPosicionBalon();
         double desplazamientoX = posicion[0] - x;
         double desplazamientoY = posicion[1] - y;
         boolean saltoBrusco = Math.hypot(desplazamientoX, desplazamientoY) > PIXELES_TELETRANSPORTE || segundos <= 0.0;
@@ -99,7 +99,7 @@ final class BallSprite implements Actor {
         if (velocidadY > VELOCIDAD_BOTE && nuevaVelocidadY < 0.0) {
             aplastamiento = 1.0;
             if (posicion[1] > suelo - ALTURA_POLVO) {
-                particulas.burst(posicion[0], suelo, POLVO, CANTIDAD_POLVO, VELOCIDAD_POLVO);
+                particulas.lanzarRafaga(posicion[0], suelo, POLVO, CANTIDAD_POLVO, VELOCIDAD_POLVO);
             }
         }
         aplastamiento *= Math.exp(-RECUPERACION_APLASTAMIENTO * segundos);
@@ -110,7 +110,7 @@ final class BallSprite implements Actor {
     }
 
     @Override
-    public void paint(Graphics2D g) {
+    public void dibujar(Graphics2D g) {
         double radio = RADIO_NOMINAL * escala;
         double atenuacion = Math.max(0.3, 1.0 - (suelo - radio - y) / ALTURA_DESVANECIMIENTO_SOMBRA);
         forma.setFrame(x - radio * atenuacion, suelo - 2.0, 2.0 * radio * atenuacion, 8.0);

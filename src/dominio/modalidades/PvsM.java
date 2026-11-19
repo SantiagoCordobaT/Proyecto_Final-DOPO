@@ -1,8 +1,10 @@
 package dominio.modalidades;
 
 /**
- * Jugador vs Maquina: el jugador 1 es humano y el 2 usa IA. Admite Supervivencia.
- *
+ * Jugador vs Maquina: el jugador 1 es humano y el 2 usa IA. Admite
+ * Supervivencia.
+ * 
+ * 
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
@@ -14,17 +16,17 @@ class PvsM extends GameMode {
     }
 
     @Override
-    public Controller createPlayer1Controller() {
+    public Controller crearControladorJugador1() {
         return new HumanController();
     }
 
     @Override
-    public Controller createPlayer2Controller() {
+    public Controller crearControladorJugador2() {
         return new AIController();
     }
 
     @Override
-    public boolean supportsSurvival() {
+    public boolean admiteSupervivencia() {
         return true;
     }
 }

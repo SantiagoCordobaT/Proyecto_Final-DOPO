@@ -4,7 +4,8 @@ import dominio.excepciones.POOBSoccerException;
 
 /**
  * Partido por tiempo: 60 segundos. Al acabarse gana quien va adelante; si hay
- * empate el reloj se congela en Gol de Oro y el siguiente gol termina el partido.
+ * empate el reloj se congela en Gol de Oro y el siguiente gol termina el
+ * partido.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -22,44 +23,49 @@ class TimeMatch extends MatchType {
     }
 
     @Override
-    public void begin(MatchContext contexto) {
-        super.begin(contexto);
+    public void iniciar(MatchContext contexto) {
+        super.iniciar(contexto);
         golDeOro = false;
     }
 
     @Override
-    public void tick(double segundos) throws POOBSoccerException {
-        super.tick(segundos);
-        if (!golDeOro && remainingSeconds() <= TOLERANCIA) {
-            timeUp();
+    public void avanzar(double segundos) throws POOBSoccerException {
+        super.avanzar(segundos);
+        if (!golDeOro && segundosRestantes() <= TOLERANCIA) {
+            tiempoAgotado();
         }
     }
 
     /** Se acabo el tiempo: gana el lider o, con empate, empieza el Gol de Oro. */
-    private void timeUp() throws POOBSoccerException {
-        int diferencia = goalsOf(JUGADOR_UNO) - goalsOf(JUGADOR_DOS);
+    private void tiempoAgotado() throws POOBSoccerException {
+        int diferencia = golesDe(JUGADOR_UNO) - golesDe(JUGADOR_DOS);
         if (diferencia == 0) {
             golDeOro = true;
         } else {
-            finish(diferencia > 0 ? JUGADOR_UNO : JUGADOR_DOS);
+            finalizar(diferencia > 0 ? JUGADOR_UNO : JUGADOR_DOS);
         }
     }
 
-    /** Solo el gol de oro decide el partido; los demas goles solo suman al marcador. */
+    /**
+     * Solo el gol de oro decide el partido; los demas goles solo suman al marcador.
+     */
     @Override
-    protected void onGoal(int anotador) {
+    protected void alAnotarGol(int anotador) {
         if (golDeOro) {
-            finish(anotador);
+            finalizar(anotador);
         }
     }
 
-    /** @return "GOL DE ORO" o el tiempo restante "mm:ss", con las fracciones redondeadas hacia arriba. */
+    /**
+     * @return "GOL DE ORO" o el tiempo restante "mm:ss", con las fracciones
+     *         redondeadas hacia arriba.
+     */
     @Override
-    public String getStatusText() {
-        return golDeOro ? GOL_DE_ORO : clock((int) Math.ceil(remainingSeconds() - TOLERANCIA));
+    public String obtenerTextoEstado() {
+        return golDeOro ? GOL_DE_ORO : formatoReloj((int) Math.ceil(segundosRestantes() - TOLERANCIA));
     }
 
-    private double remainingSeconds() {
-        return Math.max(0.0, SEGUNDOS_PARTIDO - getElapsedSeconds());
+    private double segundosRestantes() {
+        return Math.max(0.0, SEGUNDOS_PARTIDO - obtenerSegundosTranscurridos());
     }
 }

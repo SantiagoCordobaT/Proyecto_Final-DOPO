@@ -32,21 +32,23 @@ public abstract class MatchType implements Named {
     }
 
     /**
-     * Por defecto todo tipo de partido admite cualquier modalidad; Supervivencia lo redefine.
+     * Por defecto todo tipo de partido admite cualquier modalidad; Supervivencia lo
+     * redefine.
      *
      * @param modo Modalidad elegida.
      * @return true si el tipo de partido se puede jugar en esa modalidad.
      */
-    public boolean supports(GameMode modo) {
+    public boolean admite(GameMode modo) {
         return true;
     }
 
     /**
-     * Inicia (o reinicia) el tipo de partido para un partido nuevo: sin ganador y con el reloj en cero.
+     * Inicia (o reinicia) el tipo de partido para un partido nuevo: sin ganador y
+     * con el reloj en cero.
      *
      * @param contexto Partido en curso.
      */
-    public void begin(MatchContext contexto) {
+    public void iniciar(MatchContext contexto) {
         this.contexto = contexto;
         this.terminado = false;
         this.ganador = SIN_GANADOR;
@@ -59,39 +61,41 @@ public abstract class MatchType implements Named {
      * @param segundos Segundos transcurridos.
      * @throws POOBSoccerException Si el marcador no se pudiera consultar.
      */
-    public void tick(double segundos) throws POOBSoccerException {
+    public void avanzar(double segundos) throws POOBSoccerException {
         segundosTranscurridos += segundos;
     }
 
     /**
-     * Metodo plantilla: se llama despues de sumar un gol y solo lo procesa si el partido sigue en juego.
+     * Metodo plantilla: se llama despues de sumar un gol y solo lo procesa si el
+     * partido sigue en juego.
      *
      * @param anotador Jugador (1 o 2) que anota (ya tiene el gol sumado).
      * @throws POOBSoccerException Si el partido no pudiera reaccionar al gol.
      */
-    public final void goalScored(int anotador) throws POOBSoccerException {
-        if (!isFinished()) {
-            onGoal(anotador);
+    public final void golAnotado(int anotador) throws POOBSoccerException {
+        if (!estaTerminado()) {
+            alAnotarGol(anotador);
         }
     }
 
     /**
-     * Paso variable de {@link #goalScored}: reaccion propia de cada tipo de partido al gol.
+     * Paso variable de {@link #golAnotado}: reaccion propia de cada tipo de partido
+     * al gol.
      *
      * @param anotador Jugador (1 o 2) que anota.
      * @throws POOBSoccerException Si el partido no pudiera reaccionar al gol.
      */
-    protected abstract void onGoal(int anotador) throws POOBSoccerException;
+    protected abstract void alAnotarGol(int anotador) throws POOBSoccerException;
 
     /** @return Texto de estado para el marcador (reloj, meta, balones...). */
-    public abstract String getStatusText();
+    public abstract String obtenerTextoEstado();
 
     /**
      * Cierra el partido.
      *
      * @param ganador Jugador (1 o 2) ganador.
      */
-    protected final void finish(int ganador) {
+    protected final void finalizar(int ganador) {
         this.ganador = ganador;
         this.terminado = true;
     }
@@ -101,8 +105,8 @@ public abstract class MatchType implements Named {
      * @return Goles del jugador.
      * @throws POOBSoccerException Si el jugador no es 1 ni 2.
      */
-    protected final int goalsOf(int jugador) throws POOBSoccerException {
-        return contexto.getGoals(jugador);
+    protected final int golesDe(int jugador) throws POOBSoccerException {
+        return contexto.obtenerGoles(jugador);
     }
 
     /**
@@ -110,12 +114,12 @@ public abstract class MatchType implements Named {
      *
      * @throws POOBSoccerException Si el catalogo no pudiera entregar el rival.
      */
-    protected final void replaceRival() throws POOBSoccerException {
-        contexto.replaceRival();
+    protected final void reemplazarRival() throws POOBSoccerException {
+        contexto.reemplazarRival();
     }
 
-    /** @return Segundos jugados desde {@link #begin}. */
-    protected final double getElapsedSeconds() {
+    /** @return Segundos jugados desde {@link #iniciar}. */
+    protected final double obtenerSegundosTranscurridos() {
         return segundosTranscurridos;
     }
 
@@ -126,23 +130,26 @@ public abstract class MatchType implements Named {
      * @param segundos Segundos enteros (no negativos).
      * @return Tiempo con formato "mm:ss".
      */
-    protected static String clock(int segundos) {
+    protected static String formatoReloj(int segundos) {
         return String.format("%02d:%02d", segundos / SEGUNDOS_POR_MINUTO, segundos % SEGUNDOS_POR_MINUTO);
     }
 
     /** @return true si el partido termino. */
-    public final boolean isFinished() {
+    public final boolean estaTerminado() {
         return terminado;
     }
 
-    /** @return Jugador (1 o 2) ganador; solo tiene sentido cuando {@link #isFinished()}. */
-    public final int getWinner() {
+    /**
+     * @return Jugador (1 o 2) ganador; solo tiene sentido cuando
+     *         {@link #estaTerminado()}.
+     */
+    public final int obtenerGanador() {
         return ganador;
     }
 
     /** @return Nombre del tipo de partido. */
     @Override
-    public final String getName() {
+    public final String obtenerNombre() {
         return nombre;
     }
 }

@@ -21,30 +21,27 @@ class AIController extends Controller {
 
     /** Se acerca al punto detras del balon, con una zona muerta para no temblar. */
     @Override
-    protected int direction(Character personaje, Ball balon) {
-        double distanciaX = balon.getX() - personaje.getFacing() * DISTANCIA_DETRAS_BALON - personaje.getX();
+    protected int direccion(Character personaje, Ball balon) {
+        double distanciaX = balon.obtenerX() - personaje.obtenerOrientacion() * DISTANCIA_DETRAS_BALON
+                - personaje.obtenerX();
         return Math.abs(distanciaX) > ZONA_MUERTA ? (int) Math.signum(distanciaX) : 0;
     }
 
     /** Salta si el balon pasa por encima de su cabeza y esta cerca en X. */
     @Override
-    protected boolean wantsJump(Character personaje, Ball balon) {
-        return balon.getY() < personaje.getTop() - MARGEN_BALON_ALTO
-                && Math.abs(balon.getX() - personaje.getX()) < RANGO_SALTO_X;
+    protected boolean quiereSaltar(Character personaje, Ball balon) {
+        return balon.obtenerY() < personaje.obtenerBordeSuperior() - MARGEN_BALON_ALTO
+                && Math.abs(balon.obtenerX() - personaje.obtenerX()) < RANGO_SALTO_X;
     }
 
-    
-
-    /** Pide patada si el balon esta cerca en X y en Y. */
-    @Override
-    protected boolean wantsKick(Character personaje, Ball balon) {
-        return Math.abs(balon.getX() - personaje.getX()) < RANGO_PATADA
-                && Math.abs(balon.getY() - personaje.getCenterY()) < RANGO_PATADA;
+    protected boolean quierePatear(Character personaje, Ball balon) {
+        return Math.abs(balon.obtenerX() - personaje.obtenerX()) < RANGO_PATADA
+                && Math.abs(balon.obtenerY() - personaje.obtenerCentroY()) < RANGO_PATADA;
     }
 
     /** Siempre intenta armar el poder: solo se arma con la barra llena. */
     @Override
-    protected boolean wantsPower() {
+    protected boolean quierePoder() {
         return true;
     }
 }

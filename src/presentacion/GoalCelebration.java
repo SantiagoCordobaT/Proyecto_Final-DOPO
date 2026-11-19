@@ -1,6 +1,6 @@
 package presentacion;
 
-import static presentacion.Texts.text;
+import static presentacion.Texts.texto;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -57,13 +57,13 @@ final class GoalCelebration implements Actor {
      * @param arcos      Arcos, para sacudir la red donde entro el balon.
      */
     GoalCelebration(HeadSoccer modelo, Particles particulas, GoalSprite arcos) {
-        Resources recursos = Resources.getInstance();
+        Resources recursos = Resources.obtenerInstancia();
         this.modelo = modelo;
         this.particulas = particulas;
         this.arcos = arcos;
-        this.ancho = modelo.getFieldWidth();
-        this.suelo = modelo.getGroundY();
-        this.confeti = new Color[] { recursos.playerColor(1), recursos.playerColor(2), Resources.LISTO,
+        this.ancho = modelo.obtenerAnchoCancha();
+        this.suelo = modelo.obtenerSueloY();
+        this.confeti = new Color[] { recursos.colorJugador(1), recursos.colorJugador(2), Resources.LISTO,
                 Resources.TEXTO };
     }
 
@@ -71,43 +71,43 @@ final class GoalCelebration implements Actor {
      * Olvida el marcador conocido: el primer cuadro de un partido nuevo no es un
      * gol.
      */
-    void forget() {
+    void olvidar() {
         marcador = MARCADOR_DESCONOCIDO;
         tiempo = 0.0;
     }
 
     /** @return Desplazamiento horizontal de la camara por el temblor del gol. */
-    double getShake() {
+    double obtenerSacudida() {
         double intensidad = tiempo / SEGUNDOS;
         return PIXELES_TEMBLOR * intensidad * intensidad * Math.sin(tiempo * VELOCIDAD_TEMBLOR);
     }
 
     @Override
-    public void update(double segundos) throws POOBSoccerException {
-        int actual = modelo.getPlayerGoals(1) + modelo.getPlayerGoals(2);
+    public void actualizar(double segundos) throws POOBSoccerException {
+        int actual = modelo.obtenerGolesJugador(1) + modelo.obtenerGolesJugador(2);
         if (marcador != MARCADOR_DESCONOCIDO && actual != marcador) {
-            celebrate();
+            celebrar();
         }
         marcador = actual;
-        balonX = modelo.getBallPosition()[0];
+        balonX = modelo.obtenerPosicionBalon()[0];
         tiempo = Math.max(0.0, tiempo - segundos);
     }
 
-    private void celebrate() {
+    private void celebrar() {
         tiempo = SEGUNDOS;
-        arcos.shakeNear(balonX);
-        Shape contorno = Resources.FUENTE_TITULO.createGlyphVector(CONTEXTO_FUENTE, text("match.goal")).getOutline();
+        arcos.sacudirCerca(balonX);
+        Shape contorno = Resources.FUENTE_TITULO.createGlyphVector(CONTEXTO_FUENTE, texto("match.goal")).getOutline();
         Rectangle2D caja = contorno.getBounds2D();
         cartel = AffineTransform.getTranslateInstance(-caja.getCenterX(), -caja.getMaxY())
                 .createTransformedShape(contorno);
         for (int i = 0; i < RAFAGAS_CONFETI; i++) {
-            particulas.burst(ancho * (i + 0.5) / RAFAGAS_CONFETI, suelo * CARTEL_Y, confeti[i % confeti.length],
+            particulas.lanzarRafaga(ancho * (i + 0.5) / RAFAGAS_CONFETI, suelo * CARTEL_Y, confeti[i % confeti.length],
                     CANTIDAD_CONFETI, VELOCIDAD_CONFETI);
         }
     }
 
     @Override
-    public void paint(Graphics2D g) {
+    public void dibujar(Graphics2D g) {
         if (tiempo > 0.0) {
             double progreso = 1.0 - tiempo / SEGUNDOS;
             double tamano = Math.min(1.0, progreso * REBOTE_ESCALA) * Math.min(1.0, (1.0 - progreso) * REBOTE_ESCALA);

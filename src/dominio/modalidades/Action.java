@@ -18,7 +18,7 @@ public enum Action {
      * @throws POOBSoccerException Si el nombre es nulo o no corresponde a ninguna
      *                             accion.
      */
-    public static Action named(String nombre) throws POOBSoccerException {
+    public static Action porNombre(String nombre) throws POOBSoccerException {
         if (nombre == null) {
             throw new POOBSoccerException(POOBSoccerException.ACCION_INVALIDA);
         }

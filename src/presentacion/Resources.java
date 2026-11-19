@@ -86,11 +86,11 @@ final class Resources {
         equipos.put("Brasil", new Color[] { new Color(0, 156, 59), new Color(255, 223, 0), new Color(0, 39, 118) });
         UIManager.put("ProgressBar.selectionForeground", ASFALTO);
         UIManager.put("ProgressBar.selectionBackground", TEXTO);
-        fondo = paintStreet(ANCHO, ALTO);
+        fondo = dibujarCalle(ANCHO, ALTO);
     }
 
     /** @return La unica instancia del gestor de recursos. */
-    static Resources getInstance() {
+    static Resources obtenerInstancia() {
         if (instancia == null) {
             instancia = new Resources();
         }
@@ -102,7 +102,7 @@ final class Resources {
      * @return Los tres colores del equipo; colores neutros si el pais no tiene
      *         equipacion.
      */
-    Color[] teamColors(String pais) {
+    Color[] coloresEquipo(String pais) {
         return equipos.getOrDefault(pais, EQUIPO_NEUTRO);
     }
 
@@ -110,7 +110,7 @@ final class Resources {
      * @param numero Jugador (1 o 2).
      * @return Color que identifica a ese jugador en la cancha y el marcador.
      */
-    Color playerColor(int numero) {
+    Color colorJugador(int numero) {
         return coloresJugador[numero - 1];
     }
 
@@ -118,7 +118,7 @@ final class Resources {
      * @param suelo Coordenada Y del suelo de la cancha.
      * @return Alto del lienzo que deja el suelo del fondo justo en esa coordenada.
      */
-    int courtHeight(double suelo) {
+    int altoCancha(double suelo) {
         return (int) Math.round(suelo * ALTO / SUELO);
     }
 
@@ -126,15 +126,15 @@ final class Resources {
      * Pinta el fondo callejero del tamano indicado. El fondo se dibuja una sola vez
      * por tamano y se reutiliza en cada cuadro.
      */
-    void paintBackdrop(Graphics g, int ancho, int alto) {
+    void dibujarFondo(Graphics g, int ancho, int alto) {
         if (fondo.getWidth() != ancho || fondo.getHeight() != alto) {
-            fondo = paintStreet(ancho, alto);
+            fondo = dibujarCalle(ancho, alto);
         }
         g.drawImage(fondo, 0, 0, null);
     }
 
     /** @return Boton con el estilo del juego y su escuchador ya suscrito. */
-    JButton button(String texto, ActionListener escuchador) {
+    JButton crearBoton(String texto, ActionListener escuchador) {
         JButton boton = new JButton(texto.toUpperCase());
         boton.setFont(FUENTE_TEXTO);
         boton.setBackground(ACENTO);
@@ -150,7 +150,7 @@ final class Resources {
      * @return Etiqueta centrada con la fuente indicada y el color de texto del
      *         juego.
      */
-    JLabel label(String texto, Font fuente) {
+    JLabel crearEtiqueta(String texto, Font fuente) {
         JLabel etiqueta = new JLabel(texto, SwingConstants.CENTER);
         etiqueta.setFont(fuente);
         etiqueta.setForeground(TEXTO);
@@ -161,7 +161,7 @@ final class Resources {
      * @return Lista de seleccion unica con el estilo del juego y su primer elemento
      *         elegido.
      */
-    JList<String> list(String[] elementos) {
+    JList<String> crearLista(String[] elementos) {
         JList<String> lista = new JList<String>(elementos);
         lista.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         lista.setFont(FUENTE_TEXTO);
@@ -175,7 +175,7 @@ final class Resources {
     }
 
     /** @return Barra de 0 a {@code maximo} del color indicado. */
-    JProgressBar bar(int maximo, Color color) {
+    JProgressBar crearBarra(int maximo, Color color) {
         JProgressBar barra = new JProgressBar(0, maximo);
         barra.setForeground(color);
         barra.setBackground(CONCRETO);
@@ -185,13 +185,13 @@ final class Resources {
     }
 
     /** @return Panel oscuro con el administrador de disposicion indicado. */
-    JPanel panel(LayoutManager disposicion) {
+    JPanel crearPanel(LayoutManager disposicion) {
         JPanel panel = new JPanel(disposicion);
         panel.setBackground(ASFALTO);
         return panel;
     }
 
-    private static BufferedImage paintStreet(int ancho, int alto) {
+    private static BufferedImage dibujarCalle(int ancho, int alto) {
         // Imagen en el formato de la pantalla: copiarla en cada cuadro es lo mas rapido
         // posible
         BufferedImage imagen = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
@@ -199,18 +199,18 @@ final class Resources {
         Graphics2D g = imagen.createGraphics();
         g.scale(ancho / (double) ANCHO, alto / (double) ALTO);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        paintSkyline(g);
-        paintFence(g);
-        paintWall(g);
-        paintFloor(g);
-        paintFloodlights(g);
-        paintVignette(g);
+        dibujarEdificios(g);
+        dibujarMalla(g);
+        dibujarMuro(g);
+        dibujarPiso(g);
+        dibujarReflectores(g);
+        dibujarVineta(g);
         g.dispose();
         return imagen;
     }
 
     /** Cielo nocturno y edificios con ventanas encendidas. */
-    private static void paintSkyline(Graphics2D g) {
+    private static void dibujarEdificios(Graphics2D g) {
         g.setPaint(new GradientPaint(0, 0, new Color(8, 10, 30), 0, SUELO, new Color(70, 44, 80)));
         g.fillRect(0, 0, ANCHO, SUELO);
         Color iluminada = new Color(250, 205, 110);
@@ -230,7 +230,7 @@ final class Resources {
     }
 
     /** Malla metalica sobre el muro. */
-    private static void paintFence(Graphics2D g) {
+    private static void dibujarMalla(Graphics2D g) {
         int altoMalla = MURO_ARRIBA - MALLA_ARRIBA;
         g.setColor(new Color(10, 10, 14, 90));
         g.fillRect(0, MALLA_ARRIBA, ANCHO, altoMalla);
@@ -248,7 +248,7 @@ final class Resources {
     }
 
     /** Muro de ladrillo con grafiti. */
-    private static void paintWall(Graphics2D g) {
+    private static void dibujarMuro(Graphics2D g) {
         g.setColor(new Color(112, 60, 46));
         g.fillRect(0, MURO_ARRIBA, ANCHO, SUELO - MURO_ARRIBA);
         g.setColor(new Color(74, 40, 32));
@@ -281,7 +281,7 @@ final class Resources {
      * Dos postes de luz con su haz sobre la cancha, el charco de luz en el piso y
      * el halo de la lampara.
      */
-    private static void paintFloodlights(Graphics2D g) {
+    private static void dibujarReflectores(Graphics2D g) {
         Color brillo = new Color(255, 250, 210, 150);
         Color transparente = new Color(255, 250, 210, 0);
         for (int x = ANCHO / 6; x < ANCHO; x += ANCHO * 2 / 3) {
@@ -301,7 +301,7 @@ final class Resources {
     }
 
     /** Bordes oscurecidos: centran la mirada en la cancha. */
-    private static void paintVignette(Graphics2D g) {
+    private static void dibujarVineta(Graphics2D g) {
         g.setPaint(new RadialGradientPaint(ANCHO / 2f, ALTO / 2f, ANCHO * 0.62f, new float[] { 0.55f, 1f },
                 new Color[] { new Color(0, 0, 0, 0), new Color(0, 0, 0, 150) }));
         g.fillRect(0, 0, ANCHO, ALTO);
@@ -311,7 +311,7 @@ final class Resources {
      * Piso de concreto en perspectiva con la linea de la cancha, la marca central y
      * grietas.
      */
-    private static void paintFloor(Graphics2D g) {
+    private static void dibujarPiso(Graphics2D g) {
         g.setPaint(new GradientPaint(0, SUELO, new Color(104, 104, 110), 0, ALTO, new Color(56, 56, 62)));
         g.fillRect(0, SUELO, ANCHO, ALTO - SUELO);
         g.setColor(new Color(40, 40, 44, 110));

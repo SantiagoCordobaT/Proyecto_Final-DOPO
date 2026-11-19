@@ -1,6 +1,6 @@
 package presentacion;
 
-import static presentacion.Texts.text;
+import static presentacion.Texts.texto;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -30,7 +30,7 @@ final class CharacterCard extends JPanel {
 
     private static final int ESTADISTICA_MAX = 5;
 
-    private final Resources recursos = Resources.getInstance();
+    private final Resources recursos = Resources.obtenerInstancia();
     private final HeadSoccer modelo;
     private final int numero;
     private final JList<String> personajes;
@@ -55,11 +55,11 @@ final class CharacterCard extends JPanel {
         this.numero = numero;
         setBackground(Resources.CONCRETO);
         setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(recursos.playerColor(numero), 3),
+                BorderFactory.createLineBorder(recursos.colorJugador(numero), 3),
                 BorderFactory.createEmptyBorder(Resources.ESPACIO, Resources.ESPACIO, Resources.ESPACIO,
                         Resources.ESPACIO)));
-        personajes = recursos.list(modelo.getCharacterNames());
-        pais = recursos.label("", Resources.FUENTE_TEXTO);
+        personajes = recursos.crearLista(modelo.obtenerNombresPersonajes());
+        pais = recursos.crearEtiqueta("", Resources.FUENTE_TEXTO);
         estadisticas = new JPanel(new GridLayout(0, 1, 0, Resources.ESPACIO / 2));
         estadisticas.setOpaque(false);
         JPanel equipo = new JPanel(new FlowLayout(FlowLayout.CENTER, Resources.ESPACIO, 0));
@@ -67,37 +67,38 @@ final class CharacterCard extends JPanel {
         equipo.add(escudo);
         equipo.add(pais);
         estadisticas.add(equipo);
-        velocidad = addStat("card.speed");
-        salto = addStat("card.jump");
-        fuerza = addStat("card.strength");
-        poder = addStat("card.power");
-        especial = recursos.label("", Resources.FUENTE_TEXTO);
-        descripcion = recursos.label("", Resources.FUENTE_TEXTO);
+        velocidad = agregarEstadistica("card.speed");
+        salto = agregarEstadistica("card.jump");
+        fuerza = agregarEstadistica("card.strength");
+        poder = agregarEstadistica("card.power");
+        especial = recursos.crearEtiqueta("", Resources.FUENTE_TEXTO);
+        descripcion = recursos.crearEtiqueta("", Resources.FUENTE_TEXTO);
         estadisticas.add(especial);
         estadisticas.add(descripcion);
-        add(recursos.label(text("select.player") + " " + numero, Resources.FUENTE_ENCABEZADO), BorderLayout.NORTH);
+        add(recursos.crearEtiqueta(texto("select.player") + " " + numero, Resources.FUENTE_ENCABEZADO),
+                BorderLayout.NORTH);
         add(new JScrollPane(personajes), BorderLayout.WEST);
         add(estadisticas, BorderLayout.CENTER);
         personajes.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                refresh();
+                refrescar();
             }
         });
         personajes.setSelectedIndex(inicial);
-        refresh();
+        refrescar();
     }
 
     /** @return Indice del personaje elegido en el catalogo. */
-    int getSelectedIndex() {
+    int obtenerIndiceSeleccionado() {
         return personajes.getSelectedIndex();
     }
 
-    private JProgressBar addStat(String clave) {
-        JProgressBar barra = recursos.bar(ESTADISTICA_MAX, recursos.playerColor(numero));
+    private JProgressBar agregarEstadistica(String clave) {
+        JProgressBar barra = recursos.crearBarra(ESTADISTICA_MAX, recursos.colorJugador(numero));
         JPanel fila = new JPanel(new GridLayout(1, 2, Resources.ESPACIO, 0));
         fila.setOpaque(false);
-        fila.add(recursos.label(text(clave), Resources.FUENTE_TEXTO));
+        fila.add(recursos.crearEtiqueta(texto(clave), Resources.FUENTE_TEXTO));
         fila.add(barra);
         estadisticas.add(fila);
         return barra;
@@ -106,20 +107,20 @@ final class CharacterCard extends JPanel {
     /**
      * Muestra los datos del personaje seleccionado tal como los entrega el dominio.
      */
-    private void refresh() {
+    private void refrescar() {
         int indice = personajes.getSelectedIndex();
         try {
-            String equipo = modelo.getCharacterCountry(indice);
-            escudo.setCountry(equipo);
+            String equipo = modelo.obtenerPaisPersonaje(indice);
+            escudo.establecerPais(equipo);
             pais.setText(equipo);
-            velocidad.setValue(modelo.getCharacterSpeed(indice));
-            salto.setValue(modelo.getCharacterJump(indice));
-            fuerza.setValue(modelo.getCharacterStrength(indice));
-            poder.setValue(modelo.getCharacterPowerLevel(indice));
-            especial.setText(text("card.special") + " " + modelo.getCharacterPowerName(indice));
-            descripcion.setText(modelo.getCharacterPowerDescription(indice));
+            velocidad.setValue(modelo.obtenerVelocidadPersonaje(indice));
+            salto.setValue(modelo.obtenerSaltoPersonaje(indice));
+            fuerza.setValue(modelo.obtenerFuerzaPersonaje(indice));
+            poder.setValue(modelo.obtenerNivelPoderPersonaje(indice));
+            especial.setText(texto("card.special") + " " + modelo.obtenerNombrePoderPersonaje(indice));
+            descripcion.setText(modelo.obtenerDescripcionPoderPersonaje(indice));
         } catch (POOBSoccerException e) {
-            HeadSoccerGUI.report(this, e);
+            HeadSoccerGUI.reportarError(this, e);
         }
     }
 }

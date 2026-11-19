@@ -17,12 +17,12 @@ public interface MatchContext {
      * @return Goles del jugador.
      * @throws POOBSoccerException Si el jugador no es 1 ni 2.
      */
-    int getGoals(int jugador) throws POOBSoccerException;
+    int obtenerGoles(int jugador) throws POOBSoccerException;
 
     /**
      * Reemplaza al rival (jugador 2) por el siguiente del catalogo, listo para jugar.
      *
      * @throws POOBSoccerException Si el catalogo no pudiera entregar el rival.
      */
-    void replaceRival() throws POOBSoccerException;
+    void reemplazarRival() throws POOBSoccerException;
 }

@@ -36,8 +36,8 @@ class Goal {
      * @param balon Balon.
      * @return true solo si el balon esta completamente dentro del area del arco.
      */
-    boolean isBallInside(Ball balon) {
-        return balon.isInside(izquierdaX, BORDE_ABAJO, derechaX, Field.SUELO_Y);
+    boolean contieneBalon(Ball balon) {
+        return balon.estaDentroDe(izquierdaX, BORDE_ABAJO, derechaX, Field.SUELO_Y);
     }
 
     /**
@@ -45,16 +45,16 @@ class Goal {
      *
      * @param balon Balon a corregir.
      */
-    void resolveCrossbar(Ball balon) {
-        if (!balon.overlaps(izquierdaX, BORDE_ARRIBA, derechaX, BORDE_ABAJO)) {
+    void resolverTravesano(Ball balon) {
+        if (!balon.seSolapaCon(izquierdaX, BORDE_ARRIBA, derechaX, BORDE_ABAJO)) {
             return;
         }
-        if (balon.isAbove(BORDE_ABAJO)) {
-            balon.bounceUp(BORDE_ARRIBA);
-        } else if (balon.isBelow(BORDE_ABAJO)) {
-            balon.bounceDown(BORDE_ABAJO);
+        if (balon.estaPorEncimaDe(BORDE_ABAJO)) {
+            balon.rebotarArriba(BORDE_ARRIBA);
+        } else if (balon.estaPorDebajoDe(BORDE_ABAJO)) {
+            balon.rebotarAbajo(BORDE_ABAJO);
         } else {
-            balon.bounceSideways(bocaX, direccionBoca);
+            balon.rebotarDeLado(bocaX, direccionBoca);
         }
     }
 
@@ -62,12 +62,12 @@ class Goal {
      * @return Arco desde el suelo hasta lo alto del travesaño, como {izquierda,
      *         arriba, ancho, alto}.
      */
-    double[] getBounds() {
+    double[] obtenerLimites() {
         return new double[] { izquierdaX, BORDE_ARRIBA, derechaX - izquierdaX, Field.SUELO_Y - BORDE_ARRIBA };
     }
 
     /** @return Jugador (1 o 2) que anota en este arco. */
-    int getScorer() {
+    int obtenerAnotador() {
         return anotador;
     }
 }

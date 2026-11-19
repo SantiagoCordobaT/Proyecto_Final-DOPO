@@ -3,8 +3,10 @@ package dominio.partidos;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Partido por goles: sin limite de tiempo, gana el primero en llegar a la meta (3, 5 o 7).
- *
+ * Partido por goles: sin limite de tiempo, gana el primero en llegar a la meta
+ * (3, 5 o 7).
+ * 
+ * 
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
@@ -23,9 +25,9 @@ class GoalMatch extends MatchType {
     }
 
     @Override
-    protected void onGoal(int anotador) throws POOBSoccerException {
-        if (goalsOf(anotador) >= metaGoles) {
-            finish(anotador);
+    protected void alAnotarGol(int anotador) throws POOBSoccerException {
+        if (golesDe(anotador) >= metaGoles) {
+            finalizar(anotador);
         }
     }
 
@@ -34,7 +36,8 @@ class GoalMatch extends MatchType {
      *         abajo), por ejemplo "Meta: 3 goles | 00:42".
      */
     @Override
-    public String getStatusText() {
-        return "Meta: " + metaGoles + " goles | " + clock((int) Math.floor(getElapsedSeconds() + TOLERANCIA));
+    public String obtenerTextoEstado() {
+        return "Meta: " + metaGoles + " goles | "
+                + formatoReloj((int) Math.floor(obtenerSegundosTranscurridos() + TOLERANCIA));
     }
 }

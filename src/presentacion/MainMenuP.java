@@ -1,6 +1,6 @@
 package presentacion;
 
-import static presentacion.Texts.text;
+import static presentacion.Texts.texto;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -26,7 +26,7 @@ final class MainMenuP extends JPanel {
 
     private static final String TITULO = "POOBSOCCER";
 
-    private final Resources recursos = Resources.getInstance();
+    private final Resources recursos = Resources.obtenerInstancia();
     private final JLabel subtitulo;
     private final JButton jugar;
     private final JButton configuracion;
@@ -37,25 +37,25 @@ final class MainMenuP extends JPanel {
         super(new BorderLayout());
         setBorder(BorderFactory.createEmptyBorder(Resources.ESPACIO * 2, Resources.ESPACIO, Resources.ESPACIO * 2,
                 Resources.ESPACIO));
-        JLabel titulo = recursos.label(TITULO, Resources.FUENTE_TITULO);
+        JLabel titulo = recursos.crearEtiqueta(TITULO, Resources.FUENTE_TITULO);
         titulo.setForeground(Resources.ACENTO);
-        subtitulo = recursos.label("", Resources.FUENTE_ENCABEZADO);
-        jugar = recursos.button("", new ActionListener() {
+        subtitulo = recursos.crearEtiqueta("", Resources.FUENTE_ENCABEZADO);
+        jugar = recursos.crearBoton("", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ventana.openGameModes();
+                ventana.abrirModosJuego();
             }
         });
-        configuracion = recursos.button("", new ActionListener() {
+        configuracion = recursos.crearBoton("", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ventana.openSettings();
+                ventana.abrirConfiguracion();
             }
         });
-        salir = recursos.button("", new ActionListener() {
+        salir = recursos.crearBoton("", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ventana.close();
+                ventana.cerrar();
             }
         });
         JPanel encabezado = new JPanel(new GridLayout(2, 1));
@@ -69,20 +69,20 @@ final class MainMenuP extends JPanel {
         botones.add(salir);
         add(encabezado, BorderLayout.NORTH);
         add(botones, BorderLayout.SOUTH);
-        refresh();
+        refrescar();
     }
 
     /** Rotula el menu en el idioma actual. */
-    void refresh() {
-        subtitulo.setText(text("menu.subtitle"));
-        jugar.setText(text("menu.play").toUpperCase());
-        configuracion.setText(text("menu.settings").toUpperCase());
-        salir.setText(text("menu.exit").toUpperCase());
+    void refrescar() {
+        subtitulo.setText(texto("menu.subtitle"));
+        jugar.setText(texto("menu.play").toUpperCase());
+        configuracion.setText(texto("menu.settings").toUpperCase());
+        salir.setText(texto("menu.exit").toUpperCase());
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        recursos.paintBackdrop(g, getWidth(), getHeight());
+        recursos.dibujarFondo(g, getWidth(), getHeight());
     }
 }

@@ -1,6 +1,6 @@
 package presentacion;
 
-import static presentacion.Texts.text;
+import static presentacion.Texts.texto;
 
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -27,34 +27,34 @@ final class PauseD extends StreetDialog {
      * @param partido Pantalla del partido en pausa.
      */
     PauseD(Frame dueno, MatchP partido) {
-        super(dueno, text("pause.title"));
+        super(dueno, texto("pause.title"));
         this.partido = partido;
-        controles = new JTextArea(text("help.controls"));
+        controles = new JTextArea(texto("help.controls"));
         controles.setEditable(false);
         controles.setFont(Resources.FUENTE_TEXTO);
         controles.setBackground(Resources.CONCRETO);
         controles.setForeground(Resources.TEXTO);
         controles.setBorder(BorderFactory.createEmptyBorder(Resources.ESPACIO, Resources.ESPACIO, Resources.ESPACIO,
                 Resources.ESPACIO));
-        setBody(controles);
-        addButton(text("pause.resume"), new ActionListener() {
+        establecerCuerpo(controles);
+        agregarBoton(texto("pause.resume"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                close();
+                cerrar();
             }
         });
-        addButton(text("pause.giveUp"), new ActionListener() {
+        agregarBoton(texto("pause.giveUp"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose();
-                partido.giveUp();
+                partido.abandonar();
             }
         });
     }
 
     @Override
-    protected void close() {
-        super.close();
-        partido.resumeGame();
+    protected void cerrar() {
+        super.cerrar();
+        partido.reanudarPartido();
     }
 }

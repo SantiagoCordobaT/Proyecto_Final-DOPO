@@ -17,7 +17,7 @@ public class ShrinkPower extends Power {
     }
 
     @Override
-    protected Effect createEffect() {
+    protected Effect crearEfecto() {
         return new ShrinkEffect();
     }
 }

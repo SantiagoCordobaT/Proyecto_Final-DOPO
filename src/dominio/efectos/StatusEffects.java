@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Coleccion de efectos activos de un personaje (Experto en informacion): los
- * combina multiplicando sus aportes y descarta los vencidos.
+ * Coleccion de efectos activos de un personaje
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -20,8 +19,8 @@ public class StatusEffects {
      *
      * @param efecto Efecto a aplicar.
      */
-    public void add(Effect efecto) {
-        efectos.removeIf(activo -> activo.isSameKindAs(efecto));
+    public void agregar(Effect efecto) {
+        efectos.removeIf(activo -> activo.esMismoTipoQue(efecto));
         efectos.add(efecto);
     }
 
@@ -30,22 +29,22 @@ public class StatusEffects {
      *
      * @param segundosTranscurridos Segundos transcurridos.
      */
-    public void tick(double segundosTranscurridos) {
+    public void transcurrir(double segundosTranscurridos) {
         for (Effect efecto : efectos) {
-            efecto.tick(segundosTranscurridos);
+            efecto.transcurrir(segundosTranscurridos);
         }
-        efectos.removeIf(Effect::isExpired);
+        efectos.removeIf(Effect::haExpirado);
     }
 
     /** Elimina todos los efectos. */
-    public void clear() {
+    public void limpiar() {
         efectos.clear();
     }
 
     /** @return true si ningun efecto impide moverse, saltar o patear. */
-    public boolean allowActions() {
+    public boolean permitenAcciones() {
         for (Effect efecto : efectos) {
-            if (!efecto.allowsActions()) {
+            if (!efecto.permiteAcciones()) {
                 return false;
             }
         }
@@ -53,10 +52,10 @@ public class StatusEffects {
     }
 
     /** @return Escala del cuerpo (producto de las escalas de los efectos). */
-    public double scale() {
+    public double escala() {
         double escala = 1.0;
         for (Effect efecto : efectos) {
-            escala *= efecto.getScale();
+            escala *= efecto.obtenerEscala();
         }
         return escala;
     }
@@ -65,19 +64,19 @@ public class StatusEffects {
      * @return Signo del movimiento horizontal (producto de los signos de los
      *         efectos).
      */
-    public int horizontalSign() {
+    public int signoHorizontal() {
         int signo = 1;
         for (Effect efecto : efectos) {
-            signo *= efecto.getHorizontalSign();
+            signo *= efecto.obtenerSignoHorizontal();
         }
         return signo;
     }
 
     /** @return Nombres de los efectos activos. */
-    public String[] names() {
+    public String[] obtenerNombres() {
         String[] nombres = new String[efectos.size()];
         for (int i = 0; i < nombres.length; i++) {
-            nombres[i] = efectos.get(i).getName();
+            nombres[i] = efectos.get(i).obtenerNombre();
         }
         return nombres;
     }

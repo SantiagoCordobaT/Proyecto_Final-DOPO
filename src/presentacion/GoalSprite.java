@@ -44,7 +44,7 @@ final class GoalSprite implements Actor {
     /** @param modelo Fachada del dominio. */
     GoalSprite(HeadSoccer modelo) {
         this.modelo = modelo;
-        this.centro = modelo.getFieldWidth() / 2.0;
+        this.centro = modelo.obtenerAnchoCancha() / 2.0;
     }
 
     /**
@@ -52,7 +52,7 @@ final class GoalSprite implements Actor {
      *
      * @param x Coordenada X donde se vio el balon por ultima vez antes del gol.
      */
-    void shakeNear(double x) {
+    void sacudirCerca(double x) {
         for (int i = 0; i < arcos.length; i++) {
             if ((arcos[i][0] < centro) == (x < centro)) {
                 sacudida[i] = SEGUNDOS_SACUDIDA;
@@ -61,9 +61,9 @@ final class GoalSprite implements Actor {
     }
 
     @Override
-    public void update(double segundos) throws POOBSoccerException {
-        arcos = modelo.getGoalBounds();
-        travesano = modelo.getCrossbarThickness();
+    public void actualizar(double segundos) throws POOBSoccerException {
+        arcos = modelo.obtenerLimitesArcos();
+        travesano = modelo.obtenerGrosorTravesano();
         if (sacudida.length != arcos.length) {
             sacudida = new double[arcos.length];
         }
@@ -73,7 +73,7 @@ final class GoalSprite implements Actor {
     }
 
     @Override
-    public void paint(Graphics2D g) {
+    public void dibujar(Graphics2D g) {
         for (int i = 0; i < arcos.length; i++) {
             double izquierda = arcos[i][0];
             double arriba = arcos[i][1];

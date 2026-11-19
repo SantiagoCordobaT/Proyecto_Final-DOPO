@@ -18,7 +18,7 @@ import javax.swing.WindowConstants;
  * Dialogo modal con el armazon comun del juego: titulo al norte, cuerpo al
  * centro
  * y barra de botones al sur. Cerrar la ventana pasa siempre por
- * {@link #close()},
+ * {@link #cerrar()},
  * que cada dialogo puede extender para dejar el juego en un estado seguro.
  *
  * @author Santiago Cordoba - Camilo Rivas
@@ -27,7 +27,7 @@ import javax.swing.WindowConstants;
 @SuppressWarnings("serial")
 abstract class StreetDialog extends JDialog {
 
-    protected final Resources recursos = Resources.getInstance();
+    protected final Resources recursos = Resources.obtenerInstancia();
     private final JPanel contenido;
     private final JPanel botones;
 
@@ -37,11 +37,11 @@ abstract class StreetDialog extends JDialog {
      */
     StreetDialog(Frame dueno, String titulo) {
         super(dueno, titulo, true);
-        contenido = recursos.panel(new BorderLayout(Resources.ESPACIO, Resources.ESPACIO));
-        botones = recursos.panel(new FlowLayout(FlowLayout.CENTER, Resources.ESPACIO, 0));
+        contenido = recursos.crearPanel(new BorderLayout(Resources.ESPACIO, Resources.ESPACIO));
+        botones = recursos.crearPanel(new FlowLayout(FlowLayout.CENTER, Resources.ESPACIO, 0));
         contenido.setBorder(BorderFactory.createEmptyBorder(Resources.ESPACIO, Resources.ESPACIO * 2, Resources.ESPACIO,
                 Resources.ESPACIO * 2));
-        contenido.add(recursos.label(titulo.toUpperCase(), Resources.FUENTE_ENCABEZADO), BorderLayout.NORTH);
+        contenido.add(recursos.crearEtiqueta(titulo.toUpperCase(), Resources.FUENTE_ENCABEZADO), BorderLayout.NORTH);
         contenido.add(botones, BorderLayout.SOUTH);
         setContentPane(contenido);
         setResizable(false);
@@ -49,13 +49,13 @@ abstract class StreetDialog extends JDialog {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                close();
+                cerrar();
             }
         });
     }
 
     /** Ubica el cuerpo del dialogo en el centro. */
-    protected final void setBody(JComponent cuerpo) {
+    protected final void establecerCuerpo(JComponent cuerpo) {
         contenido.add(cuerpo, BorderLayout.CENTER);
     }
 
@@ -65,8 +65,8 @@ abstract class StreetDialog extends JDialog {
      * @return El boton creado, por si el dialogo necesita habilitarlo o
      *         deshabilitarlo.
      */
-    protected final JButton addButton(String texto, ActionListener escuchador) {
-        JButton boton = recursos.button(texto, escuchador);
+    protected final JButton agregarBoton(String texto, ActionListener escuchador) {
+        JButton boton = recursos.crearBoton(texto, escuchador);
         botones.add(boton);
         return boton;
     }
@@ -75,14 +75,14 @@ abstract class StreetDialog extends JDialog {
      * Ajusta el tamano al contenido, centra el dialogo sobre su ventana y lo
      * muestra.
      */
-    final void open() {
+    final void abrir() {
         pack();
         setLocationRelativeTo(getOwner());
         setVisible(true);
     }
 
     /** Cierra el dialogo liberando sus recursos. */
-    protected void close() {
+    protected void cerrar() {
         dispose();
     }
 }

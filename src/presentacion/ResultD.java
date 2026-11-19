@@ -1,6 +1,6 @@
 package presentacion;
 
-import static presentacion.Texts.text;
+import static presentacion.Texts.texto;
 
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -32,43 +32,43 @@ final class ResultD extends StreetDialog {
      * @param modelo  Fachada del dominio, con el partido ya terminado.
      */
     ResultD(HeadSoccerGUI ventana, HeadSoccer modelo) {
-        super(ventana, text("result.title"));
+        super(ventana, texto("result.title"));
         this.ventana = ventana;
-        ganador = recursos.label("", Resources.FUENTE_ENCABEZADO);
-        marcador = recursos.label("", Resources.FUENTE_MARCADOR);
-        estado = recursos.label("", Resources.FUENTE_TEXTO);
+        ganador = recursos.crearEtiqueta("", Resources.FUENTE_ENCABEZADO);
+        marcador = recursos.crearEtiqueta("", Resources.FUENTE_MARCADOR);
+        estado = recursos.crearEtiqueta("", Resources.FUENTE_TEXTO);
         ganador.setForeground(Resources.LISTO);
-        JPanel cuerpo = recursos.panel(new GridLayout(3, 1, 0, Resources.ESPACIO / 2));
+        JPanel cuerpo = recursos.crearPanel(new GridLayout(3, 1, 0, Resources.ESPACIO / 2));
         cuerpo.add(ganador);
         cuerpo.add(marcador);
         cuerpo.add(estado);
-        setBody(cuerpo);
-        addButton(text("result.rematch"), new ActionListener() {
+        establecerCuerpo(cuerpo);
+        agregarBoton(texto("result.rematch"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                close();
-                ventana.openCharacterSelect();
+                cerrar();
+                ventana.abrirSeleccionPersonajes();
             }
         });
-        addButton(text("result.menu"), new ActionListener() {
+        agregarBoton(texto("result.menu"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                close();
+                cerrar();
             }
         });
         try {
-            ganador.setText(text("result.winner") + " " + modelo.getWinnerName());
-            marcador.setText(modelo.getPlayerName(1) + "  " + modelo.getPlayerGoals(1) + " - "
-                    + modelo.getPlayerGoals(2) + "  " + modelo.getPlayerName(2));
-            estado.setText(modelo.getMatchStatus());
+            ganador.setText(texto("result.winner") + " " + modelo.obtenerNombreGanador());
+            marcador.setText(modelo.obtenerNombreJugador(1) + "  " + modelo.obtenerGolesJugador(1) + " - "
+                    + modelo.obtenerGolesJugador(2) + "  " + modelo.obtenerNombreJugador(2));
+            estado.setText(modelo.obtenerEstadoPartido());
         } catch (POOBSoccerException e) {
-            HeadSoccerGUI.report(this, e);
+            HeadSoccerGUI.reportarError(this, e);
         }
     }
 
     @Override
-    protected void close() {
-        super.close();
-        ventana.showMenu();
+    protected void cerrar() {
+        super.cerrar();
+        ventana.mostrarMenu();
     }
 }

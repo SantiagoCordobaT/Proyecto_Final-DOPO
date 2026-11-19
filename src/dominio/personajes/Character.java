@@ -75,15 +75,15 @@ public class Character implements Named {
         if (nombre == null || nombre.trim().isEmpty() || pais == null || pais.trim().isEmpty() || poder == null) {
             throw new POOBSoccerException(POOBSoccerException.PERSONAJE_INVALIDO);
         }
-        validateStat(velocidad);
-        validateStat(salto);
-        validateStat(fuerza);
-        validateStat(nivelPoder);
+        validarEstadistica(velocidad);
+        validarEstadistica(salto);
+        validarEstadistica(fuerza);
+        validarEstadistica(nivelPoder);
     }
 
     /**
      * Constructor base, sin validacion: lo usan el constructor publico (que valida
-     * despues) y {@link #copy()} (Prototype). El personaje empieza sin efectos.
+     * despues) y {@link #copiar()} (Prototype). El personaje empieza sin efectos.
      *
      * @param nombre     Nombre.
      * @param pais       Pais.
@@ -106,11 +106,11 @@ public class Character implements Named {
      *
      * @return Nueva instancia con los mismos datos base y la barra vacia.
      */
-    public Character copy() {
-        return new Character(nombre, pais, velocidad, salto, fuerza, barraPoder.fresh());
+    public Character copiar() {
+        return new Character(nombre, pais, velocidad, salto, fuerza, barraPoder.nuevaCopia());
     }
 
-    private static void validateStat(int valor) throws POOBSoccerException {
+    private static void validarEstadistica(int valor) throws POOBSoccerException {
         if (valor < ESTADISTICA_MIN || valor > ESTADISTICA_MAX) {
             throw new POOBSoccerException(POOBSoccerException.ESTADISTICAS_FUERA_DE_RANGO);
         }
@@ -123,16 +123,16 @@ public class Character implements Named {
      * @param xInicial    Posicion horizontal inicial.
      * @param orientacion 1 si ataca hacia la derecha, -1 hacia la izquierda.
      */
-    public void enterAt(double xInicial, int orientacion) {
+    public void entrarEn(double xInicial, int orientacion) {
         this.xInicial = xInicial;
         this.orientacion = orientacion;
-        resetGoals();
-        barraPoder.reset();
-        restart();
+        reiniciarGoles();
+        barraPoder.reiniciar();
+        reiniciarJugada();
     }
 
     /** Pone el marcador del personaje en cero para un encuentro nuevo. */
-    public void resetGoals() {
+    public void reiniciarGoles() {
         goles = 0;
     }
 
@@ -140,14 +140,14 @@ public class Character implements Named {
      * Reinicio tras un gol: vuelve a su posicion inicial, en el suelo, y limpia
      * efectos temporales.
      */
-    public void restart() {
+    public void reiniciarJugada() {
         this.x = xInicial;
         this.y = Field.SUELO_Y;
         this.velocidadY = 0.0;
         this.direccionMovimiento = 0;
         this.esperaPatada = 0.0;
         this.enfriamientoPatada = 0.0;
-        this.efectos.clear();
+        this.efectos.limpiar();
     }
 
     /**
@@ -156,14 +156,14 @@ public class Character implements Named {
      * @param direccion -1 izquierda, 0 quieto, 1 derecha (otros valores se
      *                  normalizan por signo).
      */
-    public void setMoveDirection(int direccion) {
+    public void establecerDireccionMovimiento(int direccion) {
         this.direccionMovimiento = Integer.signum(direccion);
     }
 
     /** Salta; solo es posible en el suelo y sin efectos que lo impidan. */
-    public void jump() {
+    public void saltar() {
         boolean enSuelo = y >= Field.SUELO_Y;
-        if (canAct() && enSuelo) {
+        if (puedeActuar() && enSuelo) {
             velocidadY = -(VELOCIDAD_SALTO_BASE + salto * VELOCIDAD_SALTO_POR_PUNTO);
         }
     }
@@ -172,8 +172,8 @@ public class Character implements Named {
      * Solicita una patada (queda en espera un instante corto) si ningun efecto lo
      * impide.
      */
-    public void requestKick() {
-        if (canAct()) {
+    public void solicitarPatada() {
+        if (puedeActuar()) {
             esperaPatada = VENTANA_PATADA_SEGUNDOS;
         }
     }
@@ -187,20 +187,20 @@ public class Character implements Named {
      * @param oponente Rival.
      * @return true si pateo el balon.
      */
-    public boolean tryKick(Ball balon, Character oponente) {
-        boolean balonAlAlcance = overlaps(balon, ALCANCE_PATADA);
-        boolean oponenteAlAlcance = isInMeleeRange(oponente);
-        if (!canKickNow() || !(balonAlAlcance || oponenteAlAlcance)) {
+    public boolean intentarPatear(Ball balon, Character oponente) {
+        boolean balonAlAlcance = seSolapaCon(balon, ALCANCE_PATADA);
+        boolean oponenteAlAlcance = estaEnRangoCuerpoACuerpo(oponente);
+        if (!puedePatearAhora() || !(balonAlAlcance || oponenteAlAlcance)) {
             return false;
         }
         esperaPatada = 0.0;
         enfriamientoPatada = ENFRIAMIENTO_PATADA_SEGUNDOS;
         if (oponenteAlAlcance) {
-            oponente.stun();
+            oponente.aturdir();
         }
         if (balonAlAlcance) {
-            balon.kick(fuerza, orientacion);
-            barraPoder.fireOn(oponente);
+            balon.patear(fuerza, orientacion);
+            barraPoder.dispararSobre(oponente);
         }
         return balonAlAlcance;
     }
@@ -209,8 +209,8 @@ public class Character implements Named {
      * @param balon Balon.
      * @return true si el hitbox toca el balon.
      */
-    public boolean touches(Ball balon) {
-        return overlaps(balon, 0.0);
+    public boolean toca(Ball balon) {
+        return seSolapaCon(balon, 0.0);
     }
 
     /**
@@ -219,18 +219,18 @@ public class Character implements Named {
      *
      * @param balon Balon en contacto.
      */
-    public void push(Ball balon) {
-        if (balon.isAbove(getTop())) {
-            balon.bounceUp(getTop());
+    public void empujar(Ball balon) {
+        if (balon.estaPorEncimaDe(obtenerBordeSuperior())) {
+            balon.rebotarArriba(obtenerBordeSuperior());
         } else {
-            int lado = balon.sideOf(x);
-            balon.pushSideways(x + lado * getWidth() / 2.0, lado);
+            int lado = balon.ladoRespectoA(x);
+            balon.empujarDeLado(x + lado * obtenerAncho() / 2.0, lado);
         }
     }
 
     /** Arma el poder; solo tiene efecto con la barra llena. */
-    public void armPower() {
-        barraPoder.arm();
+    public void armarPoder() {
+        barraPoder.armar();
     }
 
     /**
@@ -239,13 +239,13 @@ public class Character implements Named {
      *
      * @param efecto Efecto a aplicar.
      */
-    public void addEffect(Effect efecto) {
-        efectos.add(efecto);
+    public void agregarEfecto(Effect efecto) {
+        efectos.agregar(efecto);
     }
 
     /** Aturde al personaje durante 3 segundos. */
-    public void stun() {
-        addEffect(new StunEffect());
+    public void aturdir() {
+        agregarEfecto(new StunEffect());
     }
 
     /**
@@ -254,17 +254,17 @@ public class Character implements Named {
      *
      * @param segundosTranscurridos Segundos transcurridos.
      */
-    public void update(double segundosTranscurridos) {
-        efectos.tick(segundosTranscurridos);
-        barraPoder.recharge(segundosTranscurridos);
+    public void actualizar(double segundosTranscurridos) {
+        efectos.transcurrir(segundosTranscurridos);
+        barraPoder.recargar(segundosTranscurridos);
         esperaPatada = Math.max(0.0, esperaPatada - segundosTranscurridos);
         enfriamientoPatada = Math.max(0.0, enfriamientoPatada - segundosTranscurridos);
 
-        if (canAct()) {
-            x += direccionMovimiento * efectos.horizontalSign() * velocidad * VELOCIDAD_POR_PUNTO
+        if (puedeActuar()) {
+            x += direccionMovimiento * efectos.signoHorizontal() * velocidad * VELOCIDAD_POR_PUNTO
                     * segundosTranscurridos;
         }
-        double mitad = getWidth() / 2.0;
+        double mitad = obtenerAncho() / 2.0;
         x = Math.max(mitad, Math.min(Field.ANCHO - mitad, x));
 
         velocidadY += GRAVEDAD * segundosTranscurridos;
@@ -276,25 +276,25 @@ public class Character implements Named {
     }
 
     /** Suma un gol al personaje. */
-    public void addGoal() {
+    public void sumarGol() {
         goles++;
     }
 
     /** @return true si ningun efecto impide moverse, saltar o patear. */
-    private boolean canAct() {
-        return efectos.allowActions();
+    private boolean puedeActuar() {
+        return efectos.permitenAcciones();
     }
 
     /** @return true mientras dura la patada que el personaje acaba de ejecutar. */
-    public boolean isKicking() {
+    public boolean estaPateando() {
         return enfriamientoPatada > 0.0;
     }
 
     /**
      * @return true si hay una patada solicitada y el personaje puede ejecutarla.
      */
-    private boolean canKickNow() {
-        return canAct() && esperaPatada > 0.0 && enfriamientoPatada <= 0.0;
+    private boolean puedePatearAhora() {
+        return puedeActuar() && esperaPatada > 0.0 && enfriamientoPatada <= 0.0;
     }
 
     /**
@@ -302,8 +302,9 @@ public class Character implements Named {
      * @param margen Margen extra en cada lado del hitbox.
      * @return true si el hitbox ampliado por el margen toca el balon.
      */
-    private boolean overlaps(Ball balon, double margen) {
-        return balon.overlaps(getLeft() - margen, getTop() - margen, getRight() + margen, getBottom() + margen);
+    private boolean seSolapaCon(Ball balon, double margen) {
+        return balon.seSolapaCon(obtenerIzquierda() - margen, obtenerBordeSuperior() - margen,
+                obtenerDerecha() + margen, obtenerAbajo() + margen);
     }
 
     /**
@@ -311,153 +312,153 @@ public class Character implements Named {
      * @return true si los hitbox, ampliados por el alcance cuerpo a cuerpo, se
      *         solapan.
      */
-    private boolean isInMeleeRange(Character otro) {
-        return getLeft() - ALCANCE_CUERPO_A_CUERPO <= otro.getRight()
-                && getRight() + ALCANCE_CUERPO_A_CUERPO >= otro.getLeft()
-                && getTop() - ALCANCE_CUERPO_A_CUERPO <= otro.getBottom()
-                && getBottom() + ALCANCE_CUERPO_A_CUERPO >= otro.getTop();
+    private boolean estaEnRangoCuerpoACuerpo(Character otro) {
+        return obtenerIzquierda() - ALCANCE_CUERPO_A_CUERPO <= otro.obtenerDerecha()
+                && obtenerDerecha() + ALCANCE_CUERPO_A_CUERPO >= otro.obtenerIzquierda()
+                && obtenerBordeSuperior() - ALCANCE_CUERPO_A_CUERPO <= otro.obtenerAbajo()
+                && obtenerAbajo() + ALCANCE_CUERPO_A_CUERPO >= otro.obtenerBordeSuperior();
     }
 
     /** @return Escala actual del cuerpo (producto de los efectos activos). */
-    private double getScale() {
-        return efectos.scale();
+    private double obtenerEscala() {
+        return efectos.escala();
     }
 
     /** @return Nombres de los efectos activos. */
-    public String[] getEffectNames() {
-        return efectos.names();
+    public String[] obtenerNombresEfectos() {
+        return efectos.obtenerNombres();
     }
 
     /**
      * @return Nombre del personaje.
      */
     @Override
-    public String getName() {
+    public String obtenerNombre() {
         return nombre;
     }
 
     /**
      * @return Pais del personaje.
      */
-    public String getCountry() {
+    public String obtenerPais() {
         return pais;
     }
 
     /**
      * @return Estadistica de velocidad (1 a 5).
      */
-    public int getSpeed() {
+    public int obtenerVelocidad() {
         return velocidad;
     }
 
     /**
      * @return Estadistica de salto (1 a 5).
      */
-    public int getJump() {
+    public int obtenerSalto() {
         return salto;
     }
 
     /**
      * @return Estadistica de fuerza (1 a 5).
      */
-    public int getStrength() {
+    public int obtenerFuerza() {
         return fuerza;
     }
 
     /**
      * @return Estadistica de Poder Unico (1 a 5).
      */
-    public int getPowerLevel() {
-        return barraPoder.getLevel();
+    public int obtenerNivelPoder() {
+        return barraPoder.obtenerNivel();
     }
 
     /**
      * @return Goles anotados.
      */
-    public int getGoals() {
+    public int obtenerGoles() {
         return goles;
     }
 
     /**
      * @return Fraccion llena de la barra de poder (0.0 a 1.0).
      */
-    public double getPowerCharge() {
-        return barraPoder.getCharge();
+    public double obtenerCargaPoder() {
+        return barraPoder.obtenerCarga();
     }
 
     /**
      * @return true si el poder esta armado.
      */
-    public boolean isPowerArmed() {
-        return barraPoder.isArmed();
+    public boolean estaPoderArmado() {
+        return barraPoder.estaArmado();
     }
 
     /**
      * @return Nombre del poder del personaje.
      */
-    public String getPowerName() {
-        return barraPoder.getPowerName();
+    public String obtenerNombrePoder() {
+        return barraPoder.obtenerNombrePoder();
     }
 
     /**
      * @return Descripcion del poder del personaje.
      */
-    public String getPowerDescription() {
-        return barraPoder.getPowerDescription();
+    public String obtenerDescripcionPoder() {
+        return barraPoder.obtenerDescripcionPoder();
     }
 
     /**
      * @return Hitbox actual (con efectos) como {izquierda, arriba, ancho, alto}.
      */
-    public double[] getBounds() {
-        return new double[] { getLeft(), getTop(), getWidth(), getHeight() };
+    public double[] obtenerLimites() {
+        return new double[] { obtenerIzquierda(), obtenerBordeSuperior(), obtenerAncho(), obtenerAlto() };
     }
 
     /**
      * @return Posicion horizontal (centro).
      */
-    public double getX() {
+    public double obtenerX() {
         return x;
     }
 
     /**
      * @return Borde superior del hitbox.
      */
-    public double getTop() {
-        return y - getHeight();
+    public double obtenerBordeSuperior() {
+        return y - obtenerAlto();
     }
 
     /**
      * @return Altura del centro del hitbox.
      */
-    public double getCenterY() {
-        return getTop() + getHeight() / 2.0;
+    public double obtenerCentroY() {
+        return obtenerBordeSuperior() + obtenerAlto() / 2.0;
     }
 
     /**
      * @return Sentido de ataque: 1 derecha, -1 izquierda.
      */
-    public int getFacing() {
+    public int obtenerOrientacion() {
         return orientacion;
     }
 
-    private double getWidth() {
-        return ANCHO_BASE * getScale();
+    private double obtenerAncho() {
+        return ANCHO_BASE * obtenerEscala();
     }
 
-    private double getHeight() {
-        return ALTO_BASE * getScale();
+    private double obtenerAlto() {
+        return ALTO_BASE * obtenerEscala();
     }
 
-    private double getLeft() {
-        return x - getWidth() / 2.0;
+    private double obtenerIzquierda() {
+        return x - obtenerAncho() / 2.0;
     }
 
-    private double getRight() {
-        return x + getWidth() / 2.0;
+    private double obtenerDerecha() {
+        return x + obtenerAncho() / 2.0;
     }
 
-    private double getBottom() {
+    private double obtenerAbajo() {
         return y;
     }
 }

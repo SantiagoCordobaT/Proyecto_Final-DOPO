@@ -1,8 +1,10 @@
 package dominio.efectos;
 
 /**
- * Reduccion: la escala y el hitbox del personaje se reducen a la mitad durante 6 segundos.
- *
+ * Reduccion: la escala y el hitbox del personaje se reducen a la mitad durante
+ * 6 segundos.
+ * 
+ * 
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
@@ -18,7 +20,7 @@ public class ShrinkEffect extends Effect {
     }
 
     @Override
-    double getScale() {
+    double obtenerEscala() {
         return ESCALA_REDUCCION;
     }
 }

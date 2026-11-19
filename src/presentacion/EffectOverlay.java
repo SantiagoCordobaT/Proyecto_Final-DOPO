@@ -55,10 +55,10 @@ final class EffectOverlay {
      * Registra la animacion de cada efecto conocido por su nombre en el dominio.
      */
     EffectOverlay() {
-        dibujos.put("Congelado", EffectOverlay::paintIce);
-        dibujos.put("Aturdido", EffectOverlay::paintStars);
-        dibujos.put("Confundido", EffectOverlay::paintQuestions);
-        dibujos.put("Reducido", EffectOverlay::paintArrows);
+        dibujos.put("Congelado", EffectOverlay::dibujarHielo);
+        dibujos.put("Aturdido", EffectOverlay::dibujarEstrellas);
+        dibujos.put("Confundido", EffectOverlay::dibujarInterrogaciones);
+        dibujos.put("Reducido", EffectOverlay::dibujarFlechas);
     }
 
     /**
@@ -68,14 +68,14 @@ final class EffectOverlay {
      * @param efectos Nombres de los efectos activos.
      * @param tiempo  Reloj de animacion del personaje, en segundos.
      */
-    void paint(Graphics2D g, String[] efectos, double tiempo) {
+    void dibujar(Graphics2D g, String[] efectos, double tiempo) {
         for (String efecto : efectos) {
-            dibujos.getOrDefault(efecto, EffectOverlay::paintName).paint(g, efecto, tiempo);
+            dibujos.getOrDefault(efecto, EffectOverlay::dibujarNombre).dibujar(g, efecto, tiempo);
         }
     }
 
     /** Bloque de hielo translucido que encierra al personaje. */
-    private static void paintIce(Graphics2D g, String nombre, double tiempo) {
+    private static void dibujarHielo(Graphics2D g, String nombre, double tiempo) {
         g.setColor(HIELO);
         g.fill(BLOQUE_HIELO);
         g.setColor(BORDE_HIELO);
@@ -87,27 +87,27 @@ final class EffectOverlay {
     }
 
     /** Estrellas que giran sobre la cabeza. */
-    private static void paintStars(Graphics2D g, String nombre, double tiempo) {
+    private static void dibujarEstrellas(Graphics2D g, String nombre, double tiempo) {
         g.setColor(ESTRELLA);
         for (int i = 0; i < ORBITANTES; i++) {
             AffineTransform guardado = g.getTransform();
-            g.translate(orbitX(tiempo, i), orbitY(tiempo, i));
+            g.translate(orbitaX(tiempo, i), orbitaY(tiempo, i));
             g.fill(FORMA_ESTRELLA);
             g.setTransform(guardado);
         }
     }
 
     /** Signos de pregunta que giran sobre la cabeza. */
-    private static void paintQuestions(Graphics2D g, String nombre, double tiempo) {
+    private static void dibujarInterrogaciones(Graphics2D g, String nombre, double tiempo) {
         g.setColor(MAREO);
         g.setFont(Resources.FUENTE_TEXTO);
         for (int i = 0; i < ORBITANTES; i++) {
-            g.drawString(INTERROGACION, (float) orbitX(tiempo, i), (float) orbitY(tiempo, i));
+            g.drawString(INTERROGACION, (float) orbitaX(tiempo, i), (float) orbitaY(tiempo, i));
         }
     }
 
     /** Flechas que aprietan al personaje desde arriba. */
-    private static void paintArrows(Graphics2D g, String nombre, double tiempo) {
+    private static void dibujarFlechas(Graphics2D g, String nombre, double tiempo) {
         g.setColor(REDUCCION);
         for (int i = -1; i <= 1; i += 2) {
             AffineTransform guardado = g.getTransform();
@@ -118,7 +118,7 @@ final class EffectOverlay {
     }
 
     /** Respaldo: etiqueta con el nombre del efecto sobre la cabeza. */
-    private static void paintName(Graphics2D g, String nombre, double tiempo) {
+    private static void dibujarNombre(Graphics2D g, String nombre, double tiempo) {
         g.setFont(Resources.FUENTE_TEXTO);
         FontMetrics metricas = g.getFontMetrics();
         double ancho = metricas.stringWidth(nombre) + 2.0 * MARGEN_ETIQUETA;
@@ -129,16 +129,16 @@ final class EffectOverlay {
         g.drawString(nombre, (float) (-ancho / 2.0 + MARGEN_ETIQUETA), (float) ETIQUETA_Y);
     }
 
-    private static double orbitX(double tiempo, int indice) {
+    private static double orbitaX(double tiempo, int indice) {
         return ANCHO_ORBITA * Math.cos(tiempo * VELOCIDAD_ORBITA + indice * 2.0 * Math.PI / ORBITANTES);
     }
 
-    private static double orbitY(double tiempo, int indice) {
+    private static double orbitaY(double tiempo, int indice) {
         return ORBITA_Y + ALTO_ORBITA * Math.sin(tiempo * VELOCIDAD_ORBITA + indice * 2.0 * Math.PI / ORBITANTES);
     }
 
     /** Animacion de un efecto de estado. */
     private interface Drawing {
-        void paint(Graphics2D g, String nombre, double tiempo);
+        void dibujar(Graphics2D g, String nombre, double tiempo);
     }
 }

@@ -22,10 +22,10 @@ public class Field {
      *
      * @param balon Balon.
      */
-    void updateBall(Ball balon) {
-        balon.updatePhysics(SUELO_Y, TECHO_Y);
+    void actualizarBalon(Ball balon) {
+        balon.actualizarFisica(SUELO_Y, TECHO_Y);
         for (Goal arco : arcos) {
-            arco.resolveCrossbar(balon);
+            arco.resolverTravesano(balon);
         }
     }
 
@@ -36,8 +36,8 @@ public class Field {
      *
      * @param balon Balon.
      */
-    void keepBallInside(Ball balon) {
-        balon.bounceOffWalls(PARED_IZQUIERDA_X, ANCHO);
+    void mantenerBalonDentro(Ball balon) {
+        balon.rebotarEnParedes(PARED_IZQUIERDA_X, ANCHO);
     }
 
     /**
@@ -48,19 +48,19 @@ public class Field {
      * @param fraccion Fraccion del siguiente paso ya transcurrida.
      * @return Centro visible del balon como {x, y}.
      */
-    double[] visibleBall(Ball balon, double fraccion) {
-        double x = Math.max(PARED_IZQUIERDA_X + Ball.RADIO, Math.min(ANCHO - Ball.RADIO, balon.xAfter(fraccion)));
-        double y = Math.min(SUELO_Y - Ball.RADIO, balon.yAfter(fraccion));
+    double[] balonVisible(Ball balon, double fraccion) {
+        double x = Math.max(PARED_IZQUIERDA_X + Ball.RADIO, Math.min(ANCHO - Ball.RADIO, balon.xDespuesDe(fraccion)));
+        double y = Math.min(SUELO_Y - Ball.RADIO, balon.yDespuesDe(fraccion));
         return new double[] { x, y };
     }
 
     /**
      * @return Dimensiones y posicion de cada arco.
      */
-    double[][] getGoalBounds() {
+    double[][] obtenerLimitesArcos() {
         double[][] limites = new double[arcos.length][];
         for (int i = 0; i < arcos.length; i++) {
-            limites[i] = arcos[i].getBounds();
+            limites[i] = arcos[i].obtenerLimites();
         }
         return limites;
     }
@@ -70,8 +70,8 @@ public class Field {
      *
      * @param balon Balon.
      */
-    void dropBall(Ball balon) {
-        balon.placeAt(CENTRO_X, CAIDA_BALON_Y);
+    void soltarBalon(Ball balon) {
+        balon.ubicarEn(CENTRO_X, CAIDA_BALON_Y);
     }
 
     /**
@@ -79,10 +79,10 @@ public class Field {
      * @return Jugador (1 o 2) que anota si el balon esta completamente dentro de un
      *         arco y por defecto retorna que no hay gol.
      */
-    int scorerOf(Ball balon) {
+    int anotadorDe(Ball balon) {
         for (Goal arco : arcos) {
-            if (arco.isBallInside(balon)) {
-                return arco.getScorer();
+            if (arco.contieneBalon(balon)) {
+                return arco.obtenerAnotador();
             }
         }
         return SIN_GOL;

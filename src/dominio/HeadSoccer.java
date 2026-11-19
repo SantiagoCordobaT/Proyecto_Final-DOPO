@@ -17,7 +17,7 @@ import dominio.personajes.CharacterCatalog;
  * clase: aqui se validan las selecciones y se delega el partido en
  * {@link Match}.
  * Es Singleton: toda la aplicacion comparte una unica sesion de juego, que
- * {@link #newGame()} reinicia.
+ * {@link #nuevoJuego()} reinicia.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -51,7 +51,7 @@ public final class HeadSoccer {
      * @return La unica instancia del juego; se crea en la primera llamada.
      * @throws POOBSoccerException Si algun dato del catalogo fuera invalido.
      */
-    public static HeadSoccer getInstance() throws POOBSoccerException {
+    public static HeadSoccer obtenerInstancia() throws POOBSoccerException {
         if (instancia == null) {
             instancia = new HeadSoccer();
         }
@@ -63,7 +63,7 @@ public final class HeadSoccer {
      * personajes
      * elegidos y el partido anterior.
      */
-    public void newGame() {
+    public void nuevoJuego() {
         modoSeleccionado = null;
         tipoPartidoSeleccionado = null;
         Arrays.fill(elegidos, null);
@@ -73,21 +73,21 @@ public final class HeadSoccer {
     // ------------------------------------------------------------ catalogos
 
     /** @return Nombres de las modalidades. */
-    public String[] getModeNames() {
-        return modos.names();
+    public String[] obtenerNombresModos() {
+        return modos.obtenerNombres();
     }
 
     /** @return Nombres de los tipos de partido. */
-    public String[] getMatchTypeNames() {
-        return tiposPartido.names();
+    public String[] obtenerNombresTiposPartido() {
+        return tiposPartido.obtenerNombres();
     }
 
     /**
      * @return Nombres de todos los personajes del catálogo (para uso directo en
      *         vistas).
      */
-    public String[] getCharacterNames() {
-        return personajes.names();
+    public String[] obtenerNombresPersonajes() {
+        return personajes.obtenerNombres();
     }
 
     /**
@@ -95,8 +95,8 @@ public final class HeadSoccer {
      * @return Pais del personaje.
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public String getCharacterCountry(int indice) throws POOBSoccerException {
-        return personajes.getCountry(indice);
+    public String obtenerPaisPersonaje(int indice) throws POOBSoccerException {
+        return personajes.obtenerPais(indice);
     }
 
     /**
@@ -104,8 +104,8 @@ public final class HeadSoccer {
      * @return Velocidad del personaje.
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public int getCharacterSpeed(int indice) throws POOBSoccerException {
-        return personajes.getSpeed(indice);
+    public int obtenerVelocidadPersonaje(int indice) throws POOBSoccerException {
+        return personajes.obtenerVelocidad(indice);
     }
 
     /**
@@ -113,8 +113,8 @@ public final class HeadSoccer {
      * @return Salto del personaje.
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public int getCharacterJump(int indice) throws POOBSoccerException {
-        return personajes.getJump(indice);
+    public int obtenerSaltoPersonaje(int indice) throws POOBSoccerException {
+        return personajes.obtenerSalto(indice);
     }
 
     /**
@@ -122,8 +122,8 @@ public final class HeadSoccer {
      * @return Fuerza del personaje.
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public int getCharacterStrength(int indice) throws POOBSoccerException {
-        return personajes.getStrength(indice);
+    public int obtenerFuerzaPersonaje(int indice) throws POOBSoccerException {
+        return personajes.obtenerFuerza(indice);
     }
 
     /**
@@ -131,8 +131,8 @@ public final class HeadSoccer {
      * @return Estadistica de Poder Unico del personaje (1 a 5).
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public int getCharacterPowerLevel(int indice) throws POOBSoccerException {
-        return personajes.getPowerLevel(indice);
+    public int obtenerNivelPoderPersonaje(int indice) throws POOBSoccerException {
+        return personajes.obtenerNivelPoder(indice);
     }
 
     /**
@@ -140,8 +140,8 @@ public final class HeadSoccer {
      * @return Nombre del poder del personaje.
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public String getCharacterPowerName(int indice) throws POOBSoccerException {
-        return personajes.getPowerName(indice);
+    public String obtenerNombrePoderPersonaje(int indice) throws POOBSoccerException {
+        return personajes.obtenerNombrePoder(indice);
     }
 
     /**
@@ -149,8 +149,8 @@ public final class HeadSoccer {
      * @return Descripcion del poder del personaje.
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public String getCharacterPowerDescription(int indice) throws POOBSoccerException {
-        return personajes.getPowerDescription(indice);
+    public String obtenerDescripcionPoderPersonaje(int indice) throws POOBSoccerException {
+        return personajes.obtenerDescripcionPoder(indice);
     }
 
     // ------------------------------------------------------------ selecciones
@@ -163,8 +163,8 @@ public final class HeadSoccer {
      * @param indice Indice de la modalidad.
      * @throws POOBSoccerException Si el indice es invalido.
      */
-    public void selectMode(int indice) throws POOBSoccerException {
-        modoSeleccionado = modos.get(indice);
+    public void seleccionarModo(int indice) throws POOBSoccerException {
+        modoSeleccionado = modos.obtener(indice);
         tipoPartidoSeleccionado = null;
     }
 
@@ -176,12 +176,12 @@ public final class HeadSoccer {
      * @throws POOBSoccerException Si no hay modalidad, el indice es invalido o el
      *                             tipo no admite la modalidad.
      */
-    public void selectMatchType(int indice) throws POOBSoccerException {
+    public void seleccionarTipoPartido(int indice) throws POOBSoccerException {
         if (modoSeleccionado == null) {
             throw new POOBSoccerException(POOBSoccerException.MODO_INVALIDO);
         }
-        MatchType tipo = tiposPartido.get(indice);
-        if (!tipo.supports(modoSeleccionado)) {
+        MatchType tipo = tiposPartido.obtener(indice);
+        if (!tipo.admite(modoSeleccionado)) {
             throw new POOBSoccerException(POOBSoccerException.SUPERVIVENCIA_SOLO_PVSM);
         }
         tipoPartidoSeleccionado = tipo;
@@ -195,8 +195,8 @@ public final class HeadSoccer {
      * @throws POOBSoccerException Si el jugador no es 1 ni 2 o el personaje no
      *                             existe.
      */
-    public void selectPlayer(int numero, int indicePersonaje) throws POOBSoccerException {
-        elegidos[Match.index(numero)] = personajes.get(indicePersonaje);
+    public void seleccionarJugador(int numero, int indicePersonaje) throws POOBSoccerException {
+        elegidos[Match.indiceJugador(numero)] = personajes.obtener(indicePersonaje);
     }
 
     // ------------------------------------------------------------ partido
@@ -211,18 +211,18 @@ public final class HeadSoccer {
      * @throws POOBSoccerException Si falta el tipo de partido (o la modalidad) o
      *                             algun jugador.
      */
-    public void startMatch() throws POOBSoccerException {
+    public void iniciarPartido() throws POOBSoccerException {
         if (tipoPartidoSeleccionado == null) {
             throw new POOBSoccerException(POOBSoccerException.MODO_INVALIDO);
         }
         if (Arrays.asList(elegidos).contains(null)) {
             throw new POOBSoccerException(POOBSoccerException.JUGADORES_INCOMPLETOS);
         }
-        partido = new Match(modoSeleccionado, tipoPartidoSeleccionado, elegidos[0].copy(), elegidos[1].copy(),
+        partido = new Match(modoSeleccionado, tipoPartidoSeleccionado, elegidos[0].copiar(), elegidos[1].copiar(),
                 personajes);
     }
 
-    private Match requireMatch() throws POOBSoccerException {
+    private Match requerirPartido() throws POOBSoccerException {
         if (partido == null) {
             throw new POOBSoccerException(POOBSoccerException.PARTIDO_NO_INICIADO);
         }
@@ -235,8 +235,8 @@ public final class HeadSoccer {
      * @param segundosTranscurridos Segundos transcurridos desde el tick anterior.
      * @throws POOBSoccerException Si el partido no inicio o el tiempo es negativo.
      */
-    public void updateTick(double segundosTranscurridos) throws POOBSoccerException {
-        requireMatch().updateTick(segundosTranscurridos);
+    public void actualizarTick(double segundosTranscurridos) throws POOBSoccerException {
+        requerirPartido().actualizarTick(segundosTranscurridos);
     }
 
     /**
@@ -244,8 +244,8 @@ public final class HeadSoccer {
      *
      * @throws POOBSoccerException Si el partido no ha iniciado.
      */
-    public void pause() throws POOBSoccerException {
-        requireMatch().pause();
+    public void pausar() throws POOBSoccerException {
+        requerirPartido().pausar();
     }
 
     /**
@@ -255,8 +255,8 @@ public final class HeadSoccer {
      *
      * @throws POOBSoccerException Si el partido no ha iniciado.
      */
-    public void releaseAllActions() throws POOBSoccerException {
-        requireMatch().releaseAll();
+    public void soltarTodasLasAcciones() throws POOBSoccerException {
+        requerirPartido().soltarTodo();
     }
 
     /**
@@ -264,8 +264,8 @@ public final class HeadSoccer {
      *
      * @throws POOBSoccerException Si el partido no ha iniciado.
      */
-    public void resume() throws POOBSoccerException {
-        requireMatch().resume();
+    public void reanudar() throws POOBSoccerException {
+        requerirPartido().reanudar();
     }
 
     /**
@@ -277,8 +277,8 @@ public final class HeadSoccer {
      * @throws POOBSoccerException Si no hay partido, el jugador no es valido o la
      *                             accion no existe.
      */
-    public void pressAction(int numero, String accion) throws POOBSoccerException {
-        requireMatch().press(numero, Action.named(accion));
+    public void presionarAccion(int numero, String accion) throws POOBSoccerException {
+        requerirPartido().presionar(numero, Action.porNombre(accion));
     }
 
     /**
@@ -289,8 +289,8 @@ public final class HeadSoccer {
      * @throws POOBSoccerException Si no hay partido, el jugador no es valido o la
      *                             accion no existe.
      */
-    public void releaseAction(int numero, String accion) throws POOBSoccerException {
-        requireMatch().release(numero, Action.named(accion));
+    public void soltarAccion(int numero, String accion) throws POOBSoccerException {
+        requerirPartido().soltar(numero, Action.porNombre(accion));
     }
 
     // ------------------------------------------------------------ consultas para
@@ -301,8 +301,8 @@ public final class HeadSoccer {
      * @return Nombre del personaje del jugador.
      * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
-    public String getPlayerName(int numero) throws POOBSoccerException {
-        return requireMatch().getPlayerName(numero);
+    public String obtenerNombreJugador(int numero) throws POOBSoccerException {
+        return requerirPartido().obtenerNombreJugador(numero);
     }
 
     /**
@@ -310,8 +310,8 @@ public final class HeadSoccer {
      * @return Pais del personaje del jugador.
      * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
-    public String getPlayerCountry(int numero) throws POOBSoccerException {
-        return requireMatch().getPlayerCountry(numero);
+    public String obtenerPaisJugador(int numero) throws POOBSoccerException {
+        return requerirPartido().obtenerPaisJugador(numero);
     }
 
     /**
@@ -319,8 +319,8 @@ public final class HeadSoccer {
      * @return Hitbox actual del jugador como {izquierda, arriba, ancho, alto}.
      * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
-    public double[] getPlayerBounds(int numero) throws POOBSoccerException {
-        return requireMatch().getPlayerBounds(numero);
+    public double[] obtenerLimitesJugador(int numero) throws POOBSoccerException {
+        return requerirPartido().obtenerLimitesJugador(numero);
     }
 
     /**
@@ -328,8 +328,8 @@ public final class HeadSoccer {
      * @return Goles del jugador.
      * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
-    public int getPlayerGoals(int numero) throws POOBSoccerException {
-        return requireMatch().getGoals(numero);
+    public int obtenerGolesJugador(int numero) throws POOBSoccerException {
+        return requerirPartido().obtenerGoles(numero);
     }
 
     /**
@@ -337,8 +337,8 @@ public final class HeadSoccer {
      * @return Fraccion llena de la barra de poder (0.0 a 1.0).
      * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
-    public double getPlayerPowerBar(int numero) throws POOBSoccerException {
-        return requireMatch().getPlayerPowerCharge(numero);
+    public double obtenerBarraPoderJugador(int numero) throws POOBSoccerException {
+        return requerirPartido().obtenerCargaPoderJugador(numero);
     }
 
     /**
@@ -346,8 +346,8 @@ public final class HeadSoccer {
      * @return Nombre del poder del personaje del jugador.
      * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
-    public String getPlayerPowerName(int numero) throws POOBSoccerException {
-        return requireMatch().getPlayerPowerName(numero);
+    public String obtenerNombrePoderJugador(int numero) throws POOBSoccerException {
+        return requerirPartido().obtenerNombrePoderJugador(numero);
     }
 
     /**
@@ -355,8 +355,8 @@ public final class HeadSoccer {
      * @return true si el jugador tiene su poder armado.
      * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
-    public boolean isPlayerPowerArmed(int numero) throws POOBSoccerException {
-        return requireMatch().isPlayerPowerArmed(numero);
+    public boolean estaPoderJugadorArmado(int numero) throws POOBSoccerException {
+        return requerirPartido().estaPoderJugadorArmado(numero);
     }
 
     /**
@@ -364,8 +364,8 @@ public final class HeadSoccer {
      * @return Nombres de los efectos activos del jugador.
      * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
-    public String[] getPlayerEffects(int numero) throws POOBSoccerException {
-        return requireMatch().getPlayerEffects(numero);
+    public String[] obtenerEfectosJugador(int numero) throws POOBSoccerException {
+        return requerirPartido().obtenerEfectosJugador(numero);
     }
 
     /**
@@ -374,8 +374,8 @@ public final class HeadSoccer {
      *         izquierda.
      * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
-    public int getPlayerFacing(int numero) throws POOBSoccerException {
-        return requireMatch().getPlayerFacing(numero);
+    public int obtenerOrientacionJugador(int numero) throws POOBSoccerException {
+        return requerirPartido().obtenerOrientacionJugador(numero);
     }
 
     /**
@@ -383,16 +383,16 @@ public final class HeadSoccer {
      * @return true mientras dura la patada que el jugador acaba de ejecutar.
      * @throws POOBSoccerException Si el jugador no es valido o no hay partido.
      */
-    public boolean isPlayerKicking(int numero) throws POOBSoccerException {
-        return requireMatch().isPlayerKicking(numero);
+    public boolean estaJugadorPateando(int numero) throws POOBSoccerException {
+        return requerirPartido().estaJugadorPateando(numero);
     }
 
     /**
      * @return Centro del balon como {x, y}, suavizado entre pasos de fisica.
      * @throws POOBSoccerException Si no hay partido.
      */
-    public double[] getBallPosition() throws POOBSoccerException {
-        return requireMatch().getBallPosition();
+    public double[] obtenerPosicionBalon() throws POOBSoccerException {
+        return requerirPartido().obtenerPosicionBalon();
     }
 
     /**
@@ -401,59 +401,59 @@ public final class HeadSoccer {
      *         goles y tiempo jugado, o balones y racha de Supervivencia.
      * @throws POOBSoccerException Si no hay partido.
      */
-    public String getMatchStatus() throws POOBSoccerException {
-        return requireMatch().getStatus();
+    public String obtenerEstadoPartido() throws POOBSoccerException {
+        return requerirPartido().obtenerEstado();
     }
 
     /**
      * @return true si el partido ya termino.
      * @throws POOBSoccerException Si no hay partido.
      */
-    public boolean isMatchFinished() throws POOBSoccerException {
-        return requireMatch().isFinished();
+    public boolean estaPartidoTerminado() throws POOBSoccerException {
+        return requerirPartido().estaTerminado();
     }
 
     /**
      * @return Cada arco de la cancha (el izquierdo y luego el derecho)
      * 
      */
-    public double[][] getGoalBounds() throws POOBSoccerException {
-        return requireMatch().getGoalBounds();
+    public double[][] obtenerLimitesArcos() throws POOBSoccerException {
+        return requerirPartido().obtenerLimitesArcos();
     }
 
     /**
      * @return Nombre del personaje ganador.
      * @throws POOBSoccerException Si no hay partido o aun no termina.
      */
-    public String getWinnerName() throws POOBSoccerException {
-        return requireMatch().getWinnerName();
+    public String obtenerNombreGanador() throws POOBSoccerException {
+        return requerirPartido().obtenerNombreGanador();
     }
 
     /**
      * @return Radio del balon.
      */
-    public double getBallRadius() {
+    public double obtenerRadioBalon() {
         return Ball.RADIO;
     }
 
     /**
      * @return Ancho de la cancha.
      */
-    public double getFieldWidth() {
+    public double obtenerAnchoCancha() {
         return Field.ANCHO;
     }
 
     /**
      * @return Coordenada Y del suelo.
      */
-    public double getGroundY() {
+    public double obtenerSueloY() {
         return Field.SUELO_Y;
     }
 
     /**
      * @return Grosor del travesaño de cada arco.
      */
-    public double getCrossbarThickness() {
+    public double obtenerGrosorTravesano() {
         return Goal.GROSOR_BORDE;
     }
 }

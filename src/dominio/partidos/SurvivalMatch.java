@@ -4,9 +4,12 @@ import dominio.excepciones.POOBSoccerException;
 import dominio.modalidades.GameMode;
 
 /**
- * Supervivencia (solo PvsM): serie de partidos contra la maquina jugada con balones.
- * Cada gol quita un balon a quien lo recibe. Si la maquina se queda sin balones se
- * suma una victoria a la racha y entra un nuevo rival con balones llenos; la serie
+ * Supervivencia (solo PvsM): serie de partidos contra la maquina jugada con
+ * balones.
+ * Cada gol quita un balon a quien lo recibe. Si la maquina se queda sin balones
+ * se
+ * suma una victoria a la racha y entra un nuevo rival con balones llenos; la
+ * serie
  * termina unicamente cuando el jugador 1 pierde todos sus balones.
  *
  * @author Santiago Cordoba - Camilo Rivas
@@ -27,26 +30,31 @@ class SurvivalMatch extends MatchType {
 
     /** @return true solo si la modalidad admite Supervivencia. */
     @Override
-    public boolean supports(GameMode modo) {
-        return modo.supportsSurvival();
+    public boolean admite(GameMode modo) {
+        return modo.admiteSupervivencia();
     }
 
     @Override
-    public void begin(MatchContext contexto) {
-        super.begin(contexto);
+    public void iniciar(MatchContext contexto) {
+        super.iniciar(contexto);
         vidas = new Lives[] { new PlayerLives(), new RivalLives() };
         racha = 0;
     }
 
-    /** Quien recibe el gol es el otro jugador: su indice (numero - 1) es {@code JUGADOR_DOS - anotador}. */
+    /**
+     * Quien recibe el gol es el otro jugador: su indice (numero - 1) es
+     * {@code JUGADOR_DOS - anotador}.
+     */
     @Override
-    protected void onGoal(int anotador) throws POOBSoccerException {
-        vidas[JUGADOR_DOS - anotador].lose();
+    protected void alAnotarGol(int anotador) throws POOBSoccerException {
+        vidas[JUGADOR_DOS - anotador].perder();
     }
 
-    /** @return Balones de cada jugador y racha, por ejemplo "Balones 3-2 | Racha 1". */
+    /**
+     * @return Balones de cada jugador y racha, por ejemplo "Balones 3-2 | Racha 1".
+     */
     @Override
-    public String getStatusText() {
+    public String obtenerTextoEstado() {
         return String.format("Balones %d-%d | Racha %d", vidas[0].balones, vidas[1].balones, racha);
     }
 
@@ -58,34 +66,37 @@ class SurvivalMatch extends MatchType {
 
         int balones = BALONES_INICIALES;
 
-        final void lose() throws POOBSoccerException {
+        final void perder() throws POOBSoccerException {
             balones--;
             if (balones == 0) {
-                exhausted();
+                agotado();
             }
         }
 
         /** Reaccion cuando el jugador se queda sin balones. */
-        abstract void exhausted() throws POOBSoccerException;
+        abstract void agotado() throws POOBSoccerException;
     }
 
     /** Balones del jugador 1: al agotarse, la maquina gana la serie. */
     private final class PlayerLives extends Lives {
 
         @Override
-        void exhausted() {
-            finish(JUGADOR_DOS);
+        void agotado() {
+            finalizar(JUGADOR_DOS);
         }
     }
 
-    /** Balones de la maquina: al agotarse sube la racha y entra un nuevo rival con balones llenos. */
+    /**
+     * Balones de la maquina: al agotarse sube la racha y entra un nuevo rival con
+     * balones llenos.
+     */
     private final class RivalLives extends Lives {
 
         @Override
-        void exhausted() throws POOBSoccerException {
+        void agotado() throws POOBSoccerException {
             racha++;
             balones = BALONES_INICIALES;
-            replaceRival();
+            reemplazarRival();
         }
     }
 }

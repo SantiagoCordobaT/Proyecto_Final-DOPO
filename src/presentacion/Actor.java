@@ -21,12 +21,12 @@ interface Actor {
      * @param segundos Segundos reales transcurridos desde el cuadro anterior.
      * @throws POOBSoccerException Si no hay un partido iniciado.
      */
-    void update(double segundos) throws POOBSoccerException;
+    void actualizar(double segundos) throws POOBSoccerException;
 
     /**
      * Pinta el actor en coordenadas de la cancha.
      *
      * @param g Lienzo del cuadro actual.
      */
-    void paint(Graphics2D g);
+    void dibujar(Graphics2D g);
 }

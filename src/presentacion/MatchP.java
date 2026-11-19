@@ -58,114 +58,115 @@ final class MatchP extends JPanel {
         temporizador = new Timer(MILIS_CUADRO, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                advance();
+                avanzar();
             }
         });
-        bindPlayer(1, standard(KeyEvent.VK_A), standard(KeyEvent.VK_D), standard(KeyEvent.VK_W),
-                standard(KeyEvent.VK_S), standard(KeyEvent.VK_Q));
-        bindPlayer(2, standard(KeyEvent.VK_LEFT), standard(KeyEvent.VK_RIGHT), standard(KeyEvent.VK_UP),
-                standard(KeyEvent.VK_DOWN), slot(KeyEvent.VK_CONTROL, KeyEvent.KEY_LOCATION_RIGHT));
+        asignarJugador(1, teclaEstandar(KeyEvent.VK_A), teclaEstandar(KeyEvent.VK_D), teclaEstandar(KeyEvent.VK_W),
+                teclaEstandar(KeyEvent.VK_S), teclaEstandar(KeyEvent.VK_Q));
+        asignarJugador(2, teclaEstandar(KeyEvent.VK_LEFT), teclaEstandar(KeyEvent.VK_RIGHT),
+                teclaEstandar(KeyEvent.VK_UP), teclaEstandar(KeyEvent.VK_DOWN),
+                ranuraTecla(KeyEvent.VK_CONTROL, KeyEvent.KEY_LOCATION_RIGHT));
         setFocusable(true);
         addKeyListener(new Keyboard());
         addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                releaseKeys();
+                soltarTeclas();
             }
         });
     }
 
     /** Arranca el ciclo del partido ya iniciado en la fachada y toma el teclado. */
-    void start() {
-        marcador.relabel();
-        cancha.enter();
+    void iniciar() {
+        marcador.rotular();
+        cancha.entrar();
         ultimoNano = System.nanoTime();
         temporizador.start();
         requestFocusInWindow();
     }
 
     /** Detiene el ciclo del partido. */
-    void stop() {
+    void detener() {
         temporizador.stop();
     }
 
     /** Reanuda el partido pausado y recupera el teclado. */
-    void resumeGame() {
+    void reanudarPartido() {
         try {
-            modelo.resume();
+            modelo.reanudar();
             requestFocusInWindow();
         } catch (POOBSoccerException e) {
-            HeadSoccerGUI.report(this, e);
+            HeadSoccerGUI.reportarError(this, e);
         }
     }
 
     /** Abandona el partido en curso y vuelve al menu. */
-    void giveUp() {
+    void abandonar() {
         temporizador.stop();
-        ventana.showMenu();
+        ventana.mostrarMenu();
     }
 
     /**
      * Un cuadro: avanza el dominio el tiempo real transcurrido, refresca y detecta
      * el final.
      */
-    private void advance() {
+    private void avanzar() {
         long ahora = System.nanoTime();
         double segundos = Math.min((ahora - ultimoNano) / NANOS_POR_SEGUNDO, MAX_SEGUNDOS_CUADRO);
         ultimoNano = ahora;
         try {
-            modelo.updateTick(segundos);
-            marcador.refresh(segundos);
-            cancha.animate(segundos);
-            if (modelo.isMatchFinished()) {
+            modelo.actualizarTick(segundos);
+            marcador.refrescar(segundos);
+            cancha.animar(segundos);
+            if (modelo.estaPartidoTerminado()) {
                 temporizador.stop();
-                ventana.showResult();
+                ventana.mostrarResultado();
             }
         } catch (POOBSoccerException e) {
             temporizador.stop();
-            HeadSoccerGUI.report(this, e);
-            ventana.showMenu();
+            HeadSoccerGUI.reportarError(this, e);
+            ventana.mostrarMenu();
         }
     }
 
-    private void pauseGame() {
+    private void pausarPartido() {
         try {
-            modelo.pause();
-            new PauseD(ventana, this).open();
+            modelo.pausar();
+            new PauseD(ventana, this).abrir();
         } catch (POOBSoccerException e) {
-            HeadSoccerGUI.report(this, e);
+            HeadSoccerGUI.reportarError(this, e);
         }
     }
 
-    private void releaseKeys() {
+    private void soltarTeclas() {
         try {
-            modelo.releaseAllActions();
+            modelo.soltarTodasLasAcciones();
         } catch (POOBSoccerException e) {
-            HeadSoccerGUI.report(this, e);
+            HeadSoccerGUI.reportarError(this, e);
         }
     }
 
     /**
      * Asigna a un jugador, en el orden de {@link #ACCIONES}, las teclas indicadas.
      */
-    private void bindPlayer(int jugador, int... codigos) {
+    private void asignarJugador(int jugador, int... codigos) {
         for (int i = 0; i < ACCIONES.length; i++) {
             teclas.put(codigos[i], new PlayerKey(jugador, ACCIONES[i]));
         }
     }
 
-    private static int standard(int codigoTecla) {
-        return slot(codigoTecla, KeyEvent.KEY_LOCATION_STANDARD);
+    private static int teclaEstandar(int codigoTecla) {
+        return ranuraTecla(codigoTecla, KeyEvent.KEY_LOCATION_STANDARD);
     }
 
     /** Combina tecla y ubicacion: distingue el Ctrl derecho del izquierdo. */
-    private static int slot(int codigoTecla, int ubicacion) {
+    private static int ranuraTecla(int codigoTecla, int ubicacion) {
         return codigoTecla * RANGO_UBICACION + ubicacion;
     }
 
     /** Cambio de estado de una tecla de jugador: presionarla o soltarla. */
     private interface KeyChange {
-        void apply(PlayerKey tecla, HeadSoccer modelo) throws POOBSoccerException;
+        void aplicar(PlayerKey tecla, HeadSoccer modelo) throws POOBSoccerException;
     }
 
     /**
@@ -177,24 +178,24 @@ final class MatchP extends JPanel {
         @Override
         public void keyPressed(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_P || e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                pauseGame();
+                pausarPartido();
             } else {
-                forward(e, PlayerKey::press);
+                reenviar(e, PlayerKey::presionar);
             }
         }
 
         @Override
         public void keyReleased(KeyEvent e) {
-            forward(e, PlayerKey::release);
+            reenviar(e, PlayerKey::soltar);
         }
 
-        private void forward(KeyEvent e, KeyChange cambio) {
-            PlayerKey tecla = teclas.get(slot(e.getKeyCode(), e.getKeyLocation()));
+        private void reenviar(KeyEvent e, KeyChange cambio) {
+            PlayerKey tecla = teclas.get(ranuraTecla(e.getKeyCode(), e.getKeyLocation()));
             if (tecla != null) {
                 try {
-                    cambio.apply(tecla, modelo);
+                    cambio.aplicar(tecla, modelo);
                 } catch (POOBSoccerException ex) {
-                    HeadSoccerGUI.report(MatchP.this, ex);
+                    HeadSoccerGUI.reportarError(MatchP.this, ex);
                 }
             }
         }

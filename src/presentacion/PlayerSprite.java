@@ -119,25 +119,25 @@ final class PlayerSprite implements Actor {
      * @param particulas Particulas de la cancha, para el polvo y las chispas.
      */
     PlayerSprite(HeadSoccer modelo, int numero, Particles particulas) {
-        Resources recursos = Resources.getInstance();
+        Resources recursos = Resources.obtenerInstancia();
         this.modelo = modelo;
         this.numero = numero;
         this.particulas = particulas;
-        this.anillo = recursos.playerColor(numero);
-        this.suelo = modelo.getGroundY();
-        this.equipo = recursos.teamColors("");
+        this.anillo = recursos.colorJugador(numero);
+        this.suelo = modelo.obtenerSueloY();
+        this.equipo = recursos.coloresEquipo("");
         this.reloj = numero;
     }
 
     @Override
-    public void update(double segundos) throws POOBSoccerException {
-        double[] limites = modelo.getPlayerBounds(numero);
-        double[] balon = modelo.getBallPosition();
+    public void actualizar(double segundos) throws POOBSoccerException {
+        double[] limites = modelo.obtenerLimitesJugador(numero);
+        double[] balon = modelo.obtenerPosicionBalon();
         double nuevoCentroX = limites[0] + limites[2] / 2.0;
         double nuevaBaseY = limites[1] + limites[3];
         double desplazamiento = nuevoCentroX - centroX;
         boolean ahoraEnAire = nuevaBaseY < suelo - 1.0;
-        boolean ahoraPateando = modelo.isPlayerKicking(numero);
+        boolean ahoraPateando = modelo.estaJugadorPateando(numero);
 
         reloj += segundos;
         if (Math.abs(desplazamiento) < PIXELES_TELETRANSPORTE && segundos > 0.0) {
@@ -146,7 +146,7 @@ final class PlayerSprite implements Actor {
         }
         if (enAire && !ahoraEnAire) {
             aplastamiento = APLASTAMIENTO_ATERRIZAJE;
-            particulas.burst(nuevoCentroX, suelo, POLVO, CANTIDAD_POLVO, VELOCIDAD_POLVO);
+            particulas.lanzarRafaga(nuevoCentroX, suelo, POLVO, CANTIDAD_POLVO, VELOCIDAD_POLVO);
         }
         if (!enAire && ahoraEnAire) {
             aplastamiento = ESTIRAMIENTO_SALTO;
@@ -154,16 +154,17 @@ final class PlayerSprite implements Actor {
         aplastamiento *= Math.exp(-RECUPERACION_APLASTAMIENTO * segundos);
         if (ahoraPateando && !pateando) {
             tiempoPatada = SEGUNDOS_PATADA;
-            particulas.burst(nuevoCentroX + orientacion * limites[2] / 2.0, nuevaBaseY, Resources.LISTO, CANTIDAD_CHISPAS,
-                    VELOCIDAD_CHISPAS);
+            particulas.lanzarRafaga(nuevoCentroX + orientacion * limites[2] / 2.0, nuevaBaseY, Resources.LISTO,
+                    CANTIDAD_CHISPAS, VELOCIDAD_CHISPAS);
         }
         tiempoPatada = Math.max(0.0, tiempoPatada - segundos);
 
-        armado = modelo.isPlayerPowerArmed(numero);
+        armado = modelo.estaPoderJugadorArmado(numero);
         tiempoChispa += segundos;
         if (armado && tiempoChispa >= CHISPA_AURA_CADA) {
             tiempoChispa = 0.0;
-            particulas.burst(nuevoCentroX, nuevaBaseY - limites[3] / 2.0, Resources.LISTO, 1, VELOCIDAD_CHISPA_AURA);
+            particulas.lanzarRafaga(nuevoCentroX, nuevaBaseY - limites[3] / 2.0, Resources.LISTO, 1,
+                    VELOCIDAD_CHISPA_AURA);
         }
 
         double haciaX = balon[0] - nuevoCentroX;
@@ -172,9 +173,9 @@ final class PlayerSprite implements Actor {
         miradaX = MIRADA * haciaX / distancia;
         miradaY = MIRADA * haciaY / distancia;
 
-        equipo = Resources.getInstance().teamColors(modelo.getPlayerCountry(numero));
-        efectos = modelo.getPlayerEffects(numero);
-        orientacion = modelo.getPlayerFacing(numero);
+        equipo = Resources.obtenerInstancia().coloresEquipo(modelo.obtenerPaisJugador(numero));
+        efectos = modelo.obtenerEfectosJugador(numero);
+        orientacion = modelo.obtenerOrientacionJugador(numero);
         escala = limites[2] / ANCHO_NOMINAL;
         centroX = nuevoCentroX;
         baseY = nuevaBaseY;
@@ -183,7 +184,7 @@ final class PlayerSprite implements Actor {
     }
 
     @Override
-    public void paint(Graphics2D g) {
+    public void dibujar(Graphics2D g) {
         double ancho = ANCHO_NOMINAL * escala;
         double atenuacion = Math.max(0.35, 1.0 - (suelo - baseY) / ALTURA_DESVANECIMIENTO_SOMBRA);
         forma.setFrame(centroX - ancho * atenuacion / 2.0, suelo - 5.0, ancho * atenuacion, 12.0);
@@ -199,19 +200,19 @@ final class PlayerSprite implements Actor {
         g.scale(escala * (1.0 + aplastamiento * CANTIDAD_APLASTAMIENTO),
                 escala * (1.0 - aplastamiento * CANTIDAD_APLASTAMIENTO));
         g.setStroke(LINEA);
-        paintAura(g);
+        dibujarAura(g);
         double impulsoPatada = Math.sin(Math.PI * (1.0 - tiempoPatada / SEGUNDOS_PATADA));
         double zancada = enAire ? 0.0 : Math.min(1.0, Math.abs(velocidadX) / VELOCIDAD_ZANCADA);
-        paintShoe(g, -orientacion, -zancada * Math.sin(faseCarrera), -zancada * Math.cos(faseCarrera), 0.0);
-        paintTorso(g);
-        paintShoe(g, orientacion, zancada * Math.sin(faseCarrera), zancada * Math.cos(faseCarrera), impulsoPatada);
-        paintHead(g, impulsoPatada);
-        capaEfectos.paint(g, efectos, reloj);
+        dibujarZapato(g, -orientacion, -zancada * Math.sin(faseCarrera), -zancada * Math.cos(faseCarrera), 0.0);
+        dibujarTorso(g);
+        dibujarZapato(g, orientacion, zancada * Math.sin(faseCarrera), zancada * Math.cos(faseCarrera), impulsoPatada);
+        dibujarCabeza(g, impulsoPatada);
+        capaEfectos.dibujar(g, efectos, reloj);
         g.setTransform(mundo);
     }
 
     /** Halo que late alrededor del personaje mientras su poder esta armado. */
-    private void paintAura(Graphics2D g) {
+    private void dibujarAura(Graphics2D g) {
         if (armado) {
             double pulso = 3.0 * Math.sin(reloj * VELOCIDAD_AURA);
             for (int i = 0; i < AURA.length; i++) {
@@ -233,7 +234,7 @@ final class PlayerSprite implements Actor {
      *                      positivos).
      * @param impulsoPatada Avance de la patada (0 a 1).
      */
-    private void paintShoe(Graphics2D g, int lado, double alcance, double elevacion, double impulsoPatada) {
+    private void dibujarZapato(Graphics2D g, int lado, double alcance, double elevacion, double impulsoPatada) {
         double x = lado * 13.0 + alcance * ALCANCE_PASO + lado * impulsoPatada * ALCANCE_PATADA;
         double y = -6.0 - Math.max(0.0, elevacion) * ELEVACION_PASO - impulsoPatada * ELEVACION_PATADA;
         forma.setFrame(x - 12.0, y - 6.0, 24.0, 12.0);
@@ -247,7 +248,7 @@ final class PlayerSprite implements Actor {
     }
 
     /** Torso corto con la camiseta del pais. */
-    private void paintTorso(Graphics2D g) {
+    private void dibujarTorso(Graphics2D g) {
         g.setColor(equipo[0]);
         g.fill(TORSO);
         g.setColor(equipo[1]);
@@ -262,7 +263,7 @@ final class PlayerSprite implements Actor {
      * Cabeza con volumen: se inclina al correr y al patear, mira al balon y
      * parpadea.
      */
-    private void paintHead(Graphics2D g, double impulsoPatada) {
+    private void dibujarCabeza(Graphics2D g, double impulsoPatada) {
         AffineTransform cuerpo = g.getTransform();
         double inclinacion = INCLINACION_MAXIMA * Math.max(-1.0, Math.min(1.0, velocidadX / VELOCIDAD_INCLINACION))
                 - orientacion * INCLINACION_PATADA * impulsoPatada;
@@ -287,8 +288,8 @@ final class PlayerSprite implements Actor {
 
         double cara = orientacion * DESPLAZAMIENTO_CARA;
         boolean parpadeando = reloj % PARPADEO_CADA < SEGUNDOS_PARPADEO;
-        paintEye(g, cara - 10.0, parpadeando);
-        paintEye(g, cara + 10.0, parpadeando);
+        dibujarOjo(g, cara - 10.0, parpadeando);
+        dibujarOjo(g, cara + 10.0, parpadeando);
         g.setColor(CONTORNO);
         boca.setArc(cara - 8.0 - 3.0 * impulsoPatada, -52.0 - 3.0 * impulsoPatada, 16.0 + 6.0 * impulsoPatada,
                 9.0 + 6.0 * impulsoPatada, 200.0, 140.0, Arc2D.CHORD);
@@ -300,7 +301,7 @@ final class PlayerSprite implements Actor {
      * Ojo que sigue al balon; al parpadear queda como una linea, y con el poder
      * armado frunce la ceja.
      */
-    private void paintEye(Graphics2D g, double x, boolean parpadeando) {
+    private void dibujarOjo(Graphics2D g, double x, boolean parpadeando) {
         g.setColor(CONTORNO);
         double ceja = armado ? 2.5 * Math.signum(x - orientacion * DESPLAZAMIENTO_CARA) : 0.0;
         trazo.setLine(x - 6.0, -72.0 + ceja, x + 6.0, -72.0 - ceja);

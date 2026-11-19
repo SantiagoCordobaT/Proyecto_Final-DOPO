@@ -21,33 +21,33 @@ final class Texts {
     private int idioma;
 
     private Texts() {
-        put("menu.subtitle", "Fútbol callejero 1 contra 1", "1 v 1 street football");
-        put("menu.play", "Jugar", "Play");
-        put("menu.settings", "Configuración", "Settings");
-        put("menu.exit", "Salir", "Exit");
-        put("setup.title", "Modo de juego", "Game mode");
-        put("setup.mode", "Modalidad", "Mode");
-        put("setup.type", "Tipo de partido", "Match type");
-        put("common.select", "Seleccionar", "Select");
-        put("common.back", "Volver", "Back");
-        put("select.title", "Escoge tu personaje", "Choose your character");
-        put("select.player", "Jugador", "Player");
-        put("select.play", "Jugar", "Play");
-        put("card.speed", "Velocidad", "Speed");
-        put("card.jump", "Salto", "Jump");
-        put("card.strength", "Fuerza", "Strength");
-        put("card.power", "Poder Único", "Unique Power");
-        put("card.special", "Poder especial:", "Special power:");
-        put("settings.title", "Configuración", "Settings");
-        put("settings.language", "Idioma", "Language");
-        put("settings.save", "Guardar", "Save");
-        put("match.hint", "P / Esc: pausa", "P / Esc: pause");
-        put("match.goal", "¡GOL!", "GOAL!");
-        put("hud.armed", "¡PODER LISTO!", "POWER READY!");
-        put("pause.title", "Pausa", "Pause");
-        put("pause.resume", "Reanudar", "Resume");
-        put("pause.giveUp", "Abandonar", "Give up");
-        put("help.controls",
+        registrar("menu.subtitle", "Fútbol callejero 1 contra 1", "1 v 1 street football");
+        registrar("menu.play", "Jugar", "Play");
+        registrar("menu.settings", "Configuración", "Settings");
+        registrar("menu.exit", "Salir", "Exit");
+        registrar("setup.title", "Modo de juego", "Game mode");
+        registrar("setup.mode", "Modalidad", "Mode");
+        registrar("setup.type", "Tipo de partido", "Match type");
+        registrar("common.select", "Seleccionar", "Select");
+        registrar("common.back", "Volver", "Back");
+        registrar("select.title", "Escoge tu personaje", "Choose your character");
+        registrar("select.player", "Jugador", "Player");
+        registrar("select.play", "Jugar", "Play");
+        registrar("card.speed", "Velocidad", "Speed");
+        registrar("card.jump", "Salto", "Jump");
+        registrar("card.strength", "Fuerza", "Strength");
+        registrar("card.power", "Poder Único", "Unique Power");
+        registrar("card.special", "Poder especial:", "Special power:");
+        registrar("settings.title", "Configuración", "Settings");
+        registrar("settings.language", "Idioma", "Language");
+        registrar("settings.save", "Guardar", "Save");
+        registrar("match.hint", "P / Esc: pausa", "P / Esc: pause");
+        registrar("match.goal", "¡GOL!", "GOAL!");
+        registrar("hud.armed", "¡PODER LISTO!", "POWER READY!");
+        registrar("pause.title", "Pausa", "Pause");
+        registrar("pause.resume", "Reanudar", "Resume");
+        registrar("pause.giveUp", "Abandonar", "Give up");
+        registrar("help.controls",
                 "Jugador 1: A y D mover, W saltar, S patear, Q poder.\n"
                         + "Jugador 2: flechas ← y → mover, ↑ saltar, ↓ patear, Ctrl derecho poder.\n"
                         + "La barra de poder se llena con el tiempo. Llena, el poder se arma\n"
@@ -56,15 +56,15 @@ final class Texts {
                         + "Player 2: arrows ← and → move, ↑ jump, ↓ kick, right Ctrl power.\n"
                         + "The power bar fills over time. When full, the power is armed\n"
                         + "and the next kick of the ball fires it at the rival.");
-        put("result.title", "Fin del partido", "Match over");
-        put("result.winner", "Ganador:", "Winner:");
-        put("result.rematch", "Revancha", "Rematch");
-        put("result.menu", "Menú", "Menu");
-        put("error.title", "Error", "Error");
+        registrar("result.title", "Fin del partido", "Match over");
+        registrar("result.winner", "Ganador:", "Winner:");
+        registrar("result.rematch", "Revancha", "Rematch");
+        registrar("result.menu", "Menú", "Menu");
+        registrar("error.title", "Error", "Error");
     }
 
     /** @return La unica instancia de la tabla de textos. */
-    static Texts getInstance() {
+    static Texts obtenerInstancia() {
         if (instancia == null) {
             instancia = new Texts();
         }
@@ -75,30 +75,30 @@ final class Texts {
      * @param clave Clave del texto.
      * @return El texto en el idioma activo.
      */
-    static String text(String clave) {
-        return getInstance().translate(clave);
+    static String texto(String clave) {
+        return obtenerInstancia().traducir(clave);
     }
 
     /** @return Nombres de los idiomas disponibles. */
-    String[] getLanguages() {
+    String[] obtenerIdiomas() {
         return IDIOMAS.clone();
     }
 
     /** @return Indice del idioma activo. */
-    int getLanguage() {
+    int obtenerIdioma() {
         return idioma;
     }
 
     /** @param idioma Indice del idioma que pasa a estar activo. */
-    void setLanguage(int idioma) {
+    void establecerIdioma(int idioma) {
         this.idioma = idioma;
     }
 
-    private String translate(String clave) {
+    private String traducir(String clave) {
         return tabla.get(clave)[idioma];
     }
 
-    private void put(String clave, String espanol, String ingles) {
+    private void registrar(String clave, String espanol, String ingles) {
         tabla.put(clave, new String[] { espanol, ingles });
     }
 }

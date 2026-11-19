@@ -19,19 +19,19 @@ public abstract class GameMode implements Named {
     }
 
     /** @return Controlador del jugador 1. */
-    public abstract Controller createPlayer1Controller();
+    public abstract Controller crearControladorJugador1();
 
     /** @return Controlador del jugador 2. */
-    public abstract Controller createPlayer2Controller();
+    public abstract Controller crearControladorJugador2();
 
     /** @return true si la modalidad permite el partido de Supervivencia. */
-    public boolean supportsSurvival() {
+    public boolean admiteSupervivencia() {
         return false;
     }
 
     /** @return Nombre de la modalidad. */
     @Override
-    public String getName() {
+    public String obtenerNombre() {
         return nombre;
     }
 }

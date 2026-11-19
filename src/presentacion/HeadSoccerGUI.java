@@ -1,6 +1,6 @@
 package presentacion;
 
-import static presentacion.Texts.text;
+import static presentacion.Texts.texto;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -54,54 +54,54 @@ public final class HeadSoccerGUI extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                close();
+                cerrar();
             }
         });
     }
 
     /** Muestra el menu principal. */
-    void showMenu() {
+    void mostrarMenu() {
         tarjetas.show(baraja, MENU);
     }
 
     /**
      * Muestra la pantalla del partido ya iniciado en la fachada y arranca su ciclo.
      */
-    void showMatch() {
+    void mostrarPartido() {
         tarjetas.show(baraja, PARTIDO);
-        partido.start();
+        partido.iniciar();
     }
 
     /**
      * Empieza una configuracion nueva y abre el dialogo de modalidad y tipo de
      * partido.
      */
-    void openGameModes() {
-        modelo.newGame();
-        new GameModeD(this, modelo).open();
+    void abrirModosJuego() {
+        modelo.nuevoJuego();
+        new GameModeD(this, modelo).abrir();
     }
 
     /** Abre el dialogo de seleccion de personajes. */
-    void openCharacterSelect() {
-        new CharacterSelectD(this, modelo).open();
+    void abrirSeleccionPersonajes() {
+        new CharacterSelectD(this, modelo).abrir();
     }
 
     /**
      * Abre la configuracion y, al cerrarla, rotula el menu en el idioma elegido.
      */
-    void openSettings() {
-        new SettingsD(this).open();
-        menu.refresh();
+    void abrirConfiguracion() {
+        new SettingsD(this).abrir();
+        menu.refrescar();
     }
 
     /** Abre el resultado del partido terminado. */
-    void showResult() {
-        new ResultD(this, modelo).open();
+    void mostrarResultado() {
+        new ResultD(this, modelo).abrir();
     }
 
     /** Cierre seguro: detiene el ciclo del partido y libera la ventana. */
-    void close() {
-        partido.stop();
+    void cerrar() {
+        partido.detener();
         dispose();
     }
 
@@ -111,15 +111,15 @@ public final class HeadSoccerGUI extends JFrame {
      * @param padre Componente sobre el que se centra el mensaje.
      * @param e     Excepcion del dominio.
      */
-    static void report(Component padre, POOBSoccerException e) {
-        JOptionPane.showMessageDialog(padre, e.getMessage(), text("error.title"), JOptionPane.ERROR_MESSAGE);
+    static void reportarError(Component padre, POOBSoccerException e) {
+        JOptionPane.showMessageDialog(padre, e.getMessage(), texto("error.title"), JOptionPane.ERROR_MESSAGE);
     }
 
-    private static void launch() {
+    private static void iniciarInterfaz() {
         try {
-            new HeadSoccerGUI(HeadSoccer.getInstance()).setVisible(true);
+            new HeadSoccerGUI(HeadSoccer.obtenerInstancia()).setVisible(true);
         } catch (POOBSoccerException e) {
-            report(null, e);
+            reportarError(null, e);
         }
     }
 
@@ -129,6 +129,6 @@ public final class HeadSoccerGUI extends JFrame {
      * @param argumentos No se usan.
      */
     public static void main(String[] argumentos) {
-        SwingUtilities.invokeLater(HeadSoccerGUI::launch);
+        SwingUtilities.invokeLater(HeadSoccerGUI::iniciarInterfaz);
     }
 }

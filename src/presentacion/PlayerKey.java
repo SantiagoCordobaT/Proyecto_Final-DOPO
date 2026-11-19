@@ -34,8 +34,8 @@ final class PlayerKey {
      * @param juego Fachada del juego.
      * @throws POOBSoccerException Si no hay partido.
      */
-    void press(HeadSoccer juego) throws POOBSoccerException {
-        juego.pressAction(jugador, accion);
+    void presionar(HeadSoccer juego) throws POOBSoccerException {
+        juego.presionarAccion(jugador, accion);
     }
 
     /**
@@ -44,7 +44,7 @@ final class PlayerKey {
      * @param juego Fachada del juego.
      * @throws POOBSoccerException Si no hay partido.
      */
-    void release(HeadSoccer juego) throws POOBSoccerException {
-        juego.releaseAction(jugador, accion);
+    void soltar(HeadSoccer juego) throws POOBSoccerException {
+        juego.soltarAccion(jugador, accion);
     }
 }

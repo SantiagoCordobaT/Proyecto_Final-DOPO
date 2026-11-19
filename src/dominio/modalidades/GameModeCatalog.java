@@ -15,8 +15,8 @@ public final class GameModeCatalog extends Catalog<GameMode> {
     /** Crea el catalogo con las tres modalidades. */
     public GameModeCatalog() {
         super(POOBSoccerException.MODO_INVALIDO);
-        add(new PvsP());
-        add(new PvsM());
-        add(new MvsM());
+        agregar(new PvsP());
+        agregar(new PvsM());
+        agregar(new MvsM());
     }
 }

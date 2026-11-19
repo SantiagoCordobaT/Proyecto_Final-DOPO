@@ -1,7 +1,8 @@
 package dominio.efectos;
 
 /**
- * Confusion: invierte el movimiento horizontal (izquierda/derecha) durante 5 segundos.
+ * Confusion: invierte el movimiento horizontal (izquierda/derecha) durante 5
+ * segundos.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -17,7 +18,7 @@ public class ConfusionEffect extends Effect {
     }
 
     @Override
-    int getHorizontalSign() {
+    int obtenerSignoHorizontal() {
         return -1;
     }
 }

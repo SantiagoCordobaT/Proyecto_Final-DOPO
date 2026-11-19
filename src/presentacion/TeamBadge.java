@@ -25,7 +25,7 @@ final class TeamBadge extends JPanel {
     }
 
     /** @param pais Pais cuyos colores debe mostrar el escudo. */
-    void setCountry(String pais) {
+    void establecerPais(String pais) {
         if (!pais.equals(this.pais)) {
             this.pais = pais;
             repaint();
@@ -35,7 +35,7 @@ final class TeamBadge extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Color[] colores = Resources.getInstance().teamColors(pais);
+        Color[] colores = Resources.obtenerInstancia().coloresEquipo(pais);
         int franja = getWidth() / colores.length;
         for (int i = 0; i < colores.length; i++) {
             g.setColor(colores[i]);

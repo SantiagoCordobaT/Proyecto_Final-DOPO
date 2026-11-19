@@ -17,7 +17,7 @@ public class FreezePower extends Power {
     }
 
     @Override
-    protected Effect createEffect() {
+    protected Effect crearEfecto() {
         return new FreezeEffect();
     }
 }

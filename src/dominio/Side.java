@@ -26,7 +26,7 @@ enum Side {
      *
      * @param personaje Personaje que entra a la cancha.
      */
-    void place(Character personaje) {
-        personaje.enterAt(xInicial, orientacion);
+    void ubicar(Character personaje) {
+        personaje.entrarEn(xInicial, orientacion);
     }
 }

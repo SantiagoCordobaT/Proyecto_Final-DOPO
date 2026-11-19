@@ -14,12 +14,12 @@ class PvsP extends GameMode {
     }
 
     @Override
-    public Controller createPlayer1Controller() {
+    public Controller crearControladorJugador1() {
         return new HumanController();
     }
 
     @Override
-    public Controller createPlayer2Controller() {
+    public Controller crearControladorJugador2() {
         return new HumanController();
     }
 }

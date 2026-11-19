@@ -1,7 +1,8 @@
 package dominio.efectos;
 
 /**
- * Aturdimiento: el personaje no puede moverse, saltar ni patear durante 3 segundos.
+ * Aturdimiento: el personaje no puede moverse, saltar ni patear durante 3
+ * segundos.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -17,7 +18,7 @@ public class StunEffect extends Effect {
     }
 
     @Override
-    boolean allowsActions() {
+    boolean permiteAcciones() {
         return false;
     }
 }

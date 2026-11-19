@@ -1,6 +1,6 @@
 package presentacion;
 
-import static presentacion.Texts.text;
+import static presentacion.Texts.texto;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -34,40 +34,40 @@ final class CharacterSelectD extends StreetDialog {
      * @param modelo  Fachada del dominio.
      */
     CharacterSelectD(HeadSoccerGUI ventana, HeadSoccer modelo) {
-        super(ventana, text("select.title"));
+        super(ventana, texto("select.title"));
         this.ventana = ventana;
         this.modelo = modelo;
         primero = new CharacterCard(modelo, 1, 0);
         segundo = new CharacterCard(modelo, 2, INDICE_RIVAL);
-        JPanel fichas = recursos.panel(new BorderLayout(Resources.ESPACIO, 0));
+        JPanel fichas = recursos.crearPanel(new BorderLayout(Resources.ESPACIO, 0));
         fichas.add(primero, BorderLayout.WEST);
-        fichas.add(recursos.label(CONTRA, Resources.FUENTE_TITULO), BorderLayout.CENTER);
+        fichas.add(recursos.crearEtiqueta(CONTRA, Resources.FUENTE_TITULO), BorderLayout.CENTER);
         fichas.add(segundo, BorderLayout.EAST);
-        setBody(fichas);
-        addButton(text("select.play"), new ActionListener() {
+        establecerCuerpo(fichas);
+        agregarBoton(texto("select.play"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                play();
+                jugar();
             }
         });
-        addButton(text("common.back"), new ActionListener() {
+        agregarBoton(texto("common.back"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                close();
-                ventana.openGameModes();
+                cerrar();
+                ventana.abrirModosJuego();
             }
         });
     }
 
-    private void play() {
+    private void jugar() {
         try {
-            modelo.selectPlayer(1, primero.getSelectedIndex());
-            modelo.selectPlayer(2, segundo.getSelectedIndex());
-            modelo.startMatch();
-            close();
-            ventana.showMatch();
+            modelo.seleccionarJugador(1, primero.obtenerIndiceSeleccionado());
+            modelo.seleccionarJugador(2, segundo.obtenerIndiceSeleccionado());
+            modelo.iniciarPartido();
+            cerrar();
+            ventana.mostrarPartido();
         } catch (POOBSoccerException e) {
-            HeadSoccerGUI.report(this, e);
+            HeadSoccerGUI.reportarError(this, e);
         }
     }
 }

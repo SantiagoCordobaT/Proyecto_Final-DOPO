@@ -1,7 +1,8 @@
 package dominio.efectos;
 
 /**
- * Congelamiento en un bloque de hielo: impide moverse, saltar y patear durante 3 segundos.
+ * Congelamiento en un bloque de hielo: impide moverse, saltar y patear durante
+ * 3 segundos.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -17,7 +18,7 @@ public class FreezeEffect extends Effect {
     }
 
     @Override
-    boolean allowsActions() {
+    boolean permiteAcciones() {
         return false;
     }
 }

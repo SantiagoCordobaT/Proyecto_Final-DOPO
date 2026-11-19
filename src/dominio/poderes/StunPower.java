@@ -18,7 +18,7 @@ public class StunPower extends Power {
     }
 
     @Override
-    protected Effect createEffect() {
+    protected Effect crearEfecto() {
         return new StunEffect();
     }
 }
