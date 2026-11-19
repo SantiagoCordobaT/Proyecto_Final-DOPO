@@ -2,12 +2,11 @@ package dominio;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import dominio.excepciones.POOBSoccerException;
 
 /**
  * Lista ordenada de opciones elegibles por indice. Cada catalogo concreto crea
- * sus elementos (Creator) y define el mensaje para un indice inexistente.
+ * sus elementos (Creator).
  *
  * @param <T> Tipo de elemento ofrecido.
  * @author Santiago Cordoba - Camilo Rivas
@@ -18,7 +17,9 @@ public abstract class Catalog<T extends Named> {
     private final List<T> items = new ArrayList<T>();
     private final String invalidIndexMessage;
 
-    /** @param invalidIndexMessage Mensaje de la excepcion cuando se pide un indice inexistente. */
+    /**
+     * @param invalidIndexMessage Mensaje cuando se pide un indice inexistente.
+     */
     protected Catalog(String invalidIndexMessage) {
         this.invalidIndexMessage = invalidIndexMessage;
     }
@@ -32,7 +33,7 @@ public abstract class Catalog<T extends Named> {
         items.add(item);
     }
 
-    /** @return Nombres de las opciones, en orden. */
+    /** @return Nombres de las opciones ordenadas. */
     public final String[] names() {
         String[] names = new String[items.size()];
         for (int i = 0; i < names.length; i++) {
