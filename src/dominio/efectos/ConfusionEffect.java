@@ -8,12 +8,12 @@ package dominio.efectos;
  */
 public class ConfusionEffect extends Effect {
 
-    private static final String NAME = "Confundido";
-    private static final double CONFUSION_SECONDS = 5.0;
+    private static final String NOMBRE = "Confundido";
+    private static final double SEGUNDOS_CONFUSION = 5.0;
 
     /** Crea una confusion de 5 segundos. */
     public ConfusionEffect() {
-        super(NAME, CONFUSION_SECONDS);
+        super(NOMBRE, SEGUNDOS_CONFUSION);
     }
 
     @Override

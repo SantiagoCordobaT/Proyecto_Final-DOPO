@@ -1,10 +1,11 @@
-package presentation;
+package presentacion;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Tabla de textos de la interfaz en los idiomas disponibles (Singleton): toda la
+ * Tabla de textos de la interfaz en los idiomas disponibles (Singleton): toda
+ * la
  * vista comparte un unico idioma activo.
  *
  * @author Santiago Cordoba - Camilo Rivas
@@ -12,12 +13,12 @@ import java.util.Map;
  */
 final class Texts {
 
-    private static final String[] LANGUAGES = { "Español", "English" };
+    private static final String[] IDIOMAS = { "Español", "English" };
 
-    private static Texts instance;
+    private static Texts instancia;
 
-    private final Map<String, String[]> table = new HashMap<String, String[]>();
-    private int language;
+    private final Map<String, String[]> tabla = new HashMap<String, String[]>();
+    private int idioma;
 
     private Texts() {
         put("menu.subtitle", "Fútbol callejero 1 contra 1", "1 v 1 street football");
@@ -64,40 +65,40 @@ final class Texts {
 
     /** @return La unica instancia de la tabla de textos. */
     static Texts getInstance() {
-        if (instance == null) {
-            instance = new Texts();
+        if (instancia == null) {
+            instancia = new Texts();
         }
-        return instance;
+        return instancia;
     }
 
     /**
-     * @param key Clave del texto.
+     * @param clave Clave del texto.
      * @return El texto en el idioma activo.
      */
-    static String text(String key) {
-        return getInstance().translate(key);
+    static String text(String clave) {
+        return getInstance().translate(clave);
     }
 
     /** @return Nombres de los idiomas disponibles. */
     String[] getLanguages() {
-        return LANGUAGES.clone();
+        return IDIOMAS.clone();
     }
 
     /** @return Indice del idioma activo. */
     int getLanguage() {
-        return language;
+        return idioma;
     }
 
-    /** @param language Indice del idioma que pasa a estar activo. */
-    void setLanguage(int language) {
-        this.language = language;
+    /** @param idioma Indice del idioma que pasa a estar activo. */
+    void setLanguage(int idioma) {
+        this.idioma = idioma;
     }
 
-    private String translate(String key) {
-        return table.get(key)[language];
+    private String translate(String clave) {
+        return tabla.get(clave)[idioma];
     }
 
-    private void put(String key, String spanish, String english) {
-        table.put(key, new String[] { spanish, english });
+    private void put(String clave, String espanol, String ingles) {
+        tabla.put(clave, new String[] { espanol, ingles });
     }
 }

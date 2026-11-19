@@ -37,76 +37,76 @@ public final class CharacterCatalog extends Catalog<Character> {
     /**
      * Prototipo del rival que sigue al actual en el catalogo (vuelve al primero despues del ultimo).
      *
-     * @param current Personaje actual, copia de uno del catalogo.
+     * @param actual Personaje actual, copia de uno del catalogo.
      * @return Copia nueva del siguiente personaje.
      * @throws POOBSoccerException Si el catalogo no pudiera entregar el personaje.
      */
-    public Character nextAfter(Character current) throws POOBSoccerException {
-        List<String> names = Arrays.asList(names());
-        int next = (names.indexOf(current.getName()) + 1) % names.size();
-        return get(next).copy();
+    public Character nextAfter(Character actual) throws POOBSoccerException {
+        List<String> nombres = Arrays.asList(names());
+        int siguiente = (nombres.indexOf(actual.getName()) + 1) % nombres.size();
+        return get(siguiente).copy();
     }
 
     /**
-     * @param index Indice del personaje.
+     * @param indice Indice del personaje.
      * @return Pais del personaje.
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public String getCountry(int index) throws POOBSoccerException {
-        return get(index).getCountry();
+    public String getCountry(int indice) throws POOBSoccerException {
+        return get(indice).getCountry();
     }
 
     /**
-     * @param index Indice del personaje.
+     * @param indice Indice del personaje.
      * @return Velocidad del personaje (1 a 5).
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public int getSpeed(int index) throws POOBSoccerException {
-        return get(index).getSpeed();
+    public int getSpeed(int indice) throws POOBSoccerException {
+        return get(indice).getSpeed();
     }
 
     /**
-     * @param index Indice del personaje.
+     * @param indice Indice del personaje.
      * @return Salto del personaje (1 a 5).
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public int getJump(int index) throws POOBSoccerException {
-        return get(index).getJump();
+    public int getJump(int indice) throws POOBSoccerException {
+        return get(indice).getJump();
     }
 
     /**
-     * @param index Indice del personaje.
+     * @param indice Indice del personaje.
      * @return Fuerza del personaje (1 a 5).
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public int getStrength(int index) throws POOBSoccerException {
-        return get(index).getStrength();
+    public int getStrength(int indice) throws POOBSoccerException {
+        return get(indice).getStrength();
     }
 
     /**
-     * @param index Indice del personaje.
+     * @param indice Indice del personaje.
      * @return Poder Unico del personaje (1 a 5).
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public int getPowerLevel(int index) throws POOBSoccerException {
-        return get(index).getPowerLevel();
+    public int getPowerLevel(int indice) throws POOBSoccerException {
+        return get(indice).getPowerLevel();
     }
 
     /**
-     * @param index Indice del personaje.
+     * @param indice Indice del personaje.
      * @return Nombre del poder del personaje.
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public String getPowerName(int index) throws POOBSoccerException {
-        return get(index).getPowerName();
+    public String getPowerName(int indice) throws POOBSoccerException {
+        return get(indice).getPowerName();
     }
 
     /**
-     * @param index Indice del personaje.
+     * @param indice Indice del personaje.
      * @return Descripcion del poder del personaje.
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public String getPowerDescription(int index) throws POOBSoccerException {
-        return get(index).getPowerDescription();
+    public String getPowerDescription(int indice) throws POOBSoccerException {
+        return get(indice).getPowerDescription();
     }
 }

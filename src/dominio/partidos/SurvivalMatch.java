@@ -14,11 +14,11 @@ import dominio.modalidades.GameMode;
  */
 class SurvivalMatch extends MatchType {
 
-    private static final int INITIAL_BALLS = 3;
+    private static final int BALONES_INICIALES = 3;
 
     // Balones de cada jugador, indexados por numero de jugador - 1
-    private Lives[] lives;
-    private int streak;
+    private Lives[] vidas;
+    private int racha;
 
     /** Crea el partido de supervivencia; solo lo crea {@link MatchTypeCatalog}. */
     SurvivalMatch() {
@@ -27,27 +27,27 @@ class SurvivalMatch extends MatchType {
 
     /** @return true solo si la modalidad admite Supervivencia. */
     @Override
-    public boolean supports(GameMode mode) {
-        return mode.supportsSurvival();
+    public boolean supports(GameMode modo) {
+        return modo.supportsSurvival();
     }
 
     @Override
-    public void begin(MatchContext context) {
-        super.begin(context);
-        lives = new Lives[] { new PlayerLives(), new RivalLives() };
-        streak = 0;
+    public void begin(MatchContext contexto) {
+        super.begin(contexto);
+        vidas = new Lives[] { new PlayerLives(), new RivalLives() };
+        racha = 0;
     }
 
-    /** Quien recibe el gol es el otro jugador: su indice (numero - 1) es {@code PLAYER_TWO - scorer}. */
+    /** Quien recibe el gol es el otro jugador: su indice (numero - 1) es {@code JUGADOR_DOS - anotador}. */
     @Override
-    protected void onGoal(int scorer) throws POOBSoccerException {
-        lives[PLAYER_TWO - scorer].lose();
+    protected void onGoal(int anotador) throws POOBSoccerException {
+        vidas[JUGADOR_DOS - anotador].lose();
     }
 
     /** @return Balones de cada jugador y racha, por ejemplo "Balones 3-2 | Racha 1". */
     @Override
     public String getStatusText() {
-        return String.format("Balones %d-%d | Racha %d", lives[0].balls, lives[1].balls, streak);
+        return String.format("Balones %d-%d | Racha %d", vidas[0].balones, vidas[1].balones, racha);
     }
 
     /**
@@ -56,11 +56,11 @@ class SurvivalMatch extends MatchType {
      */
     private abstract class Lives {
 
-        int balls = INITIAL_BALLS;
+        int balones = BALONES_INICIALES;
 
         final void lose() throws POOBSoccerException {
-            balls--;
-            if (balls == 0) {
+            balones--;
+            if (balones == 0) {
                 exhausted();
             }
         }
@@ -74,7 +74,7 @@ class SurvivalMatch extends MatchType {
 
         @Override
         void exhausted() {
-            finish(PLAYER_TWO);
+            finish(JUGADOR_DOS);
         }
     }
 
@@ -83,8 +83,8 @@ class SurvivalMatch extends MatchType {
 
         @Override
         void exhausted() throws POOBSoccerException {
-            streak++;
-            balls = INITIAL_BALLS;
+            racha++;
+            balones = BALONES_INICIALES;
             replaceRival();
         }
     }

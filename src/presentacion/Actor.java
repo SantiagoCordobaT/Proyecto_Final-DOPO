@@ -1,11 +1,12 @@
-package presentation;
+package presentacion;
 
 import java.awt.Graphics2D;
 
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Elemento animado de la cancha. En cada cuadro primero lee de la fachada lo que
+ * Elemento animado de la cancha. En cada cuadro primero lee de la fachada lo
+ * que
  * necesita y avanza su animacion, y despues se pinta con ese estado; asi el
  * pintado nunca consulta al dominio.
  *
@@ -17,10 +18,10 @@ interface Actor {
     /**
      * Lee el estado del partido y avanza la animacion.
      *
-     * @param seconds Segundos reales transcurridos desde el cuadro anterior.
+     * @param segundos Segundos reales transcurridos desde el cuadro anterior.
      * @throws POOBSoccerException Si no hay un partido iniciado.
      */
-    void update(double seconds) throws POOBSoccerException;
+    void update(double segundos) throws POOBSoccerException;
 
     /**
      * Pinta el actor en coordenadas de la cancha.

@@ -14,17 +14,17 @@ import dominio.personajes.Character;
 class HumanController extends Controller {
 
     @Override
-    protected int direction(Character self, Ball ball) {
+    protected int direction(Character personaje, Ball balon) {
         return heldValue(Action.RIGHT) - heldValue(Action.LEFT);
     }
 
     @Override
-    protected boolean wantsJump(Character self, Ball ball) {
+    protected boolean wantsJump(Character personaje, Ball balon) {
         return isHeld(Action.JUMP);
     }
 
     @Override
-    protected boolean wantsKick(Character self, Ball ball) {
+    protected boolean wantsKick(Character personaje, Ball balon) {
         return isHeld(Action.KICK);
     }
 
@@ -33,8 +33,11 @@ class HumanController extends Controller {
         return isHeld(Action.POWER);
     }
 
-    /** @return 1 si la accion esta presionada, 0 si no (dos teclas opuestas se cancelan). */
-    private int heldValue(Action action) {
-        return isHeld(action) ? 1 : 0;
+    /**
+     * @return 1 si la accion esta presionada, 0 si no (dos teclas opuestas se
+     *         cancelan).
+     */
+    private int heldValue(Action accion) {
+        return isHeld(accion) ? 1 : 0;
     }
 }

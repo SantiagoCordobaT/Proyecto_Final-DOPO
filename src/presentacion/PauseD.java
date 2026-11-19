@@ -1,6 +1,6 @@
-package presentation;
+package presentacion;
 
-import static presentation.Texts.text;
+import static presentacion.Texts.text;
 
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -19,23 +19,24 @@ import javax.swing.JTextArea;
 @SuppressWarnings("serial")
 final class PauseD extends StreetDialog {
 
-    private final MatchP match;
-    private final JTextArea controls;
+    private final MatchP partido;
+    private final JTextArea controles;
 
     /**
-     * @param owner Ventana principal.
-     * @param match Pantalla del partido en pausa.
+     * @param dueno   Ventana principal.
+     * @param partido Pantalla del partido en pausa.
      */
-    PauseD(Frame owner, MatchP match) {
-        super(owner, text("pause.title"));
-        this.match = match;
-        controls = new JTextArea(text("help.controls"));
-        controls.setEditable(false);
-        controls.setFont(Resources.TEXT_FONT);
-        controls.setBackground(Resources.CONCRETE);
-        controls.setForeground(Resources.TEXT);
-        controls.setBorder(BorderFactory.createEmptyBorder(Resources.GAP, Resources.GAP, Resources.GAP, Resources.GAP));
-        setBody(controls);
+    PauseD(Frame dueno, MatchP partido) {
+        super(dueno, text("pause.title"));
+        this.partido = partido;
+        controles = new JTextArea(text("help.controls"));
+        controles.setEditable(false);
+        controles.setFont(Resources.FUENTE_TEXTO);
+        controles.setBackground(Resources.CONCRETO);
+        controles.setForeground(Resources.TEXTO);
+        controles.setBorder(BorderFactory.createEmptyBorder(Resources.ESPACIO, Resources.ESPACIO, Resources.ESPACIO,
+                Resources.ESPACIO));
+        setBody(controles);
         addButton(text("pause.resume"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -46,7 +47,7 @@ final class PauseD extends StreetDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose();
-                match.giveUp();
+                partido.giveUp();
             }
         });
     }
@@ -54,6 +55,6 @@ final class PauseD extends StreetDialog {
     @Override
     protected void close() {
         super.close();
-        match.resumeGame();
+        partido.resumeGame();
     }
 }

@@ -10,43 +10,43 @@ package dominio.efectos;
  */
 public abstract class Effect {
 
-    private final String name;
-    private double remainingSeconds;
+    private final String nombre;
+    private double segundosRestantes;
 
     /**
-     * @param name Nombre del efecto.
-     * @param durationSeconds Duracion en segundos.
+     * @param nombre           Nombre del efecto.
+     * @param duracionSegundos Duracion en segundos.
      */
-    protected Effect(String name, double durationSeconds) {
-        this.name = name;
-        this.remainingSeconds = durationSeconds;
+    protected Effect(String nombre, double duracionSegundos) {
+        this.nombre = nombre;
+        this.segundosRestantes = duracionSegundos;
     }
 
     /**
      * Descuenta tiempo al efecto.
      *
-     * @param deltaTimeSeconds Segundos transcurridos.
+     * @param segundosTranscurridos Segundos transcurridos.
      */
-    void tick(double deltaTimeSeconds) {
-        remainingSeconds = Math.max(0.0, remainingSeconds - deltaTimeSeconds);
+    void tick(double segundosTranscurridos) {
+        segundosRestantes = Math.max(0.0, segundosRestantes - segundosTranscurridos);
     }
 
     /** @return true si ya termino. */
     boolean isExpired() {
-        return remainingSeconds <= 0.0;
+        return segundosRestantes <= 0.0;
     }
 
     /**
-     * @param other Otro efecto.
+     * @param otro Otro efecto.
      * @return true si ambos efectos son del mismo tipo (mismo nombre).
      */
-    boolean isSameKindAs(Effect other) {
-        return name.equals(other.name);
+    boolean isSameKindAs(Effect otro) {
+        return nombre.equals(otro.nombre);
     }
 
     /** @return Nombre del efecto. */
     String getName() {
-        return name;
+        return nombre;
     }
 
     /** @return true si el personaje puede moverse, saltar y patear. */

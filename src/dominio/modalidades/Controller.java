@@ -21,70 +21,70 @@ import dominio.personajes.Character;
  */
 public abstract class Controller {
 
-    private final Set<Action> held = EnumSet.noneOf(Action.class);
+    private final Set<Action> mantenidas = EnumSet.noneOf(Action.class);
 
-    /** @param action Accion que empieza a mantenerse presionada. */
-    public final void press(Action action) {
-        held.add(action);
+    /** @param accion Accion que empieza a mantenerse presionada. */
+    public final void press(Action accion) {
+        mantenidas.add(accion);
     }
 
-    /** @param action Accion que deja de mantenerse presionada. */
-    public final void release(Action action) {
-        held.remove(action);
+    /** @param accion Accion que deja de mantenerse presionada. */
+    public final void release(Action accion) {
+        mantenidas.remove(accion);
     }
 
     /** Suelta todas las acciones mantenidas (por ejemplo, al pausar). */
     public final void releaseAll() {
-        held.clear();
+        mantenidas.clear();
     }
 
     /**
-     * @param action Accion consultada.
+     * @param accion Accion consultada.
      * @return true si la accion esta presionada.
      */
-    protected final boolean isHeld(Action action) {
-        return held.contains(action);
+    protected final boolean isHeld(Action accion) {
+        return mantenidas.contains(accion);
     }
 
     /**
      * Decide las intenciones del personaje para este tick, antes de actualizar la fisica.
      *
-     * @param self Personaje controlado.
-     * @param ball Balon.
+     * @param personaje Personaje controlado.
+     * @param balon     Balon.
      */
-    public final void control(Character self, Ball ball) {
-        self.setMoveDirection(direction(self, ball));
-        if (wantsJump(self, ball)) {
-            self.jump();
+    public final void control(Character personaje, Ball balon) {
+        personaje.setMoveDirection(direction(personaje, balon));
+        if (wantsJump(personaje, balon)) {
+            personaje.jump();
         }
-        if (wantsKick(self, ball)) {
-            self.requestKick();
+        if (wantsKick(personaje, balon)) {
+            personaje.requestKick();
         }
         if (wantsPower()) {
-            self.armPower();
+            personaje.armPower();
         }
     }
 
     /**
-     * @param self Personaje controlado.
-     * @param ball Balon.
+     * @param personaje Personaje controlado.
+     * @param balon     Balon.
      * @return -1 izquierda, 0 quieto, 1 derecha.
      */
-    protected abstract int direction(Character self, Ball ball);
+    protected abstract int direction(Character personaje, Ball balon);
 
     /**
-     * @param self Personaje controlado.
-     * @param ball Balon.
+     * @param personaje Personaje controlado.
+     * @param balon     Balon.
      * @return true si el personaje intenta saltar.
      */
-    protected abstract boolean wantsJump(Character self, Ball ball);
+    protected abstract boolean wantsJump(Character personaje, Ball balon);
 
     /**
-     * @param self Personaje controlado.
-     * @param ball Balon.
+     * @param personaje Personaje controlado.
+     * @param balon     Balon.
      * @return true si el personaje pide patear.
      */
-    protected abstract boolean wantsKick(Character self, Ball ball);
+    protected abstract boolean wantsKick(Character personaje, Ball balon);
 
     /** @return true si el personaje intenta armar su poder. */
     protected abstract boolean wantsPower();

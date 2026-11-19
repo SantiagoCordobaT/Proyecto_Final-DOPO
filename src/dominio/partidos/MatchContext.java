@@ -13,11 +13,11 @@ import dominio.excepciones.POOBSoccerException;
 public interface MatchContext {
 
     /**
-     * @param player Jugador (1 o 2).
+     * @param jugador Jugador (1 o 2).
      * @return Goles del jugador.
      * @throws POOBSoccerException Si el jugador no es 1 ni 2.
      */
-    int getGoals(int player) throws POOBSoccerException;
+    int getGoals(int jugador) throws POOBSoccerException;
 
     /**
      * Reemplaza al rival (jugador 2) por el siguiente del catalogo, listo para jugar.

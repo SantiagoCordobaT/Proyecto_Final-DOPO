@@ -8,12 +8,12 @@ package dominio.efectos;
  */
 public class FreezeEffect extends Effect {
 
-    private static final String NAME = "Congelado";
-    private static final double FREEZE_SECONDS = 3.0;
+    private static final String NOMBRE = "Congelado";
+    private static final double SEGUNDOS_CONGELAMIENTO = 3.0;
 
     /** Crea un congelamiento de 3 segundos. */
     public FreezeEffect() {
-        super(NAME, FREEZE_SECONDS);
+        super(NOMBRE, SEGUNDOS_CONGELAMIENTO);
     }
 
     @Override

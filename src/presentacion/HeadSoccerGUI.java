@@ -1,6 +1,6 @@
-package presentation;
+package presentacion;
 
-import static presentation.Texts.text;
+import static presentacion.Texts.text;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -28,25 +28,25 @@ import dominio.excepciones.POOBSoccerException;
 @SuppressWarnings("serial")
 public final class HeadSoccerGUI extends JFrame {
 
-    private static final String TITLE = "POOBSoccer";
+    private static final String TITULO = "POOBSoccer";
     private static final String MENU = "menu";
-    private static final String MATCH = "match";
+    private static final String PARTIDO = "match";
 
-    private final HeadSoccer model;
-    private final CardLayout cards = new CardLayout();
-    private final JPanel deck = new JPanel(cards);
+    private final HeadSoccer modelo;
+    private final CardLayout tarjetas = new CardLayout();
+    private final JPanel baraja = new JPanel(tarjetas);
     private final MainMenuP menu;
-    private final MatchP match;
+    private final MatchP partido;
 
-    private HeadSoccerGUI(HeadSoccer model) {
-        super(TITLE);
-        this.model = model;
+    private HeadSoccerGUI(HeadSoccer modelo) {
+        super(TITULO);
+        this.modelo = modelo;
         menu = new MainMenuP(this);
-        match = new MatchP(this, model);
-        deck.add(menu, MENU);
-        deck.add(match, MATCH);
+        partido = new MatchP(this, modelo);
+        baraja.add(menu, MENU);
+        baraja.add(partido, PARTIDO);
         setLayout(new BorderLayout());
-        add(deck, BorderLayout.CENTER);
+        add(baraja, BorderLayout.CENTER);
         setResizable(false);
         pack();
         setLocationRelativeTo(null);
@@ -61,27 +61,34 @@ public final class HeadSoccerGUI extends JFrame {
 
     /** Muestra el menu principal. */
     void showMenu() {
-        cards.show(deck, MENU);
+        tarjetas.show(baraja, MENU);
     }
 
-    /** Muestra la pantalla del partido ya iniciado en la fachada y arranca su ciclo. */
+    /**
+     * Muestra la pantalla del partido ya iniciado en la fachada y arranca su ciclo.
+     */
     void showMatch() {
-        cards.show(deck, MATCH);
-        match.start();
+        tarjetas.show(baraja, PARTIDO);
+        partido.start();
     }
 
-    /** Empieza una configuracion nueva y abre el dialogo de modalidad y tipo de partido. */
+    /**
+     * Empieza una configuracion nueva y abre el dialogo de modalidad y tipo de
+     * partido.
+     */
     void openGameModes() {
-        model.newGame();
-        new GameModeD(this, model).open();
+        modelo.newGame();
+        new GameModeD(this, modelo).open();
     }
 
     /** Abre el dialogo de seleccion de personajes. */
     void openCharacterSelect() {
-        new CharacterSelectD(this, model).open();
+        new CharacterSelectD(this, modelo).open();
     }
 
-    /** Abre la configuracion y, al cerrarla, rotula el menu en el idioma elegido. */
+    /**
+     * Abre la configuracion y, al cerrarla, rotula el menu en el idioma elegido.
+     */
     void openSettings() {
         new SettingsD(this).open();
         menu.refresh();
@@ -89,23 +96,23 @@ public final class HeadSoccerGUI extends JFrame {
 
     /** Abre el resultado del partido terminado. */
     void showResult() {
-        new ResultD(this, model).open();
+        new ResultD(this, modelo).open();
     }
 
     /** Cierre seguro: detiene el ciclo del partido y libera la ventana. */
     void close() {
-        match.stop();
+        partido.stop();
         dispose();
     }
 
     /**
      * Muestra al usuario un error reportado por el dominio.
      *
-     * @param parent Componente sobre el que se centra el mensaje.
-     * @param e Excepcion del dominio.
+     * @param padre Componente sobre el que se centra el mensaje.
+     * @param e     Excepcion del dominio.
      */
-    static void report(Component parent, POOBSoccerException e) {
-        JOptionPane.showMessageDialog(parent, e.getMessage(), text("error.title"), JOptionPane.ERROR_MESSAGE);
+    static void report(Component padre, POOBSoccerException e) {
+        JOptionPane.showMessageDialog(padre, e.getMessage(), text("error.title"), JOptionPane.ERROR_MESSAGE);
     }
 
     private static void launch() {
@@ -119,9 +126,9 @@ public final class HeadSoccerGUI extends JFrame {
     /**
      * Punto de entrada de la aplicacion.
      *
-     * @param args No se usan.
+     * @param argumentos No se usan.
      */
-    public static void main(String[] args) {
+    public static void main(String[] argumentos) {
         SwingUtilities.invokeLater(HeadSoccerGUI::launch);
     }
 }

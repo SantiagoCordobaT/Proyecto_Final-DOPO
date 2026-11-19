@@ -13,17 +13,17 @@ public enum Action {
     LEFT, RIGHT, JUMP, KICK, POWER;
 
     /**
-     * @param name Nombre de la accion (LEFT, RIGHT, JUMP, KICK o POWER).
+     * @param nombre Nombre de la accion (LEFT, RIGHT, JUMP, KICK o POWER).
      * @return Accion con ese nombre.
      * @throws POOBSoccerException Si el nombre es nulo o no corresponde a ninguna
      *                             accion.
      */
-    public static Action named(String name) throws POOBSoccerException {
-        if (name == null) {
+    public static Action named(String nombre) throws POOBSoccerException {
+        if (nombre == null) {
             throw new POOBSoccerException(POOBSoccerException.ACCION_INVALIDA);
         }
         try {
-            return valueOf(name);
+            return valueOf(nombre);
         } catch (IllegalArgumentException e) {
             throw new POOBSoccerException(POOBSoccerException.ACCION_INVALIDA);
         }

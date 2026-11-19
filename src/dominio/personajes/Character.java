@@ -20,82 +20,85 @@ import dominio.poderes.PowerBar;
  */
 public class Character implements Named {
 
-    private static final int MIN_STAT = 1;
-    private static final int MAX_STAT = 5;
+    private static final int ESTADISTICA_MIN = 1;
+    private static final int ESTADISTICA_MAX = 5;
 
-    private static final double BASE_WIDTH = 60.0;
-    private static final double BASE_HEIGHT = 90.0;
-    private static final double SPEED_PER_POINT = 70.0;
-    private static final double BASE_JUMP_SPEED = 450.0;
-    private static final double JUMP_SPEED_PER_POINT = 70.0;
-    private static final double GRAVITY = 1800.0;
-    private static final double KICK_BUFFER_SECONDS = 0.15;
-    private static final double KICK_COOLDOWN_SECONDS = 0.4;
+    private static final double ANCHO_BASE = 60.0;
+    private static final double ALTO_BASE = 90.0;
+    private static final double VELOCIDAD_POR_PUNTO = 70.0;
+    private static final double VELOCIDAD_SALTO_BASE = 450.0;
+    private static final double VELOCIDAD_SALTO_POR_PUNTO = 70.0;
+    private static final double GRAVEDAD = 1800.0;
+    private static final double VENTANA_PATADA_SEGUNDOS = 0.15;
+    private static final double ENFRIAMIENTO_PATADA_SEGUNDOS = 0.4;
 
-    // Alcance de la patada alrededor del hitbox y alcance cuerpo a cuerpo contra el rival
-    private static final double KICK_REACH = 15.0;
-    private static final double MELEE_RANGE = 10.0;
+    // Alcance de la patada alrededor del hitbox y alcance cuerpo a cuerpo contra el
+    // rival
+    private static final double ALCANCE_PATADA = 15.0;
+    private static final double ALCANCE_CUERPO_A_CUERPO = 10.0;
 
-    private final String name;
-    private final String country;
-    private final int speed;
-    private final int jump;
-    private final int strength;
-    private int goals;
-    private final PowerBar powerBar;
-    private final StatusEffects effects = new StatusEffects();
+    private final String nombre;
+    private final String pais;
+    private final int velocidad;
+    private final int salto;
+    private final int fuerza;
+    private int goles;
+    private final PowerBar barraPoder;
+    private final StatusEffects efectos = new StatusEffects();
 
     private double x;
     private double y;
-    private double speedY;
-    private double homeX;
-    private int facing = 1;
-    private int moveDirection;
-    private double kickBuffer;
-    private double kickCooldown;
+    private double velocidadY;
+    private double xInicial;
+    private int orientacion = 1;
+    private int direccionMovimiento;
+    private double esperaPatada;
+    private double enfriamientoPatada;
 
     /**
      * Crea un personaje validando sus datos.
      *
-     * @param name Nombre.
-     * @param country Pais.
-     * @param speed Velocidad (1 a 5).
-     * @param jump Salto (1 a 5).
-     * @param strength Fuerza (1 a 5).
-     * @param powerLevel Poder Unico (1 a 5): rapidez con la que se recarga la barra de poder.
-     * @param power Poder del personaje.
-     * @throws POOBSoccerException Si las estadisticas estan fuera de rango o faltan datos.
+     * @param nombre     Nombre.
+     * @param pais       Pais.
+     * @param velocidad  Velocidad (1 a 5).
+     * @param salto      Salto (1 a 5).
+     * @param fuerza     Fuerza (1 a 5).
+     * @param nivelPoder Poder Unico (1 a 5): rapidez con la que se recarga la barra
+     *                   de poder.
+     * @param poder      Poder del personaje.
+     * @throws POOBSoccerException Si las estadisticas estan fuera de rango o faltan
+     *                             datos.
      */
-    public Character(String name, String country, int speed, int jump, int strength, int powerLevel,
-            Power power) throws POOBSoccerException {
-        this(name, country, speed, jump, strength, new PowerBar(power, powerLevel));
-        if (name == null || name.trim().isEmpty() || country == null || country.trim().isEmpty() || power == null) {
+    public Character(String nombre, String pais, int velocidad, int salto, int fuerza, int nivelPoder,
+            Power poder) throws POOBSoccerException {
+        this(nombre, pais, velocidad, salto, fuerza, new PowerBar(poder, nivelPoder));
+        if (nombre == null || nombre.trim().isEmpty() || pais == null || pais.trim().isEmpty() || poder == null) {
             throw new POOBSoccerException(POOBSoccerException.PERSONAJE_INVALIDO);
         }
-        validateStat(speed);
-        validateStat(jump);
-        validateStat(strength);
-        validateStat(powerLevel);
+        validateStat(velocidad);
+        validateStat(salto);
+        validateStat(fuerza);
+        validateStat(nivelPoder);
     }
 
     /**
      * Constructor base, sin validacion: lo usan el constructor publico (que valida
      * despues) y {@link #copy()} (Prototype). El personaje empieza sin efectos.
      *
-     * @param name Nombre.
-     * @param country Pais.
-     * @param speed Velocidad.
-     * @param jump Salto.
-     * @param strength Fuerza.
-     * @param powerBar Barra de poder propia de la copia.
+     * @param nombre     Nombre.
+     * @param pais       Pais.
+     * @param velocidad  Velocidad.
+     * @param salto      Salto.
+     * @param fuerza     Fuerza.
+     * @param barraPoder Barra de poder propia de la copia.
      */
-    private Character(String name, String country, int speed, int jump, int strength, PowerBar powerBar) {
-        this.name = name;
-        this.country = country;
-        this.speed = speed;
-        this.jump = jump;
-        this.strength = strength;
-        this.powerBar = powerBar;
+    private Character(String nombre, String pais, int velocidad, int salto, int fuerza, PowerBar barraPoder) {
+        this.nombre = nombre;
+        this.pais = pais;
+        this.velocidad = velocidad;
+        this.salto = salto;
+        this.fuerza = fuerza;
+        this.barraPoder = barraPoder;
     }
 
     /**
@@ -104,11 +107,11 @@ public class Character implements Named {
      * @return Nueva instancia con los mismos datos base y la barra vacia.
      */
     public Character copy() {
-        return new Character(name, country, speed, jump, strength, powerBar.fresh());
+        return new Character(nombre, pais, velocidad, salto, fuerza, barraPoder.fresh());
     }
 
-    private static void validateStat(int value) throws POOBSoccerException {
-        if (value < MIN_STAT || value > MAX_STAT) {
+    private static void validateStat(int valor) throws POOBSoccerException {
+        if (valor < ESTADISTICA_MIN || valor > ESTADISTICA_MAX) {
             throw new POOBSoccerException(POOBSoccerException.ESTADISTICAS_FUERA_DE_RANGO);
         }
     }
@@ -117,117 +120,127 @@ public class Character implements Named {
      * Entra a la cancha para un partido nuevo: fija su lado, pone goles y barra
      * en cero y queda en su posicion inicial.
      *
-     * @param homeX Posicion horizontal inicial.
-     * @param facing 1 si ataca hacia la derecha, -1 hacia la izquierda.
+     * @param xInicial    Posicion horizontal inicial.
+     * @param orientacion 1 si ataca hacia la derecha, -1 hacia la izquierda.
      */
-    public void enterAt(double homeX, int facing) {
-        this.homeX = homeX;
-        this.facing = facing;
+    public void enterAt(double xInicial, int orientacion) {
+        this.xInicial = xInicial;
+        this.orientacion = orientacion;
         resetGoals();
-        powerBar.reset();
+        barraPoder.reset();
         restart();
     }
 
     /** Pone el marcador del personaje en cero para un encuentro nuevo. */
     public void resetGoals() {
-        goals = 0;
+        goles = 0;
     }
 
-    /** Reinicio tras un gol: vuelve a su posicion inicial, en el suelo, y limpia efectos temporales. */
+    /**
+     * Reinicio tras un gol: vuelve a su posicion inicial, en el suelo, y limpia
+     * efectos temporales.
+     */
     public void restart() {
-        this.x = homeX;
-        this.y = Field.GROUND_Y;
-        this.speedY = 0.0;
-        this.moveDirection = 0;
-        this.kickBuffer = 0.0;
-        this.kickCooldown = 0.0;
-        this.effects.clear();
+        this.x = xInicial;
+        this.y = Field.SUELO_Y;
+        this.velocidadY = 0.0;
+        this.direccionMovimiento = 0;
+        this.esperaPatada = 0.0;
+        this.enfriamientoPatada = 0.0;
+        this.efectos.clear();
     }
 
     /**
      * Establece la intencion de movimiento horizontal.
      *
-     * @param direction -1 izquierda, 0 quieto, 1 derecha (otros valores se normalizan por signo).
+     * @param direccion -1 izquierda, 0 quieto, 1 derecha (otros valores se
+     *                  normalizan por signo).
      */
-    public void setMoveDirection(int direction) {
-        this.moveDirection = Integer.signum(direction);
+    public void setMoveDirection(int direccion) {
+        this.direccionMovimiento = Integer.signum(direccion);
     }
 
     /** Salta; solo es posible en el suelo y sin efectos que lo impidan. */
     public void jump() {
-        boolean onGround = y >= Field.GROUND_Y;
-        if (canAct() && onGround) {
-            speedY = -(BASE_JUMP_SPEED + jump * JUMP_SPEED_PER_POINT);
+        boolean enSuelo = y >= Field.SUELO_Y;
+        if (canAct() && enSuelo) {
+            velocidadY = -(VELOCIDAD_SALTO_BASE + salto * VELOCIDAD_SALTO_POR_PUNTO);
         }
     }
 
-    /** Solicita una patada (queda en espera un instante corto) si ningun efecto lo impide. */
+    /**
+     * Solicita una patada (queda en espera un instante corto) si ningun efecto lo
+     * impide.
+     */
     public void requestKick() {
         if (canAct()) {
-            kickBuffer = KICK_BUFFER_SECONDS;
+            esperaPatada = VENTANA_PATADA_SEGUNDOS;
         }
     }
 
     /**
      * Ejecuta la patada solicitada si alcanza el balon o al rival: aturde al rival
-     * en rango cuerpo a cuerpo y patea el balon en alcance, disparando el poder armado.
+     * en rango cuerpo a cuerpo y patea el balon en alcance, disparando el poder
+     * armado.
      *
-     * @param ball Balon.
-     * @param opponent Rival.
+     * @param balon    Balon.
+     * @param oponente Rival.
      * @return true si pateo el balon.
      */
-    public boolean tryKick(Ball ball, Character opponent) {
-        boolean ballInReach = overlaps(ball, KICK_REACH);
-        boolean opponentInReach = isInMeleeRange(opponent);
-        if (!canKickNow() || !(ballInReach || opponentInReach)) {
+    public boolean tryKick(Ball balon, Character oponente) {
+        boolean balonAlAlcance = overlaps(balon, ALCANCE_PATADA);
+        boolean oponenteAlAlcance = isInMeleeRange(oponente);
+        if (!canKickNow() || !(balonAlAlcance || oponenteAlAlcance)) {
             return false;
         }
-        kickBuffer = 0.0;
-        kickCooldown = KICK_COOLDOWN_SECONDS;
-        if (opponentInReach) {
-            opponent.stun();
+        esperaPatada = 0.0;
+        enfriamientoPatada = ENFRIAMIENTO_PATADA_SEGUNDOS;
+        if (oponenteAlAlcance) {
+            oponente.stun();
         }
-        if (ballInReach) {
-            ball.kick(strength, facing);
-            powerBar.fireOn(opponent);
+        if (balonAlAlcance) {
+            balon.kick(fuerza, orientacion);
+            barraPoder.fireOn(oponente);
         }
-        return ballInReach;
+        return balonAlAlcance;
     }
 
     /**
-     * @param ball Balon.
+     * @param balon Balon.
      * @return true si el hitbox toca el balon.
      */
-    public boolean touches(Ball ball) {
-        return overlaps(ball, 0.0);
+    public boolean touches(Ball balon) {
+        return overlaps(balon, 0.0);
     }
 
     /**
-     * Empuja el balon que toca: rebota en la cabeza si viene desde arriba; si no, sale hacia un lado.
+     * Empuja el balon que toca: rebota en la cabeza si viene desde arriba; si no,
+     * sale hacia un lado.
      *
-     * @param ball Balon en contacto.
+     * @param balon Balon en contacto.
      */
-    public void push(Ball ball) {
-        if (ball.isAbove(getTop())) {
-            ball.bounceUp(getTop());
+    public void push(Ball balon) {
+        if (balon.isAbove(getTop())) {
+            balon.bounceUp(getTop());
         } else {
-            int side = ball.sideOf(x);
-            ball.pushSideways(x + side * getWidth() / 2.0, side);
+            int lado = balon.sideOf(x);
+            balon.pushSideways(x + lado * getWidth() / 2.0, lado);
         }
     }
 
     /** Arma el poder; solo tiene efecto con la barra llena. */
     public void armPower() {
-        powerBar.arm();
+        barraPoder.arm();
     }
 
     /**
-     * Agrega un efecto; si ya existe uno del mismo tipo se reemplaza (se reinicia su tiempo).
+     * Agrega un efecto; si ya existe uno del mismo tipo se reemplaza (se reinicia
+     * su tiempo).
      *
-     * @param effect Efecto a aplicar.
+     * @param efecto Efecto a aplicar.
      */
-    public void addEffect(Effect effect) {
-        effects.add(effect);
+    public void addEffect(Effect efecto) {
+        efectos.add(efecto);
     }
 
     /** Aturde al personaje durante 3 segundos. */
@@ -236,76 +249,83 @@ public class Character implements Named {
     }
 
     /**
-     * Actualiza el personaje: efectos, recarga de la barra, movimiento dentro de la cancha y gravedad.
+     * Actualiza el personaje: efectos, recarga de la barra, movimiento dentro de la
+     * cancha y gravedad.
      *
-     * @param dt Segundos transcurridos.
+     * @param segundosTranscurridos Segundos transcurridos.
      */
-    public void update(double dt) {
-        effects.tick(dt);
-        powerBar.recharge(dt);
-        kickBuffer = Math.max(0.0, kickBuffer - dt);
-        kickCooldown = Math.max(0.0, kickCooldown - dt);
+    public void update(double segundosTranscurridos) {
+        efectos.tick(segundosTranscurridos);
+        barraPoder.recharge(segundosTranscurridos);
+        esperaPatada = Math.max(0.0, esperaPatada - segundosTranscurridos);
+        enfriamientoPatada = Math.max(0.0, enfriamientoPatada - segundosTranscurridos);
 
         if (canAct()) {
-            x += moveDirection * effects.horizontalSign() * speed * SPEED_PER_POINT * dt;
+            x += direccionMovimiento * efectos.horizontalSign() * velocidad * VELOCIDAD_POR_PUNTO
+                    * segundosTranscurridos;
         }
-        double half = getWidth() / 2.0;
-        x = Math.max(half, Math.min(Field.WIDTH - half, x));
+        double mitad = getWidth() / 2.0;
+        x = Math.max(mitad, Math.min(Field.ANCHO - mitad, x));
 
-        speedY += GRAVITY * dt;
-        y += speedY * dt;
-        if (y >= Field.GROUND_Y) {
-            y = Field.GROUND_Y;
-            speedY = 0.0;
+        velocidadY += GRAVEDAD * segundosTranscurridos;
+        y += velocidadY * segundosTranscurridos;
+        if (y >= Field.SUELO_Y) {
+            y = Field.SUELO_Y;
+            velocidadY = 0.0;
         }
     }
 
     /** Suma un gol al personaje. */
     public void addGoal() {
-        goals++;
+        goles++;
     }
 
     /** @return true si ningun efecto impide moverse, saltar o patear. */
     private boolean canAct() {
-        return effects.allowActions();
+        return efectos.allowActions();
     }
 
     /** @return true mientras dura la patada que el personaje acaba de ejecutar. */
     public boolean isKicking() {
-        return kickCooldown > 0.0;
-    }
-
-    /** @return true si hay una patada solicitada y el personaje puede ejecutarla. */
-    private boolean canKickNow() {
-        return canAct() && kickBuffer > 0.0 && kickCooldown <= 0.0;
+        return enfriamientoPatada > 0.0;
     }
 
     /**
-     * @param ball Balon.
-     * @param margin Margen extra en cada lado del hitbox.
+     * @return true si hay una patada solicitada y el personaje puede ejecutarla.
+     */
+    private boolean canKickNow() {
+        return canAct() && esperaPatada > 0.0 && enfriamientoPatada <= 0.0;
+    }
+
+    /**
+     * @param balon  Balon.
+     * @param margen Margen extra en cada lado del hitbox.
      * @return true si el hitbox ampliado por el margen toca el balon.
      */
-    private boolean overlaps(Ball ball, double margin) {
-        return ball.overlaps(getLeft() - margin, getTop() - margin, getRight() + margin, getBottom() + margin);
+    private boolean overlaps(Ball balon, double margen) {
+        return balon.overlaps(getLeft() - margen, getTop() - margen, getRight() + margen, getBottom() + margen);
     }
 
     /**
-     * @param other Otro personaje.
-     * @return true si los hitbox, ampliados por el alcance cuerpo a cuerpo, se solapan.
+     * @param otro Otro personaje.
+     * @return true si los hitbox, ampliados por el alcance cuerpo a cuerpo, se
+     *         solapan.
      */
-    private boolean isInMeleeRange(Character other) {
-        return getLeft() - MELEE_RANGE <= other.getRight() && getRight() + MELEE_RANGE >= other.getLeft()
-                && getTop() - MELEE_RANGE <= other.getBottom() && getBottom() + MELEE_RANGE >= other.getTop();
+    private boolean isInMeleeRange(Character otro) {
+        return getLeft() - ALCANCE_CUERPO_A_CUERPO <= otro.getRight()
+                && getRight() + ALCANCE_CUERPO_A_CUERPO >= otro.getLeft()
+                && getTop() - ALCANCE_CUERPO_A_CUERPO <= otro.getBottom()
+                && getBottom() + ALCANCE_CUERPO_A_CUERPO >= otro.getTop();
     }
 
     /** @return Escala actual del cuerpo (producto de los efectos activos). */
     private double getScale() {
-        return effects.scale();
+        return efectos.scale();
     }
 
     /** @return Nombres de los efectos activos. */
     public String[] getEffectNames() {
-        return effects.names();
+        return efectos.names();
     }
 
     /**
@@ -313,77 +333,77 @@ public class Character implements Named {
      */
     @Override
     public String getName() {
-        return name;
+        return nombre;
     }
 
     /**
      * @return Pais del personaje.
      */
     public String getCountry() {
-        return country;
+        return pais;
     }
 
     /**
      * @return Estadistica de velocidad (1 a 5).
      */
     public int getSpeed() {
-        return speed;
+        return velocidad;
     }
 
     /**
      * @return Estadistica de salto (1 a 5).
      */
     public int getJump() {
-        return jump;
+        return salto;
     }
 
     /**
      * @return Estadistica de fuerza (1 a 5).
      */
     public int getStrength() {
-        return strength;
+        return fuerza;
     }
 
     /**
      * @return Estadistica de Poder Unico (1 a 5).
      */
     public int getPowerLevel() {
-        return powerBar.getLevel();
+        return barraPoder.getLevel();
     }
 
     /**
      * @return Goles anotados.
      */
     public int getGoals() {
-        return goals;
+        return goles;
     }
 
     /**
      * @return Fraccion llena de la barra de poder (0.0 a 1.0).
      */
     public double getPowerCharge() {
-        return powerBar.getCharge();
+        return barraPoder.getCharge();
     }
 
     /**
      * @return true si el poder esta armado.
      */
     public boolean isPowerArmed() {
-        return powerBar.isArmed();
+        return barraPoder.isArmed();
     }
 
     /**
      * @return Nombre del poder del personaje.
      */
     public String getPowerName() {
-        return powerBar.getPowerName();
+        return barraPoder.getPowerName();
     }
 
     /**
      * @return Descripcion del poder del personaje.
      */
     public String getPowerDescription() {
-        return powerBar.getPowerDescription();
+        return barraPoder.getPowerDescription();
     }
 
     /**
@@ -418,15 +438,15 @@ public class Character implements Named {
      * @return Sentido de ataque: 1 derecha, -1 izquierda.
      */
     public int getFacing() {
-        return facing;
+        return orientacion;
     }
 
     private double getWidth() {
-        return BASE_WIDTH * getScale();
+        return ANCHO_BASE * getScale();
     }
 
     private double getHeight() {
-        return BASE_HEIGHT * getScale();
+        return ALTO_BASE * getScale();
     }
 
     private double getLeft() {

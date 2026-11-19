@@ -13,20 +13,20 @@ enum Side {
     LEFT(200.0, 1),
     RIGHT(700.0, -1);
 
-    private final double homeX;
-    private final int facing;
+    private final double xInicial;
+    private final int orientacion;
 
-    Side(double homeX, int facing) {
-        this.homeX = homeX;
-        this.facing = facing;
+    Side(double xInicial, int orientacion) {
+        this.xInicial = xInicial;
+        this.orientacion = orientacion;
     }
 
     /**
      * Ubica al personaje en este lado para empezar un partido.
      *
-     * @param character Personaje que entra a la cancha.
+     * @param personaje Personaje que entra a la cancha.
      */
-    void place(Character character) {
-        character.enterAt(homeX, facing);
+    void place(Character personaje) {
+        personaje.enterAt(xInicial, orientacion);
     }
 }

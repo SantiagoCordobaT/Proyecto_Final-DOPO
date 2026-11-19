@@ -10,22 +10,22 @@ import dominio.excepciones.POOBSoccerException;
  */
 class GoalMatch extends MatchType {
 
-    private final int targetGoals;
+    private final int metaGoles;
 
     /**
      * Solo lo crea {@link MatchTypeCatalog}, que decide las metas ofrecidas.
      *
-     * @param targetGoals Meta de goles.
+     * @param metaGoles Meta de goles.
      */
-    GoalMatch(int targetGoals) {
-        super("Por Goles (" + targetGoals + ")");
-        this.targetGoals = targetGoals;
+    GoalMatch(int metaGoles) {
+        super("Por Goles (" + metaGoles + ")");
+        this.metaGoles = metaGoles;
     }
 
     @Override
-    protected void onGoal(int scorer) throws POOBSoccerException {
-        if (goalsOf(scorer) >= targetGoals) {
-            finish(scorer);
+    protected void onGoal(int anotador) throws POOBSoccerException {
+        if (goalsOf(anotador) >= metaGoles) {
+            finish(anotador);
         }
     }
 
@@ -35,6 +35,6 @@ class GoalMatch extends MatchType {
      */
     @Override
     public String getStatusText() {
-        return "Meta: " + targetGoals + " goles | " + clock((int) Math.floor(getElapsedSeconds() + TOLERANCE));
+        return "Meta: " + metaGoles + " goles | " + clock((int) Math.floor(getElapsedSeconds() + TOLERANCIA));
     }
 }

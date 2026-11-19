@@ -1,4 +1,4 @@
-package presentation;
+package presentacion;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -28,34 +28,34 @@ import dominio.excepciones.POOBSoccerException;
 @SuppressWarnings("serial")
 final class MatchP extends JPanel {
 
-    private static final int FRAME_MILLIS = 8;
-    private static final double NANOS_PER_SECOND = 1e9;
+    private static final int MILIS_CUADRO = 8;
+    private static final double NANOS_POR_SEGUNDO = 1e9;
     // Tope de tiempo por cuadro: una pausa de la ventana no hace saltar la fisica
-    private static final double MAX_FRAME_SECONDS = 0.1;
-    private static final int LOCATION_SPAN = 8;
-    private static final String[] ACTIONS = { "LEFT", "RIGHT", "JUMP", "KICK", "POWER" };
+    private static final double MAX_SEGUNDOS_CUADRO = 0.1;
+    private static final int RANGO_UBICACION = 8;
+    private static final String[] ACCIONES = { "LEFT", "RIGHT", "JUMP", "KICK", "POWER" };
 
-    private final HeadSoccerGUI gui;
-    private final HeadSoccer model;
-    private final HudP hud;
-    private final CourtP court;
-    private final Timer timer;
-    private final Map<Integer, PlayerKey> keys = new HashMap<Integer, PlayerKey>();
-    private long lastNanos;
+    private final HeadSoccerGUI ventana;
+    private final HeadSoccer modelo;
+    private final HudP marcador;
+    private final CourtP cancha;
+    private final Timer temporizador;
+    private final Map<Integer, PlayerKey> teclas = new HashMap<Integer, PlayerKey>();
+    private long ultimoNano;
 
     /**
-     * @param gui Ventana principal.
-     * @param model Fachada del dominio.
+     * @param ventana Ventana principal.
+     * @param modelo  Fachada del dominio.
      */
-    MatchP(HeadSoccerGUI gui, HeadSoccer model) {
+    MatchP(HeadSoccerGUI ventana, HeadSoccer modelo) {
         super(new BorderLayout());
-        this.gui = gui;
-        this.model = model;
-        hud = new HudP(model);
-        court = new CourtP(model);
-        add(hud, BorderLayout.NORTH);
-        add(court, BorderLayout.CENTER);
-        timer = new Timer(FRAME_MILLIS, new ActionListener() {
+        this.ventana = ventana;
+        this.modelo = modelo;
+        marcador = new HudP(modelo);
+        cancha = new CourtP(modelo);
+        add(marcador, BorderLayout.NORTH);
+        add(cancha, BorderLayout.CENTER);
+        temporizador = new Timer(MILIS_CUADRO, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 advance();
@@ -77,22 +77,22 @@ final class MatchP extends JPanel {
 
     /** Arranca el ciclo del partido ya iniciado en la fachada y toma el teclado. */
     void start() {
-        hud.relabel();
-        court.enter();
-        lastNanos = System.nanoTime();
-        timer.start();
+        marcador.relabel();
+        cancha.enter();
+        ultimoNano = System.nanoTime();
+        temporizador.start();
         requestFocusInWindow();
     }
 
     /** Detiene el ciclo del partido. */
     void stop() {
-        timer.stop();
+        temporizador.stop();
     }
 
     /** Reanuda el partido pausado y recupera el teclado. */
     void resumeGame() {
         try {
-            model.resume();
+            modelo.resume();
             requestFocusInWindow();
         } catch (POOBSoccerException e) {
             HeadSoccerGUI.report(this, e);
@@ -101,34 +101,37 @@ final class MatchP extends JPanel {
 
     /** Abandona el partido en curso y vuelve al menu. */
     void giveUp() {
-        timer.stop();
-        gui.showMenu();
+        temporizador.stop();
+        ventana.showMenu();
     }
 
-    /** Un cuadro: avanza el dominio el tiempo real transcurrido, refresca y detecta el final. */
+    /**
+     * Un cuadro: avanza el dominio el tiempo real transcurrido, refresca y detecta
+     * el final.
+     */
     private void advance() {
-        long now = System.nanoTime();
-        double seconds = Math.min((now - lastNanos) / NANOS_PER_SECOND, MAX_FRAME_SECONDS);
-        lastNanos = now;
+        long ahora = System.nanoTime();
+        double segundos = Math.min((ahora - ultimoNano) / NANOS_POR_SEGUNDO, MAX_SEGUNDOS_CUADRO);
+        ultimoNano = ahora;
         try {
-            model.updateTick(seconds);
-            hud.refresh(seconds);
-            court.animate(seconds);
-            if (model.isMatchFinished()) {
-                timer.stop();
-                gui.showResult();
+            modelo.updateTick(segundos);
+            marcador.refresh(segundos);
+            cancha.animate(segundos);
+            if (modelo.isMatchFinished()) {
+                temporizador.stop();
+                ventana.showResult();
             }
         } catch (POOBSoccerException e) {
-            timer.stop();
+            temporizador.stop();
             HeadSoccerGUI.report(this, e);
-            gui.showMenu();
+            ventana.showMenu();
         }
     }
 
     private void pauseGame() {
         try {
-            model.pause();
-            new PauseD(gui, this).open();
+            modelo.pause();
+            new PauseD(ventana, this).open();
         } catch (POOBSoccerException e) {
             HeadSoccerGUI.report(this, e);
         }
@@ -136,31 +139,33 @@ final class MatchP extends JPanel {
 
     private void releaseKeys() {
         try {
-            model.releaseAllActions();
+            modelo.releaseAllActions();
         } catch (POOBSoccerException e) {
             HeadSoccerGUI.report(this, e);
         }
     }
 
-    /** Asigna a un jugador, en el orden de {@link #ACTIONS}, las teclas indicadas. */
-    private void bindPlayer(int player, int... slots) {
-        for (int i = 0; i < ACTIONS.length; i++) {
-            keys.put(slots[i], new PlayerKey(player, ACTIONS[i]));
+    /**
+     * Asigna a un jugador, en el orden de {@link #ACCIONES}, las teclas indicadas.
+     */
+    private void bindPlayer(int jugador, int... codigos) {
+        for (int i = 0; i < ACCIONES.length; i++) {
+            teclas.put(codigos[i], new PlayerKey(jugador, ACCIONES[i]));
         }
     }
 
-    private static int standard(int keyCode) {
-        return slot(keyCode, KeyEvent.KEY_LOCATION_STANDARD);
+    private static int standard(int codigoTecla) {
+        return slot(codigoTecla, KeyEvent.KEY_LOCATION_STANDARD);
     }
 
     /** Combina tecla y ubicacion: distingue el Ctrl derecho del izquierdo. */
-    private static int slot(int keyCode, int location) {
-        return keyCode * LOCATION_SPAN + location;
+    private static int slot(int codigoTecla, int ubicacion) {
+        return codigoTecla * RANGO_UBICACION + ubicacion;
     }
 
     /** Cambio de estado de una tecla de jugador: presionarla o soltarla. */
     private interface KeyChange {
-        void apply(PlayerKey key, HeadSoccer model) throws POOBSoccerException;
+        void apply(PlayerKey tecla, HeadSoccer modelo) throws POOBSoccerException;
     }
 
     /**
@@ -183,11 +188,11 @@ final class MatchP extends JPanel {
             forward(e, PlayerKey::release);
         }
 
-        private void forward(KeyEvent e, KeyChange change) {
-            PlayerKey key = keys.get(slot(e.getKeyCode(), e.getKeyLocation()));
-            if (key != null) {
+        private void forward(KeyEvent e, KeyChange cambio) {
+            PlayerKey tecla = teclas.get(slot(e.getKeyCode(), e.getKeyLocation()));
+            if (tecla != null) {
                 try {
-                    change.apply(key, model);
+                    cambio.apply(tecla, modelo);
                 } catch (POOBSoccerException ex) {
                     HeadSoccerGUI.report(MatchP.this, ex);
                 }

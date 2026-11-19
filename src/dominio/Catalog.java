@@ -14,43 +14,43 @@ import dominio.excepciones.POOBSoccerException;
  */
 public abstract class Catalog<T extends Named> {
 
-    private final List<T> items = new ArrayList<T>();
-    private final String invalidIndexMessage;
+    private final List<T> elementos = new ArrayList<T>();
+    private final String mensajeIndiceInvalido;
 
     /**
-     * @param invalidIndexMessage Mensaje cuando se pide un indice inexistente.
+     * @param mensajeIndiceInvalido Mensaje cuando se pide un indice inexistente.
      */
-    protected Catalog(String invalidIndexMessage) {
-        this.invalidIndexMessage = invalidIndexMessage;
+    protected Catalog(String mensajeIndiceInvalido) {
+        this.mensajeIndiceInvalido = mensajeIndiceInvalido;
     }
 
     /**
      * Agrega una opcion al final del catalogo.
      *
-     * @param item Opcion a agregar.
+     * @param elemento Opcion a agregar.
      */
-    protected final void add(T item) {
-        items.add(item);
+    protected final void add(T elemento) {
+        elementos.add(elemento);
     }
 
     /** @return Nombres de las opciones ordenadas. */
     public final String[] names() {
-        String[] names = new String[items.size()];
-        for (int i = 0; i < names.length; i++) {
-            names[i] = items.get(i).getName();
+        String[] nombres = new String[elementos.size()];
+        for (int i = 0; i < nombres.length; i++) {
+            nombres[i] = elementos.get(i).getName();
         }
-        return names;
+        return nombres;
     }
 
     /**
-     * @param index Indice de la opcion.
+     * @param indice Indice de la opcion.
      * @return Opcion en ese indice.
      * @throws POOBSoccerException Si el indice no existe.
      */
-    public final T get(int index) throws POOBSoccerException {
-        if (index < 0 || index >= items.size()) {
-            throw new POOBSoccerException(invalidIndexMessage);
+    public final T get(int indice) throws POOBSoccerException {
+        if (indice < 0 || indice >= elementos.size()) {
+            throw new POOBSoccerException(mensajeIndiceInvalido);
         }
-        return items.get(index);
+        return elementos.get(indice);
     }
 }

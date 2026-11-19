@@ -8,12 +8,12 @@ package dominio.efectos;
  */
 public class StunEffect extends Effect {
 
-    private static final String NAME = "Aturdido";
-    private static final double STUN_SECONDS = 3.0;
+    private static final String NOMBRE = "Aturdido";
+    private static final double SEGUNDOS_ATURDIMIENTO = 3.0;
 
     /** Crea un aturdimiento de 3 segundos. */
     public StunEffect() {
-        super(NAME, STUN_SECONDS);
+        super(NOMBRE, SEGUNDOS_ATURDIMIENTO);
     }
 
     @Override

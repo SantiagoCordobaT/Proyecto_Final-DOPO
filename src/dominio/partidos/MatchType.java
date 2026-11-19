@@ -13,75 +13,75 @@ import dominio.modalidades.GameMode;
  */
 public abstract class MatchType implements Named {
 
-    protected static final int PLAYER_ONE = 1;
-    protected static final int PLAYER_TWO = 2;
-    protected static final double TOLERANCE = 1e-9;
+    protected static final int JUGADOR_UNO = 1;
+    protected static final int JUGADOR_DOS = 2;
+    protected static final double TOLERANCIA = 1e-9;
 
-    private static final int SECONDS_PER_MINUTE = 60;
-    private static final int NO_WINNER = 0;
+    private static final int SEGUNDOS_POR_MINUTO = 60;
+    private static final int SIN_GANADOR = 0;
 
-    private final String name;
-    private MatchContext context;
-    private boolean finished;
-    private int winner;
-    private double elapsedSeconds;
+    private final String nombre;
+    private MatchContext contexto;
+    private boolean terminado;
+    private int ganador;
+    private double segundosTranscurridos;
 
-    /** @param name Nombre del tipo de partido. */
-    protected MatchType(String name) {
-        this.name = name;
+    /** @param nombre Nombre del tipo de partido. */
+    protected MatchType(String nombre) {
+        this.nombre = nombre;
     }
 
     /**
      * Por defecto todo tipo de partido admite cualquier modalidad; Supervivencia lo redefine.
      *
-     * @param mode Modalidad elegida.
+     * @param modo Modalidad elegida.
      * @return true si el tipo de partido se puede jugar en esa modalidad.
      */
-    public boolean supports(GameMode mode) {
+    public boolean supports(GameMode modo) {
         return true;
     }
 
     /**
      * Inicia (o reinicia) el tipo de partido para un partido nuevo: sin ganador y con el reloj en cero.
      *
-     * @param context Partido en curso.
+     * @param contexto Partido en curso.
      */
-    public void begin(MatchContext context) {
-        this.context = context;
-        this.finished = false;
-        this.winner = NO_WINNER;
-        this.elapsedSeconds = 0.0;
+    public void begin(MatchContext contexto) {
+        this.contexto = contexto;
+        this.terminado = false;
+        this.ganador = SIN_GANADOR;
+        this.segundosTranscurridos = 0.0;
     }
 
     /**
      * Avanza el reloj del partido.
      *
-     * @param deltaTimeSeconds Segundos transcurridos.
+     * @param segundos Segundos transcurridos.
      * @throws POOBSoccerException Si el marcador no se pudiera consultar.
      */
-    public void tick(double deltaTimeSeconds) throws POOBSoccerException {
-        elapsedSeconds += deltaTimeSeconds;
+    public void tick(double segundos) throws POOBSoccerException {
+        segundosTranscurridos += segundos;
     }
 
     /**
      * Metodo plantilla: se llama despues de sumar un gol y solo lo procesa si el partido sigue en juego.
      *
-     * @param scorer Jugador (1 o 2) que anota (ya tiene el gol sumado).
+     * @param anotador Jugador (1 o 2) que anota (ya tiene el gol sumado).
      * @throws POOBSoccerException Si el partido no pudiera reaccionar al gol.
      */
-    public final void goalScored(int scorer) throws POOBSoccerException {
+    public final void goalScored(int anotador) throws POOBSoccerException {
         if (!isFinished()) {
-            onGoal(scorer);
+            onGoal(anotador);
         }
     }
 
     /**
      * Paso variable de {@link #goalScored}: reaccion propia de cada tipo de partido al gol.
      *
-     * @param scorer Jugador (1 o 2) que anota.
+     * @param anotador Jugador (1 o 2) que anota.
      * @throws POOBSoccerException Si el partido no pudiera reaccionar al gol.
      */
-    protected abstract void onGoal(int scorer) throws POOBSoccerException;
+    protected abstract void onGoal(int anotador) throws POOBSoccerException;
 
     /** @return Texto de estado para el marcador (reloj, meta, balones...). */
     public abstract String getStatusText();
@@ -89,20 +89,20 @@ public abstract class MatchType implements Named {
     /**
      * Cierra el partido.
      *
-     * @param winner Jugador (1 o 2) ganador.
+     * @param ganador Jugador (1 o 2) ganador.
      */
-    protected final void finish(int winner) {
-        this.winner = winner;
-        this.finished = true;
+    protected final void finish(int ganador) {
+        this.ganador = ganador;
+        this.terminado = true;
     }
 
     /**
-     * @param player Jugador (1 o 2).
+     * @param jugador Jugador (1 o 2).
      * @return Goles del jugador.
      * @throws POOBSoccerException Si el jugador no es 1 ni 2.
      */
-    protected final int goalsOf(int player) throws POOBSoccerException {
-        return context.getGoals(player);
+    protected final int goalsOf(int jugador) throws POOBSoccerException {
+        return contexto.getGoals(jugador);
     }
 
     /**
@@ -111,38 +111,38 @@ public abstract class MatchType implements Named {
      * @throws POOBSoccerException Si el catalogo no pudiera entregar el rival.
      */
     protected final void replaceRival() throws POOBSoccerException {
-        context.replaceRival();
+        contexto.replaceRival();
     }
 
     /** @return Segundos jugados desde {@link #begin}. */
     protected final double getElapsedSeconds() {
-        return elapsedSeconds;
+        return segundosTranscurridos;
     }
 
     /**
      * Cada tipo de partido redondea sus segundos antes de mostrarlos: la cuenta
      * regresiva hacia arriba y el tiempo jugado hacia abajo.
      *
-     * @param seconds Segundos enteros (no negativos).
+     * @param segundos Segundos enteros (no negativos).
      * @return Tiempo con formato "mm:ss".
      */
-    protected static String clock(int seconds) {
-        return String.format("%02d:%02d", seconds / SECONDS_PER_MINUTE, seconds % SECONDS_PER_MINUTE);
+    protected static String clock(int segundos) {
+        return String.format("%02d:%02d", segundos / SEGUNDOS_POR_MINUTO, segundos % SEGUNDOS_POR_MINUTO);
     }
 
     /** @return true si el partido termino. */
     public final boolean isFinished() {
-        return finished;
+        return terminado;
     }
 
     /** @return Jugador (1 o 2) ganador; solo tiene sentido cuando {@link #isFinished()}. */
     public final int getWinner() {
-        return winner;
+        return ganador;
     }
 
     /** @return Nombre del tipo de partido. */
     @Override
     public final String getName() {
-        return name;
+        return nombre;
     }
 }

@@ -22,9 +22,9 @@ public class POOBSoccerException extends Exception {
     /**
      * Crea la excepcion con el mensaje indicado.
      *
-     * @param message Mensaje.
+     * @param mensaje Mensaje.
      */
-    public POOBSoccerException(String message) {
-        super(message);
+    public POOBSoccerException(String mensaje) {
+        super(mensaje);
     }
 }

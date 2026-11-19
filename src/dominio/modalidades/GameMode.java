@@ -11,11 +11,11 @@ import dominio.Named;
  */
 public abstract class GameMode implements Named {
 
-    private final String name;
+    private final String nombre;
 
-    /** @param name Nombre de la modalidad. */
-    protected GameMode(String name) {
-        this.name = name;
+    /** @param nombre Nombre de la modalidad. */
+    protected GameMode(String nombre) {
+        this.nombre = nombre;
     }
 
     /** @return Controlador del jugador 1. */
@@ -32,6 +32,6 @@ public abstract class GameMode implements Named {
     /** @return Nombre de la modalidad. */
     @Override
     public String getName() {
-        return name;
+        return nombre;
     }
 }

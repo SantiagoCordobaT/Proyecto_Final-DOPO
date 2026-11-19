@@ -12,39 +12,40 @@ import java.util.List;
  */
 public class StatusEffects {
 
-    private final List<Effect> effects = new ArrayList<Effect>();
+    private final List<Effect> efectos = new ArrayList<Effect>();
 
     /**
-     * Agrega un efecto; si ya hay uno del mismo tipo se reemplaza (se reinicia su tiempo).
+     * Agrega un efecto; si ya hay uno del mismo tipo se reemplaza (se reinicia su
+     * tiempo).
      *
-     * @param effect Efecto a aplicar.
+     * @param efecto Efecto a aplicar.
      */
-    public void add(Effect effect) {
-        effects.removeIf(active -> active.isSameKindAs(effect));
-        effects.add(effect);
+    public void add(Effect efecto) {
+        efectos.removeIf(activo -> activo.isSameKindAs(efecto));
+        efectos.add(efecto);
     }
 
     /**
      * Descuenta tiempo a todos los efectos y elimina los que terminaron.
      *
-     * @param deltaTimeSeconds Segundos transcurridos.
+     * @param segundosTranscurridos Segundos transcurridos.
      */
-    public void tick(double deltaTimeSeconds) {
-        for (Effect e : effects) {
-            e.tick(deltaTimeSeconds);
+    public void tick(double segundosTranscurridos) {
+        for (Effect efecto : efectos) {
+            efecto.tick(segundosTranscurridos);
         }
-        effects.removeIf(Effect::isExpired);
+        efectos.removeIf(Effect::isExpired);
     }
 
     /** Elimina todos los efectos. */
     public void clear() {
-        effects.clear();
+        efectos.clear();
     }
 
     /** @return true si ningun efecto impide moverse, saltar o patear. */
     public boolean allowActions() {
-        for (Effect e : effects) {
-            if (!e.allowsActions()) {
+        for (Effect efecto : efectos) {
+            if (!efecto.allowsActions()) {
                 return false;
             }
         }
@@ -53,28 +54,31 @@ public class StatusEffects {
 
     /** @return Escala del cuerpo (producto de las escalas de los efectos). */
     public double scale() {
-        double scale = 1.0;
-        for (Effect e : effects) {
-            scale *= e.getScale();
+        double escala = 1.0;
+        for (Effect efecto : efectos) {
+            escala *= efecto.getScale();
         }
-        return scale;
+        return escala;
     }
 
-    /** @return Signo del movimiento horizontal (producto de los signos de los efectos). */
+    /**
+     * @return Signo del movimiento horizontal (producto de los signos de los
+     *         efectos).
+     */
     public int horizontalSign() {
-        int sign = 1;
-        for (Effect e : effects) {
-            sign *= e.getHorizontalSign();
+        int signo = 1;
+        for (Effect efecto : efectos) {
+            signo *= efecto.getHorizontalSign();
         }
-        return sign;
+        return signo;
     }
 
     /** @return Nombres de los efectos activos. */
     public String[] names() {
-        String[] names = new String[effects.size()];
-        for (int i = 0; i < names.length; i++) {
-            names[i] = effects.get(i).getName();
+        String[] nombres = new String[efectos.size()];
+        for (int i = 0; i < nombres.length; i++) {
+            nombres[i] = efectos.get(i).getName();
         }
-        return names;
+        return nombres;
     }
 }

@@ -9,27 +9,27 @@ package dominio;
  */
 public class Field {
 
-    public static final double WIDTH = 900.0;
-    public static final double GROUND_Y = 450.0;
-    static final int NO_GOAL = 0;
+    public static final double ANCHO = 900.0;
+    public static final double SUELO_Y = 450.0;
+    static final int SIN_GOL = 0;
 
-    private static final double LEFT_WALL_X = 0.0;
-    private static final double CEILING_Y = 0.0;
-    private static final double CENTER_X = WIDTH / 2.0;
-    private static final double BALL_DROP_Y = 60.0;
+    private static final double PARED_IZQUIERDA_X = 0.0;
+    private static final double TECHO_Y = 0.0;
+    private static final double CENTRO_X = ANCHO / 2.0;
+    private static final double CAIDA_BALON_Y = 60.0;
 
     // Arco izquierdo (defiende el jugador 1, anota el 2) y derecho (defiende el 2, anota el 1)
-    private final Goal[] goals = { new Goal(LEFT_WALL_X, Goal.WIDTH, 2), new Goal(WIDTH, WIDTH - Goal.WIDTH, 1) };
+    private final Goal[] arcos = { new Goal(PARED_IZQUIERDA_X, Goal.ANCHO, 2), new Goal(ANCHO, ANCHO - Goal.ANCHO, 1) };
 
     /**
      * Avanza el balon un paso de fisica (gravedad, suelo, techo) y el rebote en los travesaños.
      *
-     * @param ball Balon.
+     * @param balon Balon.
      */
-    void updateBall(Ball ball) {
-        ball.updatePhysics(GROUND_Y, CEILING_Y);
-        for (Goal goal : goals) {
-            goal.resolveCrossbar(ball);
+    void updateBall(Ball balon) {
+        balon.updatePhysics(SUELO_Y, TECHO_Y);
+        for (Goal arco : arcos) {
+            arco.resolveCrossbar(balon);
         }
     }
 
@@ -37,55 +37,55 @@ public class Field {
      * Rebota el balon contra las paredes laterales y lo deja dentro de la cancha. Se aplica
      * una sola vez por paso, despues de los contactos, para cubrir tambien los empujes.
      *
-     * @param ball Balon.
+     * @param balon Balon.
      */
-    void keepBallInside(Ball ball) {
-        ball.bounceOffWalls(LEFT_WALL_X, WIDTH);
+    void keepBallInside(Ball balon) {
+        balon.bounceOffWalls(PARED_IZQUIERDA_X, ANCHO);
     }
 
     /**
      * Posicion con la que se ve el balon entre dos pasos de fisica: avanza la fraccion
      * de paso pendiente sin salirse de las paredes ni hundirse en el suelo.
      *
-     * @param ball Balon.
-     * @param fraction Fraccion (0 a 1) del siguiente paso ya transcurrida.
+     * @param balon    Balon.
+     * @param fraccion Fraccion (0 a 1) del siguiente paso ya transcurrida.
      * @return Centro visible del balon como {x, y}.
      */
-    double[] visibleBall(Ball ball, double fraction) {
-        double x = Math.max(LEFT_WALL_X + Ball.RADIUS, Math.min(WIDTH - Ball.RADIUS, ball.xAfter(fraction)));
-        double y = Math.min(GROUND_Y - Ball.RADIUS, ball.yAfter(fraction));
+    double[] visibleBall(Ball balon, double fraccion) {
+        double x = Math.max(PARED_IZQUIERDA_X + Ball.RADIO, Math.min(ANCHO - Ball.RADIO, balon.xAfter(fraccion)));
+        double y = Math.min(SUELO_Y - Ball.RADIO, balon.yAfter(fraccion));
         return new double[] { x, y };
     }
 
     /** @return Cada arco (el izquierdo y luego el derecho) como {izquierda, arriba, ancho, alto}. */
     double[][] getGoalBounds() {
-        double[][] bounds = new double[goals.length][];
-        for (int i = 0; i < goals.length; i++) {
-            bounds[i] = goals[i].getBounds();
+        double[][] limites = new double[arcos.length][];
+        for (int i = 0; i < arcos.length; i++) {
+            limites[i] = arcos[i].getBounds();
         }
-        return bounds;
+        return limites;
     }
 
     /**
      * Deja caer el balon desde el centro superior de la cancha, sin inercia.
      *
-     * @param ball Balon.
+     * @param balon Balon.
      */
-    void dropBall(Ball ball) {
-        ball.placeAt(CENTER_X, BALL_DROP_Y);
+    void dropBall(Ball balon) {
+        balon.placeAt(CENTRO_X, CAIDA_BALON_Y);
     }
 
     /**
-     * @param ball Balon.
+     * @param balon Balon.
      * @return Jugador (1 o 2) que anota si el balon esta completamente dentro de un arco;
-     *         {@link #NO_GOAL} si no hay gol.
+     *         {@link #SIN_GOL} si no hay gol.
      */
-    int scorerOf(Ball ball) {
-        for (Goal goal : goals) {
-            if (goal.isBallInside(ball)) {
-                return goal.getScorer();
+    int scorerOf(Ball balon) {
+        for (Goal arco : arcos) {
+            if (arco.isBallInside(balon)) {
+                return arco.getScorer();
             }
         }
-        return NO_GOAL;
+        return SIN_GOL;
     }
 }

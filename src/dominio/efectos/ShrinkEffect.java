@@ -8,17 +8,17 @@ package dominio.efectos;
  */
 public class ShrinkEffect extends Effect {
 
-    private static final String NAME = "Reducido";
-    private static final double SHRINK_SECONDS = 6.0;
-    private static final double SHRINK_SCALE = 0.5;
+    private static final String NOMBRE = "Reducido";
+    private static final double SEGUNDOS_REDUCCION = 6.0;
+    private static final double ESCALA_REDUCCION = 0.5;
 
     /** Crea una reduccion de 6 segundos. */
     public ShrinkEffect() {
-        super(NAME, SHRINK_SECONDS);
+        super(NOMBRE, SEGUNDOS_REDUCCION);
     }
 
     @Override
     double getScale() {
-        return SHRINK_SCALE;
+        return ESCALA_REDUCCION;
     }
 }

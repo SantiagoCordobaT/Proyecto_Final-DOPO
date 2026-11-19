@@ -13,25 +13,25 @@ import dominio.personajes.Character;
  */
 public abstract class Power {
 
-    private final String name;
-    private final String description;
+    private final String nombre;
+    private final String descripcion;
 
     /**
-     * @param name Nombre del poder.
-     * @param description Descripcion del poder.
+     * @param nombre      Nombre del poder.
+     * @param descripcion Descripcion del poder.
      */
-    protected Power(String name, String description) {
-        this.name = name;
-        this.description = description;
+    protected Power(String nombre, String descripcion) {
+        this.nombre = nombre;
+        this.descripcion = descripcion;
     }
 
     /**
      * Aplica el efecto del poder sobre el oponente.
      *
-     * @param opponent Personaje rival que recibe el efecto.
+     * @param oponente Personaje rival que recibe el efecto.
      */
-    public final void applyEffect(Character opponent) {
-        opponent.addEffect(createEffect());
+    public final void applyEffect(Character oponente) {
+        oponente.addEffect(createEffect());
     }
 
     /** @return Nuevo efecto que este poder produce en el oponente. */
@@ -39,11 +39,11 @@ public abstract class Power {
 
     /** @return Nombre del poder. */
     String getName() {
-        return name;
+        return nombre;
     }
 
     /** @return Descripcion del poder. */
     String getDescription() {
-        return description;
+        return descripcion;
     }
 }
