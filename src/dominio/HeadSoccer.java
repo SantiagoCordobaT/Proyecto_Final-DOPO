@@ -454,6 +454,6 @@ public final class HeadSoccer {
      * @return Grosor del travesaño de cada arco.
      */
     public double getCrossbarThickness() {
-        return Goal.GROSOR_TRAVESANO;
+        return Goal.GROSOR_BORDE;
     }
 }

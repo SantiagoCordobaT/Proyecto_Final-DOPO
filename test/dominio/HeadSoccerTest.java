@@ -827,7 +827,8 @@ public class HeadSoccerTest {
         Set<String> poderes = new HashSet<String>();
         int cantidad = juego.getCharacterNames().length;
         for (int i = 0; i < cantidad; i++) {
-            assertTrue(poderes.add(juego.getCharacterPowerName(i)), "Poder repetido: " + juego.getCharacterPowerName(i));
+            assertTrue(poderes.add(juego.getCharacterPowerName(i)),
+                    "Poder repetido: " + juego.getCharacterPowerName(i));
         }
         assertEquals(cantidad, poderes.size());
     }
@@ -874,7 +875,7 @@ public class HeadSoccerTest {
         assertEquals(Field.ANCHO, juego.getFieldWidth(), 1e-9);
         assertEquals(Field.SUELO_Y, juego.getGroundY(), 1e-9);
         assertEquals(Ball.RADIO, juego.getBallRadius(), 1e-9);
-        assertEquals(Goal.GROSOR_TRAVESANO, juego.getCrossbarThickness(), 1e-9);
+        assertEquals(Goal.GROSOR_BORDE, juego.getCrossbarThickness(), 1e-9);
     }
 
     @Test
