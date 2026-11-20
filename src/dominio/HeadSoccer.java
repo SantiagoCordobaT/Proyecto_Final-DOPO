@@ -396,9 +396,8 @@ public final class HeadSoccer {
     }
 
     /**
-     * @return Estado del partido segun su tipo: tiempo restante o "GOL DE ORO",
-     *         meta de
-     *         goles y tiempo jugado, o balones y racha de Supervivencia.
+     * @return Estado del partido segun su tipo: meta de goles y tiempo jugado, o
+     *         balones y racha de Supervivencia.
      * @throws POOBSoccerException Si no hay partido.
      */
     public String obtenerEstadoPartido() throws POOBSoccerException {

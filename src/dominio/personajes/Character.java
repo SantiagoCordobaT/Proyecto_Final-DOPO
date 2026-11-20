@@ -26,9 +26,10 @@ public class Character implements Named {
     private static final double ANCHO_BASE = 60.0;
     private static final double ALTO_BASE = 90.0;
     private static final double VELOCIDAD_POR_PUNTO = 70.0;
-    private static final double VELOCIDAD_SALTO_BASE = 450.0;
-    private static final double VELOCIDAD_SALTO_POR_PUNTO = 70.0;
-    private static final double GRAVEDAD = 1800.0;
+    private static final double RAPIDEZ_SUBIDA = 360.0;
+    private static final double RAPIDEZ_CAIDA = 270.0;
+    private static final double ALTURA_SALTO_BASE = 60.0;
+    private static final double ALTURA_SALTO_POR_PUNTO = 25.0;
     private static final double VENTANA_PATADA_SEGUNDOS = 0.15;
     private static final double ENFRIAMIENTO_PATADA_SEGUNDOS = 0.4;
 
@@ -48,7 +49,8 @@ public class Character implements Named {
 
     private double x;
     private double y;
-    private double velocidadY;
+    private boolean subiendo;
+    private boolean enElAire;
     private double xInicial;
     private int orientacion = 1;
     private int direccionMovimiento;
@@ -143,7 +145,8 @@ public class Character implements Named {
     public void reiniciarJugada() {
         this.x = xInicial;
         this.y = Field.SUELO_Y;
-        this.velocidadY = 0.0;
+        this.subiendo = false;
+        this.enElAire = false;
         this.direccionMovimiento = 0;
         this.esperaPatada = 0.0;
         this.enfriamientoPatada = 0.0;
@@ -162,9 +165,9 @@ public class Character implements Named {
 
     /** Salta; solo es posible en el suelo y sin efectos que lo impidan. */
     public void saltar() {
-        boolean enSuelo = y >= Field.SUELO_Y;
-        if (puedeActuar() && enSuelo) {
-            velocidadY = -(VELOCIDAD_SALTO_BASE + salto * VELOCIDAD_SALTO_POR_PUNTO);
+        if (puedeActuar() && !enElAire) {
+            subiendo = true;
+            enElAire = true;
         }
     }
 
@@ -261,7 +264,7 @@ public class Character implements Named {
 
     /**
      * Actualiza el personaje: efectos, recarga de la barra, movimiento dentro de la
-     * cancha y gravedad.
+     * cancha, salto y caida.
      *
      * @param segundosTranscurridos Segundos transcurridos.
      */
@@ -278,11 +281,24 @@ public class Character implements Named {
         double mitad = obtenerAncho() / 2.0;
         x = Math.max(mitad, Math.min(Field.ANCHO - mitad, x));
 
-        velocidadY += GRAVEDAD * segundosTranscurridos;
-        y += velocidadY * segundosTranscurridos;
-        if (y >= Field.SUELO_Y) {
-            y = Field.SUELO_Y;
-            velocidadY = 0.0;
+        actualizarSalto(segundosTranscurridos);
+    }
+
+    /** Avanza la subida hasta el tope del salto o la caida hasta el suelo. */
+    private void actualizarSalto(double segundosTranscurridos) {
+        double alturaMaximaY = Field.SUELO_Y - (ALTURA_SALTO_BASE + salto * ALTURA_SALTO_POR_PUNTO);
+        if (subiendo) {
+            y -= RAPIDEZ_SUBIDA * segundosTranscurridos;
+            if (y <= alturaMaximaY) {
+                y = alturaMaximaY;
+                subiendo = false;
+            }
+        } else if (enElAire) {
+            y += RAPIDEZ_CAIDA * segundosTranscurridos;
+            if (y >= Field.SUELO_Y) {
+                y = Field.SUELO_Y;
+                enElAire = false;
+            }
         }
     }
 

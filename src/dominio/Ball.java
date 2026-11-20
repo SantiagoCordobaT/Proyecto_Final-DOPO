@@ -45,8 +45,8 @@ public class Ball {
     }
 
     /**
-     * Actualiza la posicion del balon aplicando gravedad, teniendo en cuenta
-     * colisiones contra el suelo, el techo y las paredes.
+     * Actualiza la posicion del balon segun sus impulsos activos, con tope en el
+     * suelo y el techo de la cancha.
      *
      * @param sueloY Coordenada Y de la superficie del suelo.
      * @param techoY Coordenada Y del limite superior de la cancha.

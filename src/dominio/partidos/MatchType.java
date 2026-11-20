@@ -13,7 +13,6 @@ import dominio.modalidades.GameMode;
  */
 public abstract class MatchType implements Named {
 
-    protected static final int JUGADOR_UNO = 1;
     protected static final int JUGADOR_DOS = 2;
     protected static final double TOLERANCIA = 1e-9;
 
@@ -59,9 +58,8 @@ public abstract class MatchType implements Named {
      * Avanza el reloj del partido.
      *
      * @param segundos Segundos transcurridos.
-     * @throws POOBSoccerException Si el marcador no se pudiera consultar.
      */
-    public void avanzar(double segundos) throws POOBSoccerException {
+    public void avanzar(double segundos) {
         segundosTranscurridos += segundos;
     }
 
@@ -124,8 +122,7 @@ public abstract class MatchType implements Named {
     }
 
     /**
-     * Cada tipo de partido redondea sus segundos antes de mostrarlos: la cuenta
-     * regresiva hacia arriba y el tiempo jugado hacia abajo.
+     * Formatea una cantidad de segundos enteros en formato reloj.
      *
      * @param segundos Segundos enteros (no negativos).
      * @return Tiempo con formato "mm:ss".

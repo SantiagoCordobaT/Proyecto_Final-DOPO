@@ -575,6 +575,28 @@ public class HeadSoccerTest {
     }
 
     @Test
+    public void saltoPorEstadosDeberiaSubirHastaTopeSegunEstadisticaYCaerAlSuelo() throws POOBSoccerException {
+        Character saltoBajo = new Character("A", "Canadá", 3, 1, 3, 3, new FreezePower());
+        Character saltoAlto = new Character("B", "Brasil", 3, 5, 3, 3, new ShrinkPower());
+        saltoBajo.entrarEn(200.0, 1);
+        saltoAlto.entrarEn(700.0, -1);
+
+        saltoBajo.saltar();
+        saltoAlto.saltar();
+        double menorArribaBajo = saltoBajo.obtenerBordeSuperior();
+        double menorArribaAlto = saltoAlto.obtenerBordeSuperior();
+        for (int paso = 0; paso < 90; paso++) {
+            saltoBajo.actualizar(PASO_TICK);
+            saltoAlto.actualizar(PASO_TICK);
+            menorArribaBajo = Math.min(menorArribaBajo, saltoBajo.obtenerBordeSuperior());
+            menorArribaAlto = Math.min(menorArribaAlto, saltoAlto.obtenerBordeSuperior());
+        }
+        assertTrue(menorArribaAlto < menorArribaBajo, "Mayor estadistica de salto debe alcanzar mayor altura");
+        assertEquals(Field.SUELO_Y, saltoBajo.obtenerLimites()[1] + saltoBajo.obtenerLimites()[3], 1e-9);
+        assertEquals(Field.SUELO_Y, saltoAlto.obtenerLimites()[1] + saltoAlto.obtenerLimites()[3], 1e-9);
+    }
+
+    @Test
     public void golSoloDeberiaContarParaElAnotador() throws POOBSoccerException {
         Match partido = crearPartido(MODO_PVSP, GOLES_3, 0, 0);
         partido.anotarGol(1);
