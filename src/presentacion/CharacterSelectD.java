@@ -28,6 +28,7 @@ final class CharacterSelectD extends StreetDialog {
     private final HeadSoccer modelo;
     private final CharacterCard primero;
     private final CharacterCard segundo;
+    private CharacterCard fichaActiva;
 
     /**
      * @param ventana Ventana principal.
@@ -39,6 +40,10 @@ final class CharacterSelectD extends StreetDialog {
         this.modelo = modelo;
         primero = new CharacterCard(modelo, 1, 0);
         segundo = new CharacterCard(modelo, 2, INDICE_RIVAL);
+        fichaActiva = primero;
+        primero.alSeleccionar(() -> fichaActiva = primero);
+        segundo.alSeleccionar(() -> fichaActiva = segundo);
+
         JPanel fichas = recursos.crearPanel(new BorderLayout(Resources.ESPACIO, 0));
         fichas.add(primero, BorderLayout.WEST);
         fichas.add(recursos.crearEtiqueta(CONTRA, Resources.FUENTE_TITULO), BorderLayout.CENTER);
@@ -50,6 +55,24 @@ final class CharacterSelectD extends StreetDialog {
                 jugar();
             }
         });
+        agregarBoton(texto("select.create"), new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                crearPersonaje();
+            }
+        });
+        agregarBoton(texto("select.edit"), new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                editarPersonaje();
+            }
+        });
+        agregarBoton(texto("select.delete"), new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                eliminarPersonaje();
+            }
+        });
         agregarBoton(texto("common.back"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -57,6 +80,45 @@ final class CharacterSelectD extends StreetDialog {
                 ventana.abrirModosJuego();
             }
         });
+    }
+
+    private void crearPersonaje() {
+        CharacterFormD formulario = CharacterFormD.paraCrear(ventana, modelo);
+        formulario.abrir();
+        if (formulario.obtenerIndiceResultado() >= 0) {
+            recargarFichas(formulario.obtenerIndiceResultado());
+        }
+    }
+
+    private void editarPersonaje() {
+        int indice = fichaActiva.obtenerIndiceSeleccionado();
+        try {
+            CharacterFormD formulario = CharacterFormD.paraEditar(ventana, modelo, indice);
+            formulario.abrir();
+            if (formulario.obtenerIndiceResultado() >= 0) {
+                recargarFichas(formulario.obtenerIndiceResultado());
+            }
+        } catch (POOBSoccerException e) {
+            HeadSoccerGUI.reportarError(this, e);
+        }
+    }
+
+    private void eliminarPersonaje() {
+        int indice = fichaActiva.obtenerIndiceSeleccionado();
+        try {
+            modelo.eliminarPersonaje(indice);
+            recargarFichas(Math.max(0, indice - 1));
+        } catch (POOBSoccerException e) {
+            HeadSoccerGUI.reportarError(this, e);
+        }
+    }
+
+    private void recargarFichas(int indiceEnActiva) {
+        int indicePrimero = fichaActiva == primero ? indiceEnActiva : primero.obtenerIndiceSeleccionado();
+        int indiceSegundo = fichaActiva == segundo ? indiceEnActiva : segundo.obtenerIndiceSeleccionado();
+        primero.recargar(indicePrimero);
+        segundo.recargar(indiceSegundo);
+        pack();
     }
 
     private void jugar() {

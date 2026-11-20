@@ -33,6 +33,14 @@ final class Texts {
         registrar("select.title", "Escoge tu personaje", "Choose your character");
         registrar("select.player", "Jugador", "Player");
         registrar("select.play", "Jugar", "Play");
+        registrar("select.create", "Crear", "Create");
+        registrar("select.edit", "Editar", "Edit");
+        registrar("select.delete", "Eliminar", "Delete");
+        registrar("editor.createTitle", "Crear personaje", "Create character");
+        registrar("editor.editTitle", "Editar personaje", "Edit character");
+        registrar("editor.name", "Nombre", "Name");
+        registrar("editor.country", "País", "Country");
+        registrar("editor.powerType", "Poder", "Power");
         registrar("card.speed", "Velocidad", "Speed");
         registrar("card.jump", "Salto", "Jump");
         registrar("card.strength", "Fuerza", "Strength");

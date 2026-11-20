@@ -1,5 +1,6 @@
 package dominio.poderes;
 
+import dominio.Named;
 import dominio.efectos.Effect;
 import dominio.personajes.Character;
 
@@ -10,7 +11,7 @@ import dominio.personajes.Character;
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-public abstract class Power {
+public abstract class Power implements Named {
 
     private final String nombre;
     private final String descripcion;
@@ -37,12 +38,13 @@ public abstract class Power {
     protected abstract Effect crearEfecto();
 
     /** @return Nombre del poder. */
-    String obtenerNombre() {
+    @Override
+    public String obtenerNombre() {
         return nombre;
     }
 
     /** @return Descripcion del poder. */
-    String obtenerDescripcion() {
+    public String obtenerDescripcion() {
         return descripcion;
     }
 }

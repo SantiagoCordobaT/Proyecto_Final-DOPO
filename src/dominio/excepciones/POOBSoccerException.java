@@ -9,6 +9,9 @@ package dominio.excepciones;
 public class POOBSoccerException extends Exception {
 
     public static final String PERSONAJE_INVALIDO = "El personaje seleccionado no existe o no es válido.";
+    public static final String PERSONAJE_REPETIDO = "Ya existe un personaje con ese nombre.";
+    public static final String MINIMO_PERSONAJES = "Debe haber al menos 2 personajes disponibles para jugar.";
+    public static final String PODER_INVALIDO = "El poder seleccionado no existe o no es válido.";
     public static final String MODO_INVALIDO = "La modalidad o tipo de partido seleccionado no es válido.";
     public static final String ESTADISTICAS_FUERA_DE_RANGO = "Las estadísticas deben estar entre 1 y 5.";
     public static final String SUPERVIVENCIA_SOLO_PVSM = "El modo Supervivencia solo está disponible en Jugador vs Máquina (PvsM).";

@@ -19,6 +19,7 @@ import dominio.personajes.Character;
 import dominio.personajes.CharacterCatalog;
 import dominio.poderes.ConfusionPower;
 import dominio.poderes.FreezePower;
+import dominio.poderes.PowerCatalog;
 import dominio.poderes.ShrinkPower;
 import dominio.poderes.StunPower;
 
@@ -905,5 +906,55 @@ public class HeadSoccerTest {
         assertEquals(2, arcos.length);
         assertArrayEquals(new double[] { 0.0, arriba, Goal.ANCHO, Goal.ALTO }, arcos[0], 1e-9);
         assertArrayEquals(new double[] { Field.ANCHO - Goal.ANCHO, arriba, Goal.ANCHO, Goal.ALTO }, arcos[1], 1e-9);
+    }
+
+    @Test
+    public void catalogoDePersonajesDeberiaCrearEditarYEliminarPersonajes() throws POOBSoccerException {
+        CharacterCatalog catalogo = new CharacterCatalog();
+        PowerCatalog poderes = new PowerCatalog();
+        int iniciales = catalogo.cantidad();
+
+        catalogo.crear("  Diego ", " Argentina ", 4, 5, 3, 2, poderes.obtener(0));
+        assertEquals(iniciales + 1, catalogo.cantidad());
+        assertEquals("Diego", catalogo.obtenerNombres()[iniciales]);
+        assertEquals("Argentina", catalogo.obtenerPais(iniciales));
+
+        POOBSoccerException repetido = assertThrows(POOBSoccerException.class,
+                () -> catalogo.crear(" jacob ", "Chile", 3, 3, 3, 3, poderes.obtener(0)));
+        assertEquals(POOBSoccerException.PERSONAJE_REPETIDO, repetido.getMessage());
+
+        catalogo.editar(iniciales, "Leo", "Uruguay", 5, 4, 4, 5, poderes.obtener(1));
+        assertEquals("Leo", catalogo.obtenerNombres()[iniciales]);
+        assertEquals("Uruguay", catalogo.obtenerPais(iniciales));
+        assertEquals(5, catalogo.obtenerVelocidad(iniciales));
+        assertEquals(poderes.obtener(1).obtenerNombre(), catalogo.obtenerNombrePoder(iniciales));
+
+        assertThrows(POOBSoccerException.class,
+                () -> catalogo.editar(iniciales, "Kenji", "Uruguay", 5, 4, 4, 5, poderes.obtener(1)));
+
+        while (catalogo.cantidad() > 2) {
+            catalogo.eliminarPersonaje(catalogo.cantidad() - 1);
+        }
+        POOBSoccerException minimo = assertThrows(POOBSoccerException.class, () -> catalogo.eliminarPersonaje(0));
+        assertEquals(POOBSoccerException.MINIMO_PERSONAJES, minimo.getMessage());
+    }
+
+    @Test
+    public void fachadaDeberiaGestionarPersonajesPersonalizadosEnPartido() throws POOBSoccerException {
+        assertEquals(4, juego.obtenerNombresPoderes().length);
+        POOBSoccerException poderInvalido = assertThrows(POOBSoccerException.class,
+                () -> juego.crearPersonaje("Diego", "Argentina", 3, 3, 3, 3, 99));
+        assertEquals(POOBSoccerException.PODER_INVALIDO, poderInvalido.getMessage());
+
+        int indice = juego.crearPersonaje("Diego", "Argentina", 4, 5, 3, 2, 0);
+        try {
+            juego.editarPersonaje(indice, "Lucas", "Perú", 5, 4, 4, 3, 2);
+            iniciar(MODO_PVSP, GOLES_3, indice, 0);
+            assertEquals("Lucas", juego.obtenerNombreJugador(1));
+            assertEquals("Perú", juego.obtenerPaisJugador(1));
+            assertEquals(juego.obtenerNombresPoderes()[2], juego.obtenerNombrePoderJugador(1));
+        } finally {
+            juego.eliminarPersonaje(indice);
+        }
     }
 }

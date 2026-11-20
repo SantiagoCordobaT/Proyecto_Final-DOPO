@@ -43,6 +43,8 @@ final class CharacterCard extends JPanel {
     private final JProgressBar poder;
     private final JLabel especial;
     private final JLabel descripcion;
+    private boolean recargando;
+    private Runnable alSeleccionar;
 
     /**
      * @param modelo  Fachada del dominio.
@@ -82,7 +84,13 @@ final class CharacterCard extends JPanel {
         personajes.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
+                if (e.getValueIsAdjusting()) {
+                    return;
+                }
                 refrescar();
+                if (!recargando && alSeleccionar != null) {
+                    alSeleccionar.run();
+                }
             }
         });
         personajes.setSelectedIndex(inicial);
@@ -92,6 +100,29 @@ final class CharacterCard extends JPanel {
     /** @return Indice del personaje elegido en el catalogo. */
     int obtenerIndiceSeleccionado() {
         return personajes.getSelectedIndex();
+    }
+
+    /** Registra un aviso para saber que ficha toco el usuario por ultima vez. */
+    void alSeleccionar(Runnable accion) {
+        this.alSeleccionar = accion;
+    }
+
+    /**
+     * Recarga los nombres del catalogo manteniendo un indice valido.
+     *
+     * @param indicePreferido Indice deseado tras recargar.
+     */
+    void recargar(int indicePreferido) {
+        recargando = true;
+        try {
+            String[] nombres = modelo.obtenerNombresPersonajes();
+            personajes.setListData(nombres);
+            int indice = Math.max(0, Math.min(indicePreferido, nombres.length - 1));
+            personajes.setSelectedIndex(indice);
+            refrescar();
+        } finally {
+            recargando = false;
+        }
     }
 
     private JProgressBar agregarEstadistica(String clave) {
@@ -109,6 +140,9 @@ final class CharacterCard extends JPanel {
      */
     private void refrescar() {
         int indice = personajes.getSelectedIndex();
+        if (indice < 0) {
+            return;
+        }
         try {
             String equipo = modelo.obtenerPaisPersonaje(indice);
             escudo.establecerPais(equipo);

@@ -10,6 +10,7 @@ import dominio.partidos.MatchType;
 import dominio.partidos.MatchTypeCatalog;
 import dominio.personajes.Character;
 import dominio.personajes.CharacterCatalog;
+import dominio.poderes.PowerCatalog;
 
 /**
  * Fachada (Facade / Controller) del dominio de POOBSoccer. La presentacion solo
@@ -28,6 +29,7 @@ public final class HeadSoccer {
 
     private final GameModeCatalog modos;
     private final MatchTypeCatalog tiposPartido;
+    private final PowerCatalog poderes;
     private final CharacterCatalog personajes;
     private final Character[] elegidos = new Character[Match.JUGADORES];
 
@@ -44,6 +46,7 @@ public final class HeadSoccer {
     private HeadSoccer() throws POOBSoccerException {
         this.modos = new GameModeCatalog();
         this.tiposPartido = new MatchTypeCatalog();
+        this.poderes = new PowerCatalog();
         this.personajes = new CharacterCatalog();
     }
 
@@ -151,6 +154,49 @@ public final class HeadSoccer {
      */
     public String obtenerDescripcionPoderPersonaje(int indice) throws POOBSoccerException {
         return personajes.obtenerDescripcionPoder(indice);
+    }
+
+    /** @return Nombres de los poderes disponibles para crear o editar personajes. */
+    public String[] obtenerNombresPoderes() {
+        return poderes.obtenerNombres();
+    }
+
+    /**
+     * Crea un personaje personalizado y lo agrega al catalogo.
+     *
+     * @return Indice del nuevo personaje en el catalogo.
+     * @throws POOBSoccerException Si faltan datos, el nombre ya existe, las
+     *                             estadisticas estan fuera de rango o el poder no
+     *                             existe.
+     */
+    public int crearPersonaje(String nombre, String pais, int velocidad, int salto, int fuerza, int nivelPoder,
+            int indicePoder) throws POOBSoccerException {
+        personajes.crear(nombre, pais, velocidad, salto, fuerza, nivelPoder, poderes.obtener(indicePoder));
+        return personajes.cantidad() - 1;
+    }
+
+    /**
+     * Edita un personaje existente del catalogo.
+     *
+     * @throws POOBSoccerException Si el personaje o el poder no existen, el nombre
+     *                             ya pertenece a otro o las estadisticas son
+     *                             invalidas.
+     */
+    public void editarPersonaje(int indice, String nombre, String pais, int velocidad, int salto, int fuerza,
+            int nivelPoder, int indicePoder) throws POOBSoccerException {
+        personajes.editar(indice, nombre, pais, velocidad, salto, fuerza, nivelPoder, poderes.obtener(indicePoder));
+        Arrays.fill(elegidos, null);
+    }
+
+    /**
+     * Elimina un personaje del catalogo conservando al menos dos para jugar.
+     *
+     * @throws POOBSoccerException Si el indice no existe o solo quedan dos
+     *                             personajes.
+     */
+    public void eliminarPersonaje(int indice) throws POOBSoccerException {
+        personajes.eliminarPersonaje(indice);
+        Arrays.fill(elegidos, null);
     }
 
     // ------------------------------------------------------------ selecciones
