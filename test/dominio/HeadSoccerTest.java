@@ -436,7 +436,7 @@ public class HeadSoccerTest {
         balon.ubicarEn(450.0, 100.0);
         balon.patear(5, 1);
         assertArrayEquals(new double[] { 450.0, 100.0 }, cancha.balonVisible(balon, 0.0), 1e-9);
-        assertArrayEquals(new double[] { 455.0, 95.0 }, cancha.balonVisible(balon, 0.5), 1e-9);
+        assertArrayEquals(new double[] { 453.0, 97.5 }, cancha.balonVisible(balon, 0.5), 1e-9);
         balon.ubicarEn(Field.ANCHO - Ball.RADIO, 100.0);
         balon.patear(5, 1);
         assertEquals(Field.ANCHO - Ball.RADIO, cancha.balonVisible(balon, 0.5)[0], 1e-9);

@@ -10,10 +10,16 @@ public class Ball {
 
     static final double RADIO = 15.0;
     private static final double EPSILON = 1e-6;
-    private double x;
-    private double y;
     private static final double RAPIDEZ_BASE_X = 6.0;
     private static final double RAPIDEZ_BASE_Y = 5.0;
+    private static final int MULTIPLICADOR_PATADA_X = 18;
+    private static final int MULTIPLICADOR_PATADA_Y = 8;
+    private static final int IMPULSO_REBOTE_ARRIBA = 12;
+    private static final int IMPULSO_REBOTE_LADO = 10;
+    private static final int IMPULSO_EMPUJE = 8;
+    private static final int UMBRAL_GOLPE_FUERTE = 40;
+    private double x;
+    private double y;
     private double velocidadX = RAPIDEZ_BASE_X;
     private int impulsoDerecha;
     private int impulsoIzquierda;
@@ -77,8 +83,23 @@ public class Ball {
      * @param paredDerechaX   Coordenada X del límite lateral derecho.
      */
     void rebotarEnParedes(double paredIzquierdaX, double paredDerechaX) {
-        // Paso 3: mantener entre paredIzquierdaX y paredDerechaX e invertir direccion
-        // horizontal
+        if (x - RADIO <= paredIzquierdaX) {
+            x = paredIzquierdaX + RADIO;
+            velocidadX = Math.abs(velocidadX);
+            if (impulsoIzquierda > 0) {
+                impulsoDerecha = impulsoIzquierda;
+                impulsoIzquierda = 0;
+            }
+        }
+
+        if (x + RADIO >= paredDerechaX) {
+            x = paredDerechaX - RADIO;
+            velocidadX = -Math.abs(velocidadX);
+            if (impulsoDerecha > 0) {
+                impulsoIzquierda = impulsoDerecha;
+                impulsoDerecha = 0;
+            }
+        }
     }
 
     /**
@@ -88,7 +109,8 @@ public class Ball {
      * @param direccion 1 derecha o -1 izquierda.
      */
     public void patear(int fuerza, int direccion) {
-        // Paso 4: asignar impulsos horizontal y vertical segun fuerza y direccion
+        establecerImpulsoHorizontal(direccion, MULTIPLICADOR_PATADA_X * fuerza);
+        impulsoArriba = MULTIPLICADOR_PATADA_Y * fuerza;
     }
 
     /**
@@ -142,7 +164,8 @@ public class Ball {
      */
     public void rebotarArriba(double superficieY) {
         y = superficieY - RADIO;
-        // Paso 5: activar enElAire / impulsoArriba si cae sobre travesano o cabeza
+        enElAire = true;
+        impulsoArriba = IMPULSO_REBOTE_ARRIBA;
     }
 
     /**
@@ -152,7 +175,8 @@ public class Ball {
      */
     void rebotarAbajo(double superficieY) {
         y = superficieY + RADIO;
-        // Paso 5: cortar impulsoArriba y enElAire al golpear por debajo
+        impulsoArriba = 0;
+        enElAire = false;
     }
 
     /**
@@ -163,7 +187,8 @@ public class Ball {
      */
     void rebotarDeLado(double bordeX, int direccion) {
         x = bordeX + direccion * RADIO;
-        // Paso 5: dirigir el movimiento horizontal hacia direccion
+        int impulsoRebote = Math.max(direccion > 0 ? impulsoIzquierda : impulsoDerecha, IMPULSO_REBOTE_LADO);
+        establecerImpulsoHorizontal(direccion, impulsoRebote);
     }
 
     /**
@@ -175,7 +200,21 @@ public class Ball {
      */
     public void empujarDeLado(double bordeX, int direccion) {
         x = bordeX + direccion * RADIO;
-        // Paso 5: dar impulso hacia direccion al ser empujado por un jugador
+        int impulsoEmpuje = Math.max(direccion > 0 ? impulsoDerecha : impulsoIzquierda, IMPULSO_EMPUJE);
+        establecerImpulsoHorizontal(direccion, impulsoEmpuje);
+    }
+
+    /** Asigna la direccion horizontal y activa solo el impulso hacia ese lado. */
+    private void establecerImpulsoHorizontal(int direccion, int impulso) {
+        if (direccion > 0) {
+            velocidadX = Math.abs(RAPIDEZ_BASE_X);
+            impulsoDerecha = impulso;
+            impulsoIzquierda = 0;
+        } else if (direccion < 0) {
+            velocidadX = -Math.abs(RAPIDEZ_BASE_X);
+            impulsoIzquierda = impulso;
+            impulsoDerecha = 0;
+        }
     }
 
     /**
@@ -191,13 +230,14 @@ public class Ball {
      * @return true si el balon va tan rapido como para aturdir a otro jugador.
      */
     boolean esGolpeFuerte() {
-        // Paso 6: indicar si el balon aun tiene suficiente impulso como para aturdir
-        return false;
+        return Math.max(impulsoDerecha, impulsoIzquierda) >= UMBRAL_GOLPE_FUERTE;
     }
 
     /** Frena el balon tras golpear con fuerza a un personaje. */
     void frenar() {
-        // Paso 6: reducir los impulsos activos tras golpear a un personaje
+        impulsoDerecha /= 2;
+        impulsoIzquierda /= 2;
+        impulsoArriba /= 2;
     }
 
     /**
@@ -207,7 +247,9 @@ public class Ball {
      *         paso.
      */
     double xDespuesDe(double fraccion) {
-        // Paso 7 (opcional): sumar el avance horizontal del paso * fraccion
+        if (impulsoDerecha > 0 || impulsoIzquierda > 0) {
+            return x + velocidadX * fraccion;
+        }
         return x;
     }
 
@@ -217,7 +259,12 @@ public class Ball {
      *         paso.
      */
     double yDespuesDe(double fraccion) {
-        // Paso 7 (opcional): sumar el avance vertical del paso * fraccion
+        if (impulsoArriba > 0) {
+            return y - RAPIDEZ_BASE_Y * fraccion;
+        }
+        if (!enElAire) {
+            return y + RAPIDEZ_BASE_Y * fraccion;
+        }
         return y;
     }
 
