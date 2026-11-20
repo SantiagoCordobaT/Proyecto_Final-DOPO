@@ -9,19 +9,16 @@ package dominio;
 public class Ball {
 
     static final double RADIO = 15.0;
-    private static final double GRAVEDAD = 0.45;
-    private static final double REBOTE = 0.75;
-    private static final double FRICCION_SUELO = 0.98;
-    private static final double VELOCIDAD_REPOSO = 0.5;
-    private static final double VELOCIDAD_PATADA_POR_FUERZA = 2.0;
-    private static final double VELOCIDAD_EMPUJE = 3.0;
-    private static final double VELOCIDAD_GOLPE_FUERTE = 12.0;
-    private static final double FRENADO_GOLPE_FUERTE = 0.6;
     private static final double EPSILON = 1e-6;
     private double x;
     private double y;
-    private double velocidadX;
-    private double velocidadY;
+    private static final double RAPIDEZ_BASE_X = 6.0;
+    private static final double RAPIDEZ_BASE_Y = 5.0;
+    private double velocidadX = RAPIDEZ_BASE_X;
+    private int impulsoDerecha;
+    private int impulsoIzquierda;
+    private int impulsoArriba;
+    private boolean enElAire;
 
     /**
      * Ubica el balon en un punto y cae limpiamente.
@@ -32,8 +29,11 @@ public class Ball {
     void ubicarEn(double x, double y) {
         this.x = x;
         this.y = y;
-        this.velocidadX = 0.0;
-        this.velocidadY = 0.0;
+        impulsoDerecha = 0;
+        impulsoIzquierda = 0;
+        impulsoArriba = 0;
+        enElAire = false;
+        velocidadX = RAPIDEZ_BASE_X;
     }
 
     /**
@@ -44,20 +44,29 @@ public class Ball {
      * @param techoY Coordenada Y del limite superior de la cancha.
      */
     void actualizarFisica(double sueloY, double techoY) {
-        velocidadY += GRAVEDAD;
-        x += velocidadX;
-        y += velocidadY;
-        if (y + RADIO >= sueloY) {
-            y = sueloY - RADIO;
-            velocidadY = -velocidadY * REBOTE;
-            velocidadX = velocidadX * FRICCION_SUELO;
-            if (Math.abs(velocidadY) < VELOCIDAD_REPOSO) {
-                velocidadY = 0.0;
-            }
+        if (impulsoDerecha > 0) {
+            x += velocidadX;
+            impulsoDerecha--;
+            impulsoIzquierda = 0;
+        } else if (impulsoIzquierda > 0) {
+            x += velocidadX;
+            impulsoIzquierda--;
+            impulsoDerecha = 0;
+        }
+
+        if (impulsoArriba > 0) {
+            enElAire = true;
+            impulsoArriba--;
+            y -= RAPIDEZ_BASE_Y;
+        } else {
+            enElAire = false;
         }
         if (y - RADIO <= techoY) {
             y = techoY + RADIO;
-            velocidadY = -velocidadY * REBOTE;
+            impulsoArriba = 0;
+        }
+        if (!enElAire && y + RADIO < sueloY) {
+            y = Math.min(sueloY - RADIO, y + RAPIDEZ_BASE_Y);
         }
     }
 
@@ -68,14 +77,8 @@ public class Ball {
      * @param paredDerechaX   Coordenada X del límite lateral derecho.
      */
     void rebotarEnParedes(double paredIzquierdaX, double paredDerechaX) {
-        if (x - RADIO <= paredIzquierdaX) {
-            x = paredIzquierdaX + RADIO;
-            velocidadX = -velocidadX * REBOTE;
-        }
-        if (x + RADIO >= paredDerechaX) {
-            x = paredDerechaX - RADIO;
-            velocidadX = -velocidadX * REBOTE;
-        }
+        // Paso 3: mantener entre paredIzquierdaX y paredDerechaX e invertir direccion
+        // horizontal
     }
 
     /**
@@ -85,9 +88,7 @@ public class Ball {
      * @param direccion 1 derecha o -1 izquierda.
      */
     public void patear(int fuerza, int direccion) {
-        double velocidadPatada = fuerza * VELOCIDAD_PATADA_POR_FUERZA;
-        velocidadX += direccion * velocidadPatada;
-        velocidadY -= velocidadPatada;
+        // Paso 4: asignar impulsos horizontal y vertical segun fuerza y direccion
     }
 
     /**
@@ -141,7 +142,7 @@ public class Ball {
      */
     public void rebotarArriba(double superficieY) {
         y = superficieY - RADIO;
-        velocidadY = -Math.abs(velocidadY) * REBOTE;
+        // Paso 5: activar enElAire / impulsoArriba si cae sobre travesano o cabeza
     }
 
     /**
@@ -151,7 +152,7 @@ public class Ball {
      */
     void rebotarAbajo(double superficieY) {
         y = superficieY + RADIO;
-        velocidadY = Math.abs(velocidadY) * REBOTE;
+        // Paso 5: cortar impulsoArriba y enElAire al golpear por debajo
     }
 
     /**
@@ -162,7 +163,7 @@ public class Ball {
      */
     void rebotarDeLado(double bordeX, int direccion) {
         x = bordeX + direccion * RADIO;
-        velocidadX = direccion * Math.abs(velocidadX) * REBOTE;
+        // Paso 5: dirigir el movimiento horizontal hacia direccion
     }
 
     /**
@@ -174,7 +175,7 @@ public class Ball {
      */
     public void empujarDeLado(double bordeX, int direccion) {
         x = bordeX + direccion * RADIO;
-        velocidadX = direccion * Math.max(Math.abs(velocidadX), VELOCIDAD_EMPUJE);
+        // Paso 5: dar impulso hacia direccion al ser empujado por un jugador
     }
 
     /**
@@ -190,13 +191,13 @@ public class Ball {
      * @return true si el balon va tan rapido como para aturdir a otro jugador.
      */
     boolean esGolpeFuerte() {
-        return Math.sqrt(velocidadX * velocidadX + velocidadY * velocidadY) >= VELOCIDAD_GOLPE_FUERTE;
+        // Paso 6: indicar si el balon aun tiene suficiente impulso como para aturdir
+        return false;
     }
 
     /** Frena el balon tras golpear con fuerza a un personaje. */
     void frenar() {
-        velocidadX *= FRENADO_GOLPE_FUERTE;
-        velocidadY *= FRENADO_GOLPE_FUERTE;
+        // Paso 6: reducir los impulsos activos tras golpear a un personaje
     }
 
     /**
@@ -206,7 +207,8 @@ public class Ball {
      *         paso.
      */
     double xDespuesDe(double fraccion) {
-        return x + velocidadX * fraccion;
+        // Paso 7 (opcional): sumar el avance horizontal del paso * fraccion
+        return x;
     }
 
     /**
@@ -215,7 +217,8 @@ public class Ball {
      *         paso.
      */
     double yDespuesDe(double fraccion) {
-        return y + velocidadY * fraccion;
+        // Paso 7 (opcional): sumar el avance vertical del paso * fraccion
+        return y;
     }
 
     /** @return Coordenada horizontal del centro. */
