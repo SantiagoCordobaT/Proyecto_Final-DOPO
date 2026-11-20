@@ -199,7 +199,11 @@ public class Character implements Named {
             oponente.aturdir();
         }
         if (balonAlAlcance) {
-            balon.patear(fuerza, orientacion);
+            if (estaEnZonaCabeza(balon)) {
+                balon.patearArriba(fuerza, orientacion);
+            } else {
+                balon.patear(fuerza, orientacion);
+            }
             barraPoder.dispararSobre(oponente);
         }
         return balonAlAlcance;
@@ -214,18 +218,25 @@ public class Character implements Named {
     }
 
     /**
-     * Empuja el balon que toca: rebota en la cabeza si viene desde arriba; si no,
-     * sale hacia un lado.
+     * Reacciona al contacto con el balon segun la zona del cuerpo: la cabeza lo
+     * eleva hacia adelante; los costados lo empujan hacia ese lado.
      *
      * @param balon Balon en contacto.
      */
     public void empujar(Ball balon) {
-        if (balon.estaPorEncimaDe(obtenerBordeSuperior())) {
+        if (estaEnZonaCabeza(balon)) {
             balon.rebotarArriba(obtenerBordeSuperior());
+            if (puedeActuar()) {
+                balon.patearArriba(fuerza, orientacion);
+            }
         } else {
             int lado = balon.ladoRespectoA(x);
             balon.empujarDeLado(x + lado * obtenerAncho() / 2.0, lado);
         }
+    }
+
+    private boolean estaEnZonaCabeza(Ball balon) {
+        return balon.estaPorEncimaDe(obtenerBordeSuperior());
     }
 
     /** Arma el poder; solo tiene efecto con la barra llena. */

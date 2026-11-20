@@ -536,6 +536,45 @@ public class HeadSoccerTest {
     }
 
     @Test
+    public void patearArribaDeberiaElevarMasElBalonQuePatadaNormal() {
+        Field cancha = new Field();
+        Ball normal = new Ball();
+        normal.ubicarEn(200.0, 400.0);
+        normal.patear(3, 1);
+        Ball elevado = new Ball();
+        elevado.ubicarEn(200.0, 400.0);
+        elevado.patearArriba(3, 1);
+
+        double menorYNormal = 400.0;
+        double menorYElevado = 400.0;
+        for (int paso = 0; paso < 60; paso++) {
+            cancha.actualizarBalon(normal);
+            cancha.actualizarBalon(elevado);
+            menorYNormal = Math.min(menorYNormal, normal.obtenerY());
+            menorYElevado = Math.min(menorYElevado, elevado.obtenerY());
+        }
+        assertTrue(menorYElevado < menorYNormal, "La patada alta debe alcanzar mayor altura");
+        assertTrue(elevado.obtenerX() < normal.obtenerX(), "La patada alta debe avanzar menos horizontalmente");
+    }
+
+    @Test
+    public void cabezazoEnZonaSuperiorDeberiaElevarElBalonHaciaAdelante() throws POOBSoccerException {
+        Field cancha = new Field();
+        Character personaje = new Character("A", "Canadá", 3, 3, 3, 3, new FreezePower());
+        personaje.entrarEn(400.0, 1);
+        Ball balon = new Ball();
+        balon.ubicarEn(400.0, personaje.obtenerBordeSuperior() - 2.0);
+        assertTrue(personaje.toca(balon));
+        personaje.empujar(balon);
+        for (int paso = 0; paso < 10; paso++) {
+            cancha.actualizarBalon(balon);
+        }
+        assertTrue(balon.obtenerY() < personaje.obtenerBordeSuperior() - Ball.RADIO,
+                "El cabezazo debe impulsar el balon hacia arriba");
+        assertTrue(balon.obtenerX() > 400.0, "El cabezazo debe dirigir el balon en la orientacion del jugador");
+    }
+
+    @Test
     public void golSoloDeberiaContarParaElAnotador() throws POOBSoccerException {
         Match partido = crearPartido(MODO_PVSP, GOLES_3, 0, 0);
         partido.anotarGol(1);

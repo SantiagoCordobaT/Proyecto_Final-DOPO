@@ -14,6 +14,8 @@ public class Ball {
     private static final double RAPIDEZ_BASE_Y = 5.0;
     private static final int MULTIPLICADOR_PATADA_X = 18;
     private static final int MULTIPLICADOR_PATADA_Y = 8;
+    private static final int MULTIPLICADOR_PATADA_ALTA_X = 10;
+    private static final int MULTIPLICADOR_PATADA_ALTA_Y = 12;
     private static final int IMPULSO_REBOTE_ARRIBA = 12;
     private static final int IMPULSO_REBOTE_LADO = 10;
     private static final int IMPULSO_EMPUJE = 8;
@@ -109,8 +111,24 @@ public class Ball {
      * @param direccion 1 derecha o -1 izquierda.
      */
     public void patear(int fuerza, int direccion) {
-        establecerImpulsoHorizontal(direccion, MULTIPLICADOR_PATADA_X * fuerza);
-        impulsoArriba = MULTIPLICADOR_PATADA_Y * fuerza;
+        aplicarPatada(direccion, MULTIPLICADOR_PATADA_X * fuerza, MULTIPLICADOR_PATADA_Y * fuerza);
+    }
+
+    /**
+     * Aplica una patada elevada o cabezazo (mas impulso vertical y menor alcance
+     * horizontal para superar al rival por aire).
+     *
+     * @param fuerza    Estadística de fuerza del personaje.
+     * @param direccion 1 derecha o -1 izquierda.
+     */
+    public void patearArriba(int fuerza, int direccion) {
+        aplicarPatada(direccion, MULTIPLICADOR_PATADA_ALTA_X * fuerza, MULTIPLICADOR_PATADA_ALTA_Y * fuerza);
+    }
+
+    /** Ejecuta una patada parametrizada por su impulso horizontal y vertical. */
+    private void aplicarPatada(int direccion, int impulsoHorizontal, int impulsoVertical) {
+        establecerImpulsoHorizontal(direccion, impulsoHorizontal);
+        impulsoArriba = impulsoVertical;
     }
 
     /**
