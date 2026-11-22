@@ -25,16 +25,12 @@ import dominio.excepciones.POOBSoccerException;
 final class PlayerPlateP extends JPanel {
 
     private static final int PORCENTAJE = 100;
-    private static final double SEGUNDOS_PULSO = 0.5;
-    private static final Color[] COLORES_PULSO = { Resources.LISTO, Resources.TEXTO };
-
     private final HeadSoccer modelo;
     private final int numero;
     private final Color color;
     private final TeamBadge escudo = new TeamBadge();
     private final JLabel nombre;
     private final JProgressBar poder;
-    private double pulso;
 
     /**
      * @param modelo    Fachada del dominio.
@@ -76,7 +72,10 @@ final class PlayerPlateP extends JPanel {
         nombre.setText(modelo.obtenerNombreJugador(numero).toUpperCase());
         poder.setValue((int) Math.round(modelo.obtenerBarraPoderJugador(numero) * PORCENTAJE));
         poder.setString(armado ? texto("hud.armed") : modelo.obtenerNombrePoderJugador(numero));
-        pulso = (pulso + segundos) % SEGUNDOS_PULSO;
-        poder.setForeground(armado ? COLORES_PULSO[(int) (pulso * COLORES_PULSO.length / SEGUNDOS_PULSO)] : color);
+        if (armado) {
+            poder.setForeground(Resources.LISTO);
+        } else {
+            poder.setForeground(color);
+        }
     }
 }

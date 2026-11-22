@@ -41,8 +41,18 @@ final class CharacterSelectD extends StreetDialog {
         primero = new CharacterCard(modelo, 1, 0);
         segundo = new CharacterCard(modelo, 2, INDICE_RIVAL);
         fichaActiva = primero;
-        primero.alSeleccionar(() -> fichaActiva = primero);
-        segundo.alSeleccionar(() -> fichaActiva = segundo);
+        primero.alSeleccionar(new Runnable() {
+            @Override
+            public void run() {
+                fichaActiva = primero;
+            }
+        });
+        segundo.alSeleccionar(new Runnable() {
+            @Override
+            public void run() {
+                fichaActiva = segundo;
+            }
+        });
 
         JPanel fichas = recursos.crearPanel(new BorderLayout(Resources.ESPACIO, 0));
         fichas.add(primero, BorderLayout.WEST);

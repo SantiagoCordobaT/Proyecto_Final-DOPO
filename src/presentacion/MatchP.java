@@ -164,15 +164,6 @@ final class MatchP extends JPanel {
         return codigoTecla * RANGO_UBICACION + ubicacion;
     }
 
-    /** Cambio de estado de una tecla de jugador: presionarla o soltarla. */
-    private interface KeyChange {
-        void aplicar(PlayerKey tecla, HeadSoccer modelo) throws POOBSoccerException;
-    }
-
-    /**
-     * Escuchador del teclado compartido: P o Esc pausan; las teclas de la tabla se
-     * reenvian a la fachada como acciones de su jugador; las demas se ignoran.
-     */
     private final class Keyboard extends KeyAdapter {
 
         @Override
@@ -180,20 +171,23 @@ final class MatchP extends JPanel {
             if (e.getKeyCode() == KeyEvent.VK_P || e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                 pausarPartido();
             } else {
-                reenviar(e, PlayerKey::presionar);
+                PlayerKey tecla = teclas.get(ranuraTecla(e.getKeyCode(), e.getKeyLocation()));
+                if (tecla != null) {
+                    try {
+                        tecla.presionar(modelo);
+                    } catch (POOBSoccerException ex) {
+                        HeadSoccerGUI.reportarError(MatchP.this, ex);
+                    }
+                }
             }
         }
 
         @Override
         public void keyReleased(KeyEvent e) {
-            reenviar(e, PlayerKey::soltar);
-        }
-
-        private void reenviar(KeyEvent e, KeyChange cambio) {
             PlayerKey tecla = teclas.get(ranuraTecla(e.getKeyCode(), e.getKeyLocation()));
             if (tecla != null) {
                 try {
-                    cambio.aplicar(tecla, modelo);
+                    tecla.soltar(modelo);
                 } catch (POOBSoccerException ex) {
                     HeadSoccerGUI.reportarError(MatchP.this, ex);
                 }

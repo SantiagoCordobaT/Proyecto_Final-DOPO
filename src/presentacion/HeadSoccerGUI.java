@@ -129,6 +129,11 @@ public final class HeadSoccerGUI extends JFrame {
      * @param argumentos No se usan.
      */
     public static void main(String[] argumentos) {
-        SwingUtilities.invokeLater(HeadSoccerGUI::iniciarInterfaz);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                iniciarInterfaz();
+            }
+        });
     }
 }
