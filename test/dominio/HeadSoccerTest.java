@@ -537,6 +537,17 @@ public class HeadSoccerTest {
     }
 
     @Test
+    public void balonDeberiaRebotarDeFrenteEnPuntaDelTravesano() {
+        Goal arco = new Goal(0.0, Goal.ANCHO, 2);
+        double centroTravesanoY = Field.SUELO_Y - Goal.ALTO + Goal.GROSOR_BORDE / 2.0;
+        Ball balon = new Ball();
+        balon.ubicarEn(Goal.ANCHO + 10.0, centroTravesanoY);
+        arco.resolverTravesano(balon);
+        assertEquals(Goal.ANCHO + Ball.RADIO, balon.obtenerX(), 1e-9);
+        assertEquals(centroTravesanoY, balon.obtenerY(), 1e-9);
+    }
+
+    @Test
     public void patearArribaDeberiaElevarMasElBalonQuePatadaNormal() {
         Field cancha = new Field();
         Ball normal = new Ball();

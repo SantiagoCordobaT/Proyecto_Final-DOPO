@@ -16,19 +16,20 @@
 ---
 
 ## Tabla de Contenidos
-- [Head Soccer](#-inspiración-head-soccer)
-- [Nuestra versión: POOBSoccer](#-propuesta-poobsoccer)
-- [Mecanicas](#-mecánicas-del-juego)
-- [Controles](#-controles)
-- [Modalidades](#-modalidades-de-juego)
-- [Tipos de Partido](#-tipos-de-partido)
-- [Jugadores y Stats](#-jugadores-y-estadísticas)
-- [Sistema de Poderes](#-sistema-de-poderes)
-- [Reglas y Puntajes](#-reglas-y-puntajes)
-- [Ejecutar](#-cómo-ejecutar)
-- [Arquitectura y patrones](#-arquitectura-y-patrones)
-- [Autores y Colaboradores](#-autores-y-colaboradores)
-- [Referencias](#-referencias)
+- [Head Soccer](#head-soccer)
+- [Nuestra versión: POOBSoccer](#nuestra-versión-poobsoccer)
+- [Mecánicas del Juego](#mecánicas-del-juego)
+- [Controles](#controles)
+- [Modalidades de Juego](#modalidades-de-juego)
+- [Tipos de Partido](#tipos-de-partido)
+- [Jugadores y Estadísticas](#jugadores-y-estadísticas)
+- [Sistema de Poderes](#sistema-de-poderes)
+- [Reglas y Puntajes](#reglas-y-puntajes)
+- [Cómo Ejecutar](#cómo-ejecutar)
+- [Arquitectura](#arquitectura)
+- [Uso de Herramientas de IA](#uso-de-herramientas-de-ia)
+- [Autores y Colaboradores](#autores-y-colaboradores)
+- [Referencias](#referencias)
 
 ---
 
@@ -37,8 +38,8 @@
 **Head Soccer** es un videojuego de fútbol arcade en 2D para celulares desarrollado por la empresa surcoreana **D&D Dream** y lanzado en 2012. Se ha vuelto muy popular por sus partidos rápidos de uno contra uno y por unos controles tan sencillos que cualquiera aprende a jugar en segundos.
 
 * **Dinámica básica:** Cada jugador controla un personaje que representa a un país. Los personajes se mueven a los lados, saltan y patean para meter el balón en el arco rival.
-* **Tiros especiales:** Al llenar una barra de poder, el personaje lanza un tiro especial (fuego, hielo, rayo, etc.) que puede terminar en gol o dejar al rival inmovilizado por unos segundos.
-* **Atributos:** Cada personaje posee sus propias estadísticas de velocidad, salto y fuerza, además de un tiro especial único.
+* **Tiros especiales:** Al llenar una barra de poder, el personaje lanza un tiro especial (congelamiento, aturdimiento, confusión o reducción) que altera las condiciones del rival por unos segundos.
+* **Atributos:** Cada personaje posee sus propias estadísticas de velocidad, salto, fuerza y poder único, además de poder crear, editar o eliminar personajes personalizados.
 * **Modos en la versión móvil original:** Arcade, Torneo, Supervivencia, Liga, Head Cup y Death Mode.
 
 ---
@@ -48,8 +49,8 @@
 En este proyecto final llevaremos **Head Soccer** del celular al computador. Nuestra versión, **POOBSoccer**, conserva el dinamismo de los partidos rápidos con poderes especiales, permitiendo que dos jugadores compitan en el mismo teclado e incorporando las siguientes novedades:
 
 - [x] **Tres modalidades:** Jugador vs Jugador, Jugador vs Máquina y Máquina vs Máquina.
-- [x] **Dos tipos de partido:** Por goles y supervivencia.
-- [x] **Personajes diferenciados:** Atributos propios y poderes especiales temáticos según el país.
+- [x] **Dos tipos de partido:** Por goles (3, 5 o 7) y supervivencia.
+- [x] **Personajes configurables:** Cuatro personajes iniciales y creación, edición y eliminación de personajes con atributos y poder elegibles.
 - [x] **Impacto estratégico:** Poderes con efectos de estado que alteran las condiciones del oponente.
 
 ---
@@ -57,8 +58,9 @@ En este proyecto final llevaremos **Head Soccer** del celular al computador. Nue
 ## Mecánicas del Juego
 
 * **Perspectiva y Entorno:** Partido de fútbol 2D de uno contra uno con vista lateral. Cada jugador defiende su portería y busca anotar en el arco contrario.
-* **Física:** El balón está afectado por la gravedad y cuenta con física de rebote en el suelo, los travesaños/arcos y los límites de la cancha.
-* **Información Abierta:** Ambos jugadores tienen visibilidad total y en tiempo real de toda la cancha, el balón, los personajes, el marcador, el cronómetro y las barras de poder.
+* **Física:** El balón avanza por impulsos discretos con rebote en las paredes laterales, los travesaños de los arcos y tope en suelo y techo; los personajes tienen salto y caída por estados según su atributo de salto.
+* **Zonas de golpeo:** Al patear o contactar el balón con la zona superior de la cabeza se ejecuta un tiro/cabezazo elevado hacia el campo rival.
+* **Información Abierta:** Ambos jugadores tienen visibilidad total en tiempo real de toda la cancha, el balón, los personajes, el marcador, el estado del partido (meta de goles y tiempo jugado, o balones y racha) y las barras de poder.
 * **Reanudación tras Gol:** Después de cada anotación, tanto los jugadores como el balón regresan a su posición inicial, cayendo el balón nuevamente desde el centro del campo.
 
 ---
@@ -98,7 +100,7 @@ POOBSoccer implementa tres configuraciones de control y enfrentamiento:
 * **Supervivencia:**
   * Modo exclusivo para la modalidad **PvsM**.
   * El jugador disputa una serie continua de partidos contra la máquina sin tiempo límite.
-  * Se compite mediante un sistema de vidas o balones: cada vez que se recibe una anotación, se pierde un balón. El partido finaliza para quien agote primero sus balones.
+  * Se compite mediante un sistema de vidas o balones (3 por lado): cada vez que se recibe una anotación, se pierde un balón. Cuando cae la máquina, sube la racha y entra un nuevo rival; la serie termina cuando el jugador 1 agota sus balones.
 
 ---
 
@@ -122,41 +124,82 @@ Cada personaje posee estadísticas graduadas en una escala numérica de **1 a 5*
 
 ## Sistema de Poderes
 
-El poder especial de cada personaje está directamente vinculado a su país de origen. 
+Cada personaje cuenta con un poder especial elegido entre los poderes disponibles en `PowerCatalog`.
 
-* **Carga:** La barra de energía se recarga progresivamente con el tiempo. Solo puede liberarse cuando alcanza el $100\%$ de carga.
-* **Activación:** Se activa al impactar el balón y desencadena efectos sobre el rival.
+* **Carga:** La estadística **Poder Único** fija la rapidez de la barra: se recarga $2 \times \text{Poder Único}\,\%$ por segundo hasta llegar al $100\%$.
+* **Activación:** Con la barra llena, la tecla de poder **arma** el poder (con la barra incompleta no tiene efecto) y la siguiente patada que conecta con el balón lo **dispara**: el rival recibe el efecto y la barra vuelve a cero. Si el rival ya tiene ese efecto, el nuevo lo reemplaza y reinicia su duración.
 
-### Personajes disponibles
-La estadística **Poder Único** fija la rapidez de la barra: se recarga $2 \times$ Poder Único por ciento por segundo. Con la barra llena, la tecla de poder **arma** el poder (con la barra incompleta no pasa nada) y la siguiente patada que conecta con el balón lo **dispara**: el rival recibe el efecto y la barra vuelve a cero. Si el rival ya tiene ese efecto, el nuevo lo reemplaza y reinicia su duración.
+### Personajes iniciales disponibles
+Además de poder **crear**, **editar** y **eliminar** personajes personalizados desde la pantalla de selección (conservando al menos 2 disponibles), el catálogo inicia con:
 
-**POR DEFINIR**
+| Personaje | País | Velocidad | Salto | Fuerza | Poder Único | Poder especial |
+| :--- | :--- | :---: | :---: | :---: | :---: | :--- |
+| **Jacob** | Canadá | 3 | 3 | 4 | 3 | Congelamiento |
+| **Kenji** | Japón | 5 | 4 | 2 | 2 | Aturdimiento |
+| **Mateo** | Colombia | 4 | 3 | 3 | 4 | Confusión |
+| **Rafael** | Brasil | 4 | 5 | 3 | 3 | Reducción |
 
-### Ejemplos de Habilidades:
-* **Congelación (Canadá):** Encierra al oponente en un bloque de hielo sólido durante unos segundos, anulando su movimiento.
-* **Reducción:** Encoge temporalmente al oponente a un tamaño diminuto, reduciendo su alcance de cobertura.
-* **Confusión:** Invierte por unos momentos los controles de desplazamiento del oponente.
+### Habilidades disponibles:
+* **Congelamiento:** Encierra al oponente en un bloque de hielo sólido durante 3 segundos, impidiéndole actuar.
+* **Aturdimiento:** Aturde al oponente durante 3 segundos, bloqueando movimiento, salto y patada.
+* **Confusión:** Invierte los controles horizontales (izquierda/derecha) del oponente durante 5 segundos.
+* **Reducción:** Encoge temporalmente al oponente a la mitad de su tamaño durante 6 segundos.
 
 ---
 
 ## Reglas y Puntajes
 
 ### Sistema de Puntuación
-* **Gol a favor:** Balón en el arco rival suma **$+1$ punto**.
+* **Gol a favor:** Balón completamente dentro del arco rival suma **$+1$ punto**.
 * **Autogol:** Si el balón ingresa en la portería propia, se concede **$+1$ punto al rival**.
 
 ### Normas del Encuentro
-1. **Inicio:** El juego arranca con marcador inicial de $\$0-0\$$, barras de poder vacías y cada participante ubicado en su mitad respectiva de campo.
-2. **Convalidación de gol:** El balón debe traspasar en su totalidad la línea de meta.
+1. **Inicio:** El juego arranca con marcador inicial de 0-0, barras de poder vacías y cada participante ubicado en su mitad respectiva de campo.
+2. **Convalidación de gol:** El balón debe traspasar en su totalidad la línea de meta por debajo del travesaño.
 3. **Uso de poder:** Requiere obligatoriamente que la barra se encuentre al tope de carga.
-4. **Estado de Aturdimiento:** Un personaje alcanzado por ataques o patadas del rival entra en estado de aturdimiento, periodo en el cual queda inhabilitado para moverse, saltar o patear.
+4. **Estado de Aturdimiento:** Un personaje alcanzado por ataques cuerpo a cuerpo o balonazos fuertes del rival entra en estado de aturdimiento durante 3 segundos, periodo en el cual queda inhabilitado para moverse, saltar o patear.
 5. **Pausa:** La partida puede suspenderse de manera provisional en cualquier instante.
-6. **Desempate:** En partidas por tiempo terminadas en empate, se aplica el criterio de muerte súbita (**Gol de Oro**).
+
+---
+
+## Cómo Ejecutar
+
+Desde la raíz del proyecto con JDK 21:
+
+```powershell
+mkdir out -Force | Out-Null
+javac -encoding UTF-8 -d out (Get-ChildItem -Path src -Recurse -Filter *.java).FullName
+java -cp out presentacion.HeadSoccerGUI
+```
+
+Para compilar y ejecutar las pruebas unitarias con JUnit:
+
+```powershell
+javac -encoding UTF-8 -d out -cp "lib\junit-platform-console-standalone.jar" (Get-ChildItem -Path src, test -Recurse -Filter *.java).FullName
+java -jar "lib\junit-platform-console-standalone.jar" execute --class-path out --scan-class-path
+```
+
+---
+
+## Arquitectura
+
+* **`src/dominio/`**: Fachada `HeadSoccer`, simulación `Match`, física de cancha/arcos/balón (`Field`, `Goal`, `Ball`), personajes (`dominio.personajes`), modalidades y controles (`dominio.modalidades`), reglas de partido (`dominio.partidos`), poderes y efectos (`dominio.poderes`, `dominio.efectos`) y excepciones (`dominio.excepciones`).
+* **`src/presentacion/`**: Ventana principal `HeadSoccerGUI`, menú, diálogos de configuración/selección/edición de personajes y renderizado Swing sin lógica de reglas.
+* **`test/dominio/`**: Pruebas unitarias de reglas de negocio, colisiones, poderes y fachada.
+
+---
+
+## Uso de Herramientas de IA
+
+Durante el desarrollo inicial y refactorizaciones de este repositorio se utilizaron herramientas de inteligencia artificial (Claude / Antigravity) como apoyo para estructuración inicial, traducción de identificadores y pruebas; actualmente el código está siendo revisado, simplificado y reescrito directamente por los autores del proyecto para asegurar comprensión y autoría propia de toda la solución.
 
 ---
 
 ## Autores y Colaboradores
 
+* **Desarrollo del proyecto:**
+  * Santiago Córdoba
+  * Camilo Rivas
 * **Propuesta:**
   * Mateo Sánchez García
   * María Angélica Pérez Mesa

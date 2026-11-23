@@ -49,7 +49,7 @@ class Goal {
         if (!balon.seSolapaCon(izquierdaX, BORDE_ARRIBA, derechaX, BORDE_ABAJO)) {
             return;
         }
-        if (balon.estaPorEncimaDe(BORDE_ABAJO)) {
+        if (balon.estaPorEncimaDe(BORDE_ARRIBA)) {
             balon.rebotarArriba(BORDE_ARRIBA);
         } else if (balon.estaPorDebajoDe(BORDE_ABAJO)) {
             balon.rebotarAbajo(BORDE_ABAJO);
