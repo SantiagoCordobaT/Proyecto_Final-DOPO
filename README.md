@@ -162,36 +162,11 @@ Además de poder **crear**, **editar** y **eliminar** personajes personalizados 
 
 ---
 
-## Cómo Ejecutar
-
-Desde la raíz del proyecto con JDK 21:
-
-```powershell
-mkdir out -Force | Out-Null
-javac -encoding UTF-8 -d out (Get-ChildItem -Path src -Recurse -Filter *.java).FullName
-java -cp out presentacion.HeadSoccerGUI
-```
-
-Para compilar y ejecutar las pruebas unitarias con JUnit:
-
-```powershell
-javac -encoding UTF-8 -d out -cp "lib\junit-platform-console-standalone.jar" (Get-ChildItem -Path src, test -Recurse -Filter *.java).FullName
-java -jar "lib\junit-platform-console-standalone.jar" execute --class-path out --scan-class-path
-```
-
----
-
 ## Arquitectura
 
 * **`src/dominio/`**: Fachada `HeadSoccer`, simulación `Match`, física de cancha/arcos/balón (`Field`, `Goal`, `Ball`), personajes (`dominio.personajes`), modalidades y controles (`dominio.modalidades`), reglas de partido (`dominio.partidos`), poderes y efectos (`dominio.poderes`, `dominio.efectos`) y excepciones (`dominio.excepciones`).
 * **`src/presentacion/`**: Ventana principal `HeadSoccerGUI`, menú, diálogos de configuración/selección/edición de personajes y renderizado Swing sin lógica de reglas.
 * **`test/dominio/`**: Pruebas unitarias de reglas de negocio, colisiones, poderes y fachada.
-
----
-
-## Uso de Herramientas de IA
-
-Durante el desarrollo inicial y refactorizaciones de este repositorio se utilizaron herramientas de inteligencia artificial (Claude / Antigravity) como apoyo para estructuración inicial, traducción de identificadores y pruebas; actualmente el código está siendo revisado, simplificado y reescrito directamente por los autores del proyecto para asegurar comprensión y autoría propia de toda la solución.
 
 ---
 
