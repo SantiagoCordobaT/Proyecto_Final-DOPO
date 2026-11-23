@@ -10,7 +10,7 @@ import dominio.excepciones.POOBSoccerException;
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-public final class MatchTypeCatalog extends Catalog<MatchType> {
+public class MatchTypeCatalog extends Catalog<MatchType> {
 
     private static final int[] METAS_GOLES = { 3, 5, 7 };
 
