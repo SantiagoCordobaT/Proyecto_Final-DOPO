@@ -3,10 +3,9 @@ package dominio.partidos;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Partido por goles: sin limite de tiempo, gana el primero en llegar a la meta
- * (3, 5 o 7).
- * 
- * 
+ * Partido por goles: no tiene limite de tiempo y gana el primero en alcanzar
+ * la meta de goles definida (3, 5 o 7).
+ *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
@@ -15,15 +14,21 @@ class GoalMatch extends MatchType {
     private final int metaGoles;
 
     /**
-     * Solo lo crea {@link MatchTypeCatalog}, que decide las metas ofrecidas.
+     * Crea un partido por goles con la meta indicada.
      *
-     * @param metaGoles Meta de goles.
+     * @param metaGoles Cantidad de goles necesaria para ganar.
      */
     GoalMatch(int metaGoles) {
         super("Por Goles (" + metaGoles + ")");
         this.metaGoles = metaGoles;
     }
 
+    /**
+     * Verifica si el anotador alcanzo la meta de goles y, de ser asi, cierra el
+     * partido dandolo como ganador.
+     *
+     * @param anotador Jugador que anoto el gol (1 o 2).
+     */
     @Override
     protected void alAnotarGol(int anotador) throws POOBSoccerException {
         if (golesDe(anotador) >= metaGoles) {
@@ -32,8 +37,11 @@ class GoalMatch extends MatchType {
     }
 
     /**
-     * @return Meta de goles y tiempo jugado en segundos completos (redondeado hacia
-     *         abajo), por ejemplo "Meta: 3 goles | 00:42".
+     * Construye el texto del marcador con la meta y el tiempo jugado (ej.
+     * "Meta: 3 goles | 00:42"). Se suma TOLERANCIA antes de truncar para evitar
+     * perder un segundo por imprecision decimal de tipo double.
+     *
+     * @return Meta de goles y reloj transcurrido en formato "mm:ss".
      */
     @Override
     public String obtenerTextoEstado() {

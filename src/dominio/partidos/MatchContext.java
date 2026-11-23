@@ -3,9 +3,9 @@ package dominio.partidos;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Lo que un tipo de partido necesita del partido en curso (Protected Variations):
- * leer el marcador y pedir un nuevo rival. Asi {@link MatchType} no conoce a los
- * personajes ni a la simulacion.
+ * Operaciones minimas que un tipo de partido necesita pedirle a la partida en
+ * curso (consultar goles y cambiar de rival). Asi las reglas de partido no
+ * dependen de la fisica, el balon ni la cancha.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -13,16 +13,19 @@ import dominio.excepciones.POOBSoccerException;
 public interface MatchContext {
 
     /**
-     * @param jugador Jugador (1 o 2).
-     * @return Goles del jugador.
-     * @throws POOBSoccerException Si el jugador no es 1 ni 2.
+     * Consulta los goles actuales de un jugador.
+     *
+     * @param jugador Numero del jugador (1 o 2).
+     * @return Goles anotados por ese jugador en la partida actual.
+     * @throws POOBSoccerException Si el numero de jugador no es 1 ni 2.
      */
     int obtenerGoles(int jugador) throws POOBSoccerException;
 
     /**
-     * Reemplaza al rival (jugador 2) por el siguiente del catalogo, listo para jugar.
+     * Cambia al rival (jugador 2) por el siguiente del catalogo, listo para
+     * continuar la serie en modo Supervivencia.
      *
-     * @throws POOBSoccerException Si el catalogo no pudiera entregar el rival.
+     * @throws POOBSoccerException Si el catalogo no puede entregar el nuevo rival.
      */
     void reemplazarRival() throws POOBSoccerException;
 }

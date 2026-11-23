@@ -4,9 +4,8 @@ import dominio.Catalog;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Catalogo de tipos de partido (Creator): Por Goles (3, 5 y 7) y
- * Supervivencia, en ese orden. Es el unico que conoce las metas de goles
- * ofrecidas.
+ * Catalogo que registra los cuatro tipos de partido disponibles en el orden del
+ * menu: Por Goles (3, 5 y 7) y Supervivencia.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -15,7 +14,7 @@ public final class MatchTypeCatalog extends Catalog<MatchType> {
 
     private static final int[] METAS_GOLES = { 3, 5, 7 };
 
-    /** Crea el catalogo con los cuatro tipos de partido. */
+    /** Inicializa el catalogo con las metas de goles y Supervivencia. */
     public MatchTypeCatalog() {
         super(POOBSoccerException.MODO_INVALIDO);
         for (int meta : METAS_GOLES) {

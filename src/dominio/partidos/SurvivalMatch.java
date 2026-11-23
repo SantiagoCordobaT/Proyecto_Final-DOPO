@@ -24,12 +24,13 @@ class SurvivalMatch extends MatchType {
         super("Supervivencia");
     }
 
-    // Solo se permite en modalidades que admiten supervivencia (PvsM).
+    /** Solo permite jugar Supervivencia en modalidades compatibles (PvsM). */
     @Override
     public boolean admite(GameMode modo) {
         return modo.admiteSupervivencia();
     }
 
+    /** Reinicia el estado base y devuelve ambos equipos a 3 balones con racha en 0. */
     @Override
     public void iniciar(MatchContext contexto) {
         super.iniciar(contexto);
@@ -42,6 +43,8 @@ class SurvivalMatch extends MatchType {
      * Descuenta un balon al equipo que recibio el gol.
      * Si cae el rival, suma racha y pide un nuevo oponente; si cae el jugador 1,
      * termina el partido dando la victoria al jugador 2.
+     *
+     * @param anotador Jugador que anoto el gol (1 o 2).
      */
     @Override
     protected void alAnotarGol(int anotador) throws POOBSoccerException {
@@ -60,7 +63,7 @@ class SurvivalMatch extends MatchType {
         }
     }
 
-    // Formato mostrado en el marcador superior durante la serie.
+    /** @return Balones restantes de cada lado y racha actual en formato legible. */
     @Override
     public String obtenerTextoEstado() {
         return "Balones " + balonesJugador + "-" + balonesRival + " | Racha " + racha;
