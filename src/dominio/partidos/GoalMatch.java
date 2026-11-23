@@ -37,15 +37,13 @@ class GoalMatch extends MatchType {
     }
 
     /**
-     * Construye el texto del marcador con la meta y el tiempo jugado (ej.
-     * "Meta: 3 goles | 00:42"). Se suma TOLERANCIA antes de truncar para evitar
-     * perder un segundo por imprecision decimal de tipo double.
+     * Construye el texto del marcador con la meta y el tiempo jugado.
      *
      * @return Meta de goles y reloj transcurrido en formato "mm:ss".
      */
     @Override
     public String obtenerTextoEstado() {
-        return "Meta: " + metaGoles + " goles | "
-                + formatoReloj((int) Math.floor(obtenerSegundosTranscurridos() + TOLERANCIA));
+        int segundos = (int) (obtenerSegundosTranscurridos() + TOLERANCIA);
+        return "Meta: " + metaGoles + " goles | " + formatoReloj(segundos);
     }
 }
