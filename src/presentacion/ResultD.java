@@ -1,7 +1,5 @@
 package presentacion;
 
-import static presentacion.Texts.texto;
-
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,52 +8,56 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import dominio.HeadSoccer;
+import dominio.ResumenJugador;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Diálogo que muestra el ganador, el marcador final y la opción de revancha o
- * volver al menú.
+ * Diálogo de fin de partido con el ganador, el marcador final y los botones de
+ * revancha o volver al menú.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
 @SuppressWarnings("serial")
-final class ResultD extends StreetDialog {
+final class ResultD extends DialogoBase {
 
     private final HeadSoccerGUI ventana;
-    private final JLabel ganador;
-    private final JLabel marcador;
-    private final JLabel estado;
 
     ResultD(HeadSoccerGUI ventana, HeadSoccer modelo) {
-        super(ventana, texto("result.title"));
+        super(ventana, Texts.t("Fin del partido", "Match over"));
         this.ventana = ventana;
-        ganador = recursos.crearEtiqueta("", Resources.FUENTE_ENCABEZADO);
-        marcador = recursos.crearEtiqueta("", Resources.FUENTE_MARCADOR);
-        estado = recursos.crearEtiqueta("", Resources.FUENTE_TEXTO);
-        ganador.setForeground(Resources.LISTO);
-        JPanel cuerpo = recursos.crearPanel(new GridLayout(3, 1, 0, Resources.ESPACIO / 2));
+
+        JLabel ganador = Estilo.etiqueta("", Estilo.FUENTE_SUBTITULO);
+        JLabel marcador = Estilo.etiqueta("", Estilo.FUENTE_MARCADOR);
+        JLabel estado = Estilo.etiqueta("", Estilo.FUENTE_NORMAL);
+        ganador.setForeground(Estilo.RESALTE);
+
+        JPanel cuerpo = new JPanel(new GridLayout(3, 1, 0, 6));
+        cuerpo.setBackground(Estilo.FONDO);
         cuerpo.add(ganador);
         cuerpo.add(marcador);
         cuerpo.add(estado);
-        establecerCuerpo(cuerpo);
-        agregarBoton(texto("result.rematch"), new ActionListener() {
+        ponerCentro(cuerpo);
+
+        agregarBoton(Estilo.boton(Texts.t("Revancha", "Rematch"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cerrar();
+                alCerrar();
                 ventana.abrirSeleccionPersonajes();
             }
-        });
-        agregarBoton(texto("result.menu"), new ActionListener() {
+        }));
+        agregarBoton(Estilo.boton(Texts.t("Menú", "Menu"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cerrar();
+                alCerrar();
             }
-        });
+        }));
+
         try {
-            ganador.setText(texto("result.winner") + " " + modelo.obtenerNombreGanador());
-            marcador.setText(modelo.obtenerNombreJugador(1) + "  " + modelo.obtenerGolesJugador(1) + " - "
-                    + modelo.obtenerGolesJugador(2) + "  " + modelo.obtenerNombreJugador(2));
+            ResumenJugador j1 = modelo.obtenerResumenJugador(1);
+            ResumenJugador j2 = modelo.obtenerResumenJugador(2);
+            ganador.setText(Texts.t("Ganador:", "Winner:") + " " + modelo.obtenerNombreGanador());
+            marcador.setText(j1.nombre + "  " + j1.goles + " - " + j2.goles + "  " + j2.nombre);
             estado.setText(modelo.obtenerEstadoPartido());
         } catch (POOBSoccerException e) {
             HeadSoccerGUI.reportarError(this, e);
@@ -63,8 +65,8 @@ final class ResultD extends StreetDialog {
     }
 
     @Override
-    protected void cerrar() {
-        super.cerrar();
+    protected void alCerrar() {
+        dispose();
         ventana.mostrarMenu();
     }
 }

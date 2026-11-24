@@ -10,16 +10,16 @@ import dominio.poderes.Power;
 import dominio.poderes.PowerBar;
 
 /**
- * Representa un personaje del juego. Las coordenadas (x, y) indican su centro
- * horizontal y la posición de los pies en el suelo.
+ * Personaje que juega el partido. Guarda su posición (x centro, y pies), sus
+ * estadísticas, su barra de poder y los efectos que tenga encima.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
 public class Character {
 
-    private static final int ESTADISTICA_MIN = 1;
-    private static final int ESTADISTICA_MAX = 5;
+    private static final int MIN_STAT = 1;
+    private static final int MAX_STAT = 5;
 
     private static final double ANCHO_BASE = 60.0;
     private static final double ALTO_BASE = 90.0;
@@ -28,11 +28,10 @@ public class Character {
     private static final double RAPIDEZ_CAIDA = 270.0;
     private static final double ALTURA_SALTO_BASE = 60.0;
     private static final double ALTURA_SALTO_POR_PUNTO = 25.0;
-    private static final double VENTANA_PATADA_SEGUNDOS = 0.15;
-    private static final double ENFRIAMIENTO_PATADA_SEGUNDOS = 0.4;
+    private static final double DURACION_PATADA = 0.4;
 
     private static final double ALCANCE_PATADA = 15.0;
-    private static final double ALCANCE_CUERPO_A_CUERPO = 10.0;
+    private static final double ALCANCE_RIVAL = 10.0;
 
     private final String nombre;
     private final String pais;
@@ -50,18 +49,18 @@ public class Character {
     private double xInicial;
     private int orientacion = 1;
     private int direccionMovimiento;
-    private double esperaPatada;
-    private double enfriamientoPatada;
+    private boolean quierePatear;
+    private double tiempoPatada;
 
     public Character(String nombre, String pais, int velocidad, int salto, int fuerza, int nivelPoder,
             Power poder) throws POOBSoccerException {
         if (nombre == null || nombre.trim().isEmpty() || pais == null || pais.trim().isEmpty() || poder == null) {
             throw new POOBSoccerException(POOBSoccerException.PERSONAJE_INVALIDO);
         }
-        validarEstadistica(velocidad);
-        validarEstadistica(salto);
-        validarEstadistica(fuerza);
-        validarEstadistica(nivelPoder);
+        validarStat(velocidad);
+        validarStat(salto);
+        validarStat(fuerza);
+        validarStat(nivelPoder);
         this.nombre = nombre;
         this.pais = pais;
         this.velocidad = velocidad;
@@ -75,8 +74,8 @@ public class Character {
                 barraPoder.obtenerPoder());
     }
 
-    private static void validarEstadistica(int valor) throws POOBSoccerException {
-        if (valor < ESTADISTICA_MIN || valor > ESTADISTICA_MAX) {
+    private static void validarStat(int valor) throws POOBSoccerException {
+        if (valor < MIN_STAT || valor > MAX_STAT) {
             throw new POOBSoccerException(POOBSoccerException.ESTADISTICAS_FUERA_DE_RANGO);
         }
     }
@@ -84,7 +83,7 @@ public class Character {
     public void entrarEn(double xInicial, int orientacion) {
         this.xInicial = xInicial;
         this.orientacion = orientacion;
-        reiniciarGoles();
+        goles = 0;
         barraPoder.reiniciar();
         reiniciarJugada();
     }
@@ -94,51 +93,56 @@ public class Character {
     }
 
     public void reiniciarJugada() {
-        this.x = xInicial;
-        this.y = Field.SUELO_Y;
-        this.subiendo = false;
-        this.enElAire = false;
-        this.direccionMovimiento = 0;
-        this.esperaPatada = 0.0;
-        this.enfriamientoPatada = 0.0;
-        this.efectos.limpiar();
+        x = xInicial;
+        y = Field.SUELO_Y;
+        subiendo = false;
+        enElAire = false;
+        direccionMovimiento = 0;
+        quierePatear = false;
+        tiempoPatada = 0.0;
+        efectos.limpiar();
     }
 
     public void establecerDireccionMovimiento(int direccion) {
         if (direccion > 0) {
-            this.direccionMovimiento = 1;
+            direccionMovimiento = 1;
         } else if (direccion < 0) {
-            this.direccionMovimiento = -1;
+            direccionMovimiento = -1;
         } else {
-            this.direccionMovimiento = 0;
+            direccionMovimiento = 0;
         }
     }
 
     public void saltar() {
-        if (puedeActuar() && !enElAire) {
+        if (efectos.permitenAcciones() && !enElAire) {
             subiendo = true;
             enElAire = true;
         }
     }
 
     public void solicitarPatada() {
-        if (puedeActuar()) {
-            esperaPatada = VENTANA_PATADA_SEGUNDOS;
+        if (efectos.permitenAcciones() && tiempoPatada <= 0.0) {
+            quierePatear = true;
         }
     }
 
     public boolean intentarPatear(Ball balon, Character oponente) {
-        boolean balonAlAlcance = seSolapaCon(balon, ALCANCE_PATADA);
-        boolean oponenteAlAlcance = estaEnRangoCuerpoACuerpo(oponente);
-        if (!puedePatearAhora() || !(balonAlAlcance || oponenteAlAlcance)) {
+        if (!efectos.permitenAcciones() || !quierePatear || tiempoPatada > 0.0) {
             return false;
         }
-        esperaPatada = 0.0;
-        enfriamientoPatada = ENFRIAMIENTO_PATADA_SEGUNDOS;
-        if (oponenteAlAlcance) {
+        quierePatear = false;
+
+        boolean balonCerca = seSolapaCon(balon, ALCANCE_PATADA);
+        boolean rivalCerca = estaCercaDe(oponente);
+        if (!balonCerca && !rivalCerca) {
+            return false;
+        }
+
+        tiempoPatada = DURACION_PATADA;
+        if (rivalCerca) {
             oponente.aturdir();
         }
-        if (balonAlAlcance) {
+        if (balonCerca) {
             if (estaEnZonaCabeza(balon)) {
                 balon.patearArriba(fuerza, orientacion);
             } else {
@@ -146,7 +150,7 @@ public class Character {
             }
             barraPoder.dispararSobre(oponente);
         }
-        return balonAlAlcance;
+        return balonCerca;
     }
 
     public boolean toca(Ball balon) {
@@ -156,8 +160,8 @@ public class Character {
     public void empujar(Ball balon) {
         if (estaEnZonaCabeza(balon)) {
             balon.rebotarArriba(obtenerBordeSuperior());
-            // Si no está bloqueado por un efecto, cabecea hacia adelante
-            if (puedeActuar()) {
+            // Solo cabecea hacia adelante si no está congelado o aturdido
+            if (efectos.permitenAcciones()) {
                 balon.patearArriba(fuerza, orientacion);
             }
         } else {
@@ -179,24 +183,21 @@ public class Character {
     }
 
     public void aturdir() {
-        agregarEfecto(new StunEffect());
+        efectos.agregar(new StunEffect());
     }
 
-    public void actualizar(double segundosTranscurridos) {
-        efectos.transcurrir(segundosTranscurridos);
-        barraPoder.recargar(segundosTranscurridos);
-        esperaPatada -= segundosTranscurridos;
-        if (esperaPatada < 0.0) {
-            esperaPatada = 0.0;
-        }
-        enfriamientoPatada -= segundosTranscurridos;
-        if (enfriamientoPatada < 0.0) {
-            enfriamientoPatada = 0.0;
+    public void actualizar(double segundos) {
+        efectos.transcurrir(segundos);
+        barraPoder.recargar(segundos);
+        if (tiempoPatada > 0.0) {
+            tiempoPatada -= segundos;
+            if (tiempoPatada < 0.0) {
+                tiempoPatada = 0.0;
+            }
         }
 
-        if (puedeActuar()) {
-            x += direccionMovimiento * efectos.signoHorizontal() * velocidad * VELOCIDAD_POR_PUNTO
-                    * segundosTranscurridos;
+        if (efectos.permitenAcciones()) {
+            x += direccionMovimiento * efectos.signoHorizontal() * velocidad * VELOCIDAD_POR_PUNTO * segundos;
         }
         double mitad = obtenerAncho() / 2.0;
         if (x < mitad) {
@@ -205,19 +206,19 @@ public class Character {
             x = Field.ANCHO - mitad;
         }
 
-        actualizarSalto(segundosTranscurridos);
+        actualizarSalto(segundos);
     }
 
-    private void actualizarSalto(double segundosTranscurridos) {
-        double alturaMaximaY = Field.SUELO_Y - (ALTURA_SALTO_BASE + salto * ALTURA_SALTO_POR_PUNTO);
+    private void actualizarSalto(double segundos) {
+        double topeY = Field.SUELO_Y - (ALTURA_SALTO_BASE + salto * ALTURA_SALTO_POR_PUNTO);
         if (subiendo) {
-            y -= RAPIDEZ_SUBIDA * segundosTranscurridos;
-            if (y <= alturaMaximaY) {
-                y = alturaMaximaY;
+            y -= RAPIDEZ_SUBIDA * segundos;
+            if (y <= topeY) {
+                y = topeY;
                 subiendo = false;
             }
         } else if (enElAire) {
-            y += RAPIDEZ_CAIDA * segundosTranscurridos;
+            y += RAPIDEZ_CAIDA * segundos;
             if (y >= Field.SUELO_Y) {
                 y = Field.SUELO_Y;
                 enElAire = false;
@@ -229,32 +230,20 @@ public class Character {
         goles++;
     }
 
-    private boolean puedeActuar() {
-        return efectos.permitenAcciones();
-    }
-
     public boolean estaPateando() {
-        return enfriamientoPatada > 0.0;
-    }
-
-    private boolean puedePatearAhora() {
-        return puedeActuar() && esperaPatada > 0.0 && enfriamientoPatada <= 0.0;
+        return tiempoPatada > 0.0;
     }
 
     private boolean seSolapaCon(Ball balon, double margen) {
         return balon.seSolapaCon(obtenerIzquierda() - margen, obtenerBordeSuperior() - margen,
-                obtenerDerecha() + margen, obtenerAbajo() + margen);
+                obtenerDerecha() + margen, y + margen);
     }
 
-    private boolean estaEnRangoCuerpoACuerpo(Character otro) {
-        return obtenerIzquierda() - ALCANCE_CUERPO_A_CUERPO <= otro.obtenerDerecha()
-                && obtenerDerecha() + ALCANCE_CUERPO_A_CUERPO >= otro.obtenerIzquierda()
-                && obtenerBordeSuperior() - ALCANCE_CUERPO_A_CUERPO <= otro.obtenerAbajo()
-                && obtenerAbajo() + ALCANCE_CUERPO_A_CUERPO >= otro.obtenerBordeSuperior();
-    }
-
-    private double obtenerEscala() {
-        return efectos.escala();
+    private boolean estaCercaDe(Character otro) {
+        double maxDistanciaX = (obtenerAncho() + otro.obtenerAncho()) / 2.0 + ALCANCE_RIVAL;
+        double maxDistanciaY = (obtenerAlto() + otro.obtenerAlto()) / 2.0 + ALCANCE_RIVAL;
+        return Math.abs(x - otro.x) <= maxDistanciaX
+                && Math.abs(obtenerCentroY() - otro.obtenerCentroY()) <= maxDistanciaY;
     }
 
     public String[] obtenerNombresEfectos() {
@@ -326,11 +315,11 @@ public class Character {
     }
 
     private double obtenerAncho() {
-        return ANCHO_BASE * obtenerEscala();
+        return ANCHO_BASE * efectos.escala();
     }
 
     private double obtenerAlto() {
-        return ALTO_BASE * obtenerEscala();
+        return ALTO_BASE * efectos.escala();
     }
 
     private double obtenerIzquierda() {
@@ -339,9 +328,5 @@ public class Character {
 
     private double obtenerDerecha() {
         return x + obtenerAncho() / 2.0;
-    }
-
-    private double obtenerAbajo() {
-        return y;
     }
 }

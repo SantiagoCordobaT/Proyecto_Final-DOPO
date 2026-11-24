@@ -7,12 +7,12 @@ import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Dibuja los dos arcos de la cancha con su red, travesaño y poste.
+ * Dibuja los dos arcos laterales con red y travesaño.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-final class GoalSprite implements Actor {
+final class GoalSprite {
 
     private final HeadSoccer modelo;
     private double[][] arcos = new double[0][];
@@ -22,14 +22,12 @@ final class GoalSprite implements Actor {
         this.modelo = modelo;
     }
 
-    @Override
-    public void actualizar(double segundos) throws POOBSoccerException {
+    void actualizar() throws POOBSoccerException {
         arcos = modelo.obtenerLimitesArcos();
         travesano = modelo.obtenerGrosorTravesano();
     }
 
-    @Override
-    public void dibujar(Graphics2D g) {
+    void dibujar(Graphics2D g) {
         double centro = modelo.obtenerAnchoCancha() / 2.0;
         for (int i = 0; i < arcos.length; i++) {
             int izquierda = (int) arcos[i][0];
@@ -37,7 +35,6 @@ final class GoalSprite implements Actor {
             int ancho = (int) arcos[i][2];
             int alto = (int) arcos[i][3];
             int grosor = (int) travesano;
-            boolean bocaDerecha = izquierda < centro;
 
             g.setColor(new Color(255, 255, 255, 90));
             for (int x = izquierda; x < izquierda + ancho; x += 15) {
@@ -50,10 +47,7 @@ final class GoalSprite implements Actor {
             g.setColor(Color.WHITE);
             g.fillRect(izquierda, arriba, ancho, grosor);
 
-            int posteX = izquierda;
-            if (bocaDerecha) {
-                posteX = izquierda + ancho - grosor;
-            }
+            int posteX = izquierda < centro ? izquierda + ancho - grosor : izquierda;
             g.fillRect(posteX, arriba, grosor, alto);
 
             g.setColor(Color.GRAY);

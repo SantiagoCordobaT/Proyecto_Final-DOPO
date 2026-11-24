@@ -4,14 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Administra los efectos temporales activos sobre un personaje.
+ * Guarda los efectos activos de un personaje y recalcula si está bloqueado,
+ * confundido o encogido.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
 public class StatusEffects {
 
-    private final List<Effect> efectos = new ArrayList<>();
+    private final List<Effect> activos = new ArrayList<>();
+    private boolean bloqueado;
+    private boolean invertido;
+    private double escala = 1.0;
 
     public StatusEffects() {
     }
@@ -20,61 +24,73 @@ public class StatusEffects {
         if (efecto == null) {
             return;
         }
-        // Si ya existe el mismo efecto se reemplaza para reiniciar su duración
-        for (int i = efectos.size() - 1; i >= 0; i--) {
-            if (efectos.get(i).esMismoTipoQue(efecto)) {
-                efectos.remove(i);
+        // Si ya tiene el mismo efecto se quita el anterior para reiniciar el tiempo
+        for (int i = activos.size() - 1; i >= 0; i--) {
+            if (activos.get(i).esMismoTipoQue(efecto)) {
+                activos.remove(i);
             }
         }
-        efectos.add(efecto);
+        activos.add(efecto);
+        recalcular();
     }
 
-    public void transcurrir(double segundosTranscurridos) {
-        for (int i = efectos.size() - 1; i >= 0; i--) {
-            Effect efecto = efectos.get(i);
-            efecto.transcurrir(segundosTranscurridos);
+    public void transcurrir(double segundos) {
+        boolean cambio = false;
+        for (int i = activos.size() - 1; i >= 0; i--) {
+            Effect efecto = activos.get(i);
+            efecto.transcurrir(segundos);
             if (efecto.haExpirado()) {
-                efectos.remove(i);
+                activos.remove(i);
+                cambio = true;
             }
+        }
+        if (cambio) {
+            recalcular();
         }
     }
 
     public void limpiar() {
-        efectos.clear();
+        activos.clear();
+        recalcular();
+    }
+
+    void bloquear() {
+        bloqueado = true;
+    }
+
+    void invertirMovimiento() {
+        invertido = true;
+    }
+
+    void cambiarEscala(double nuevaEscala) {
+        escala = nuevaEscala;
+    }
+
+    private void recalcular() {
+        bloqueado = false;
+        invertido = false;
+        escala = 1.0;
+        for (int i = 0; i < activos.size(); i++) {
+            activos.get(i).aplicarSobre(this);
+        }
     }
 
     public boolean permitenAcciones() {
-        for (int i = 0; i < efectos.size(); i++) {
-            if (!efectos.get(i).permiteAcciones()) {
-                return false;
-            }
-        }
-        return true;
+        return !bloqueado;
     }
 
     public double escala() {
-        for (int i = 0; i < efectos.size(); i++) {
-            double escalaActual = efectos.get(i).obtenerEscala();
-            if (escalaActual != 1.0) {
-                return escalaActual;
-            }
-        }
-        return 1.0;
+        return escala;
     }
 
     public int signoHorizontal() {
-        for (int i = 0; i < efectos.size(); i++) {
-            if (efectos.get(i).obtenerSignoHorizontal() < 0) {
-                return -1;
-            }
-        }
-        return 1;
+        return invertido ? -1 : 1;
     }
 
     public String[] obtenerNombres() {
-        String[] nombres = new String[efectos.size()];
-        for (int i = 0; i < nombres.length; i++) {
-            nombres[i] = efectos.get(i).obtenerNombre();
+        String[] nombres = new String[activos.size()];
+        for (int i = 0; i < activos.size(); i++) {
+            nombres[i] = activos.get(i).obtenerNombre();
         }
         return nombres;
     }

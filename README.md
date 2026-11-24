@@ -1,191 +1,87 @@
-<div align="center">
-
 # POOBSoccer (2026-2)
-### DOPO
-**Escuela Colombiana de Ingeniería Julio Garavito**
 
----
+Proyecto final de **DOPO** — Escuela Colombiana de Ingeniería Julio Garavito.
 
-[![Java](https://img.shields.io/badge/Language-Java-orange.svg)](https://www.java.com/)
-[![Platform](https://img.shields.io/badge/Platform-PC%20Desktop-blue.svg)](#)
-[![Genre](https://img.shields.io/badge/Genre-2D%20Arcade%20Soccer-green.svg)](#)
-[![Status](https://img.shields.io/badge/Status-Project%20Proposal-brightgreen.svg)](#)
+## Sobre el juego
 
-</div>
+**POOBSoccer** es una versión de escritorio en Java inspirada en *Head Soccer* (D&D Dream, 2012). Son partidos rápidos 1 contra 1 en una cancha vista de lado, donde cada jugador controla un personaje con estadísticas propias y un poder especial que afecta al rival durante unos segundos.
 
----
+El proyecto incluye:
+- Tres modalidades: Jugador vs Jugador (PvsP), Jugador vs Máquina (PvsM) y Máquina vs Máquina (MvsM).
+- Dos tipos de partido: Por goles (3, 5 o 7) y Supervivencia (solo en PvsM).
+- Catálogo editable con 4 personajes iniciales y opciones para crear, editar o eliminar personajes (dejando mínimo 2).
+- Interfaz en español e inglés.
 
-## Tabla de Contenidos
-- [Head Soccer](#head-soccer)
-- [Nuestra versión: POOBSoccer](#nuestra-versión-poobsoccer)
-- [Mecánicas del Juego](#mecánicas-del-juego)
-- [Controles](#controles)
-- [Modalidades de Juego](#modalidades-de-juego)
-- [Tipos de Partido](#tipos-de-partido)
-- [Jugadores y Estadísticas](#jugadores-y-estadísticas)
-- [Sistema de Poderes](#sistema-de-poderes)
-- [Reglas y Puntajes](#reglas-y-puntajes)
-- [Cómo Ejecutar](#cómo-ejecutar)
-- [Arquitectura](#arquitectura)
-- [Uso de Herramientas de IA](#uso-de-herramientas-de-ia)
-- [Autores y Colaboradores](#autores-y-colaboradores)
-- [Referencias](#referencias)
+## Mecánicas y reglas
 
----
-
-## Head Soccer
-
-**Head Soccer** es un videojuego de fútbol arcade en 2D para celulares desarrollado por la empresa surcoreana **D&D Dream** y lanzado en 2012. Se ha vuelto muy popular por sus partidos rápidos de uno contra uno y por unos controles tan sencillos que cualquiera aprende a jugar en segundos.
-
-* **Dinámica básica:** Cada jugador controla un personaje que representa a un país. Los personajes se mueven a los lados, saltan y patean para meter el balón en el arco rival.
-* **Tiros especiales:** Al llenar una barra de poder, el personaje lanza un tiro especial (congelamiento, aturdimiento, confusión o reducción) que altera las condiciones del rival por unos segundos.
-* **Atributos:** Cada personaje posee sus propias estadísticas de velocidad, salto, fuerza y poder único, además de poder crear, editar o eliminar personajes personalizados.
-* **Modos en la versión móvil original:** Arcade, Torneo, Supervivencia, Liga, Head Cup y Death Mode.
-
----
-
-## Nuestra versión: POOBSoccer
-
-En este proyecto final llevaremos **Head Soccer** del celular al computador. Nuestra versión, **POOBSoccer**, conserva el dinamismo de los partidos rápidos con poderes especiales, permitiendo que dos jugadores compitan en el mismo teclado e incorporando las siguientes novedades:
-
-- [x] **Tres modalidades:** Jugador vs Jugador, Jugador vs Máquina y Máquina vs Máquina.
-- [x] **Dos tipos de partido:** Por goles (3, 5 o 7) y supervivencia.
-- [x] **Personajes configurables:** Cuatro personajes iniciales y creación, edición y eliminación de personajes con atributos y poder elegibles.
-- [x] **Impacto estratégico:** Poderes con efectos de estado que alteran las condiciones del oponente.
-
----
-
-## Mecánicas del Juego
-
-* **Perspectiva y Entorno:** Partido de fútbol 2D de uno contra uno con vista lateral. Cada jugador defiende su portería y busca anotar en el arco contrario.
-* **Física:** El balón avanza por impulsos discretos con rebote en las paredes laterales, los travesaños de los arcos y tope en suelo y techo; los personajes tienen salto y caída por estados según su atributo de salto.
-* **Zonas de golpeo:** Al patear o contactar el balón con la zona superior de la cabeza se ejecuta un tiro/cabezazo elevado hacia el campo rival.
-* **Información Abierta:** Ambos jugadores tienen visibilidad total en tiempo real de toda la cancha, el balón, los personajes, el marcador, el estado del partido (meta de goles y tiempo jugado, o balones y racha) y las barras de poder.
-* **Reanudación tras Gol:** Después de cada anotación, tanto los jugadores como el balón regresan a su posición inicial, cayendo el balón nuevamente desde el centro del campo.
-
----
+- **Movimiento y física:** Los personajes corren dentro de la cancha, saltan hasta una altura según su atributo de salto y patean al balón o al rival si están muy cerca. El balón se mueve por impulsos discretos y rebota contra paredes, suelo, techo y travesaños.
+- **Cabeza y patada:** Si el balón toca la parte superior de la cabeza, sale elevado hacia el campo rival (salvo si el jugador está aturdido o congelado, caso en el que solo rebota arriba).
+- **Goles:** Cuenta como gol cuando el balón entra por completo en un arco por debajo del travesaño (+1 punto al atacante, o +1 al rival si es autogol). Luego del gol ambos jugadores y el balón vuelven a su posición inicial.
+- **Aturdimiento:** Una patada cuerpo a cuerpo o recibir un balonazo muy fuerte del oponente deja al jugador aturdido por 3 segundos.
+- **Supervivencia:** Empieza con 3 balones por lado. Cada gol recibido descuenta un balón. Si cae la máquina sube la racha y entra el siguiente personaje del catálogo; el juego termina cuando el jugador 1 se queda sin balones.
 
 ## Controles
 
-Ambos jugadores interactúan de forma local compartiendo el mismo teclado:
-
 | Acción | Jugador 1 | Jugador 2 |
 | :--- | :---: | :---: |
-| **Mover a la izquierda** | <kbd>A</kbd> | <kbd>←</kbd> |
-| **Mover a la derecha** | <kbd>D</kbd> | <kbd>→</kbd> |
-| **Saltar** | <kbd>W</kbd> | <kbd>↑</kbd> |
-| **Patear** | <kbd>S</kbd> | <kbd>↓</kbd> |
-| **Usar poder especial** | <kbd>Q</kbd> | <kbd>Ctrl Derecho</kbd> |
-| **Pausar el partido** | <kbd>P</kbd> o <kbd>Esc</kbd> | <kbd>P</kbd> o <kbd>Esc</kbd> |
+| Mover izquierda / derecha | `A` / `D` | `←` / `→` |
+| Saltar | `W` | `↑` |
+| Patear | `S` | `↓` |
+| Armar poder especial | `Q` | `Ctrl Derecho` |
+| Pausar | `P` o `Esc` | `P` o `Esc` |
 
-Las teclas se mantienen presionadas: moverse, saltar, patear y armar el poder duran mientras la tecla siga abajo. En **Máquina vs Máquina**, y para el jugador 2 en **Jugador vs Máquina**, el teclado no controla a la máquina.
+Las teclas funcionan mientras se mantengan presionadas. En PvsM la máquina controla al jugador 2, y en MvsM controla a ambos.
 
----
+## Personajes y poderes
 
-## Modalidades de Juego
-
-POOBSoccer implementa tres configuraciones de control y enfrentamiento:
-
-1. **Jugador vs Jugador (PvsP):** Dos jugadores humanos enfrentándose en el mismo teclado.
-2. **Jugador vs Máquina (PvsM):** Un jugador humano compitiendo contra un oponente controlado por la inteligencia del juego.
-3. **Máquina vs Máquina (MvsM):** Ambos personajes son operados de forma automatizada por la máquina.
-
----
-
-## Tipos de Partido
-
-* **Por Goles:**
-  * Sin límite de tiempo.
-  * Resulta ganador el primero en alcanzar la meta pactada: **3, 5 o 7 goles**.
-* **Supervivencia:**
-  * Modo exclusivo para la modalidad **PvsM**.
-  * El jugador disputa una serie continua de partidos contra la máquina sin tiempo límite.
-  * Se compite mediante un sistema de vidas o balones (3 por lado): cada vez que se recibe una anotación, se pierde un balón. Cuando cae la máquina, sube la racha y entra un nuevo rival; la serie termina cuando el jugador 1 agota sus balones.
-
----
-
-## Jugadores y Estadísticas
-
-### Interfaz del Jugador
-En pantalla se visualizan en todo momento los siguientes datos de cada competidor:
-* **Identificación:** Nombre y país representativo (equipo).
-* **Goles:** Conteo de anotaciones registradas en el encuentro actual.
-* **Barra de poder:** Indicador gráfico con el porcentaje de carga.
-* **Poder activo:** Indicador del poder disponible en ese instante.
-
-### Atributos
-Cada personaje posee estadísticas graduadas en una escala numérica de **1 a 5**:
-* **Velocidad**
-* **Salto**
-* **Fuerza**
-* **Poder Único**
-
----
-
-## Sistema de Poderes
-
-Cada personaje cuenta con un poder especial elegido entre los poderes disponibles en `PowerCatalog`.
-
-* **Carga:** La estadística **Poder Único** fija la rapidez de la barra: se recarga $2 \times \text{Poder Único}\,\%$ por segundo hasta llegar al $100\%$.
-* **Activación:** Con la barra llena, la tecla de poder **arma** el poder (con la barra incompleta no tiene efecto) y la siguiente patada que conecta con el balón lo **dispara**: el rival recibe el efecto y la barra vuelve a cero. Si el rival ya tiene ese efecto, el nuevo lo reemplaza y reinicia su duración.
-
-### Personajes iniciales disponibles
-Además de poder **crear**, **editar** y **eliminar** personajes personalizados desde la pantalla de selección (conservando al menos 2 disponibles), el catálogo inicia con:
+Cada personaje tiene 4 estadísticas de **1 a 5**: Velocidad, Salto, Fuerza y Poder Único. La barra de poder se carga a razón de 2 × Poder Único % por segundo hasta llegar al 100 %. Con la barra llena, al presionar la tecla de poder este queda armado y se dispara en la siguiente patada al balón.
 
 | Personaje | País | Velocidad | Salto | Fuerza | Poder Único | Poder especial |
 | :--- | :--- | :---: | :---: | :---: | :---: | :--- |
-| **Jacob** | Canadá | 3 | 3 | 4 | 3 | Congelamiento |
-| **Kenji** | Japón | 5 | 4 | 2 | 2 | Aturdimiento |
-| **Mateo** | Colombia | 4 | 3 | 3 | 4 | Confusión |
-| **Rafael** | Brasil | 4 | 5 | 3 | 3 | Reducción |
+| **Jacob** | Canadá | 3 | 3 | 4 | 3 | Congelamiento (bloquea 3 s) |
+| **Kenji** | Japón | 5 | 4 | 2 | 2 | Aturdimiento (bloquea 3 s) |
+| **Mateo** | Colombia | 4 | 3 | 3 | 4 | Confusión (invierte controles 5 s) |
+| **Rafael** | Brasil | 4 | 5 | 3 | 3 | Reducción (mitad de tamaño 6 s) |
 
-### Habilidades disponibles:
-* **Congelamiento:** Encierra al oponente en un bloque de hielo sólido durante 3 segundos, impidiéndole actuar.
-* **Aturdimiento:** Aturde al oponente durante 3 segundos, bloqueando movimiento, salto y patada.
-* **Confusión:** Invierte los controles horizontales (izquierda/derecha) del oponente durante 5 segundos.
-* **Reducción:** Encoge temporalmente al oponente a la mitad de su tamaño durante 6 segundos.
+## Cómo ejecutar
 
----
+Desde la raíz del proyecto (requiere JDK 17+):
 
-## Reglas y Puntajes
+### Compilar y abrir el juego (PowerShell / Windows)
 
-### Sistema de Puntuación
-* **Gol a favor:** Balón completamente dentro del arco rival suma **$+1$ punto**.
-* **Autogol:** Si el balón ingresa en la portería propia, se concede **$+1$ punto al rival**.
+```powershell
+mkdir out -Force
+$fuentes = Get-ChildItem -Recurse -Filter *.java src | ForEach-Object { $_.FullName }
+javac -encoding UTF-8 -d out $fuentes
+java -cp out presentacion.HeadSoccerGUI
+```
 
-### Normas del Encuentro
-1. **Inicio:** El juego arranca con marcador inicial de 0-0, barras de poder vacías y cada participante ubicado en su mitad respectiva de campo.
-2. **Convalidación de gol:** El balón debe traspasar en su totalidad la línea de meta por debajo del travesaño.
-3. **Uso de poder:** Requiere obligatoriamente que la barra se encuentre al tope de carga.
-4. **Estado de Aturdimiento:** Un personaje alcanzado por ataques cuerpo a cuerpo o balonazos fuertes del rival entra en estado de aturdimiento durante 3 segundos, periodo en el cual queda inhabilitado para moverse, saltar o patear.
-5. **Pausa:** La partida puede suspenderse de manera provisional en cualquier instante.
+### Ejecutar las pruebas unitarias (JUnit 5)
 
----
+```powershell
+$todos = Get-ChildItem -Recurse -Filter *.java src, test | ForEach-Object { $_.FullName }
+javac -encoding UTF-8 -cp "lib\junit-platform-console-standalone.jar" -d out $todos
+java -jar "lib\junit-platform-console-standalone.jar" execute --class-path out --scan-class-path
+```
 
 ## Arquitectura
 
-* **`src/dominio/`**: Fachada `HeadSoccer`, simulación `Match`, física de cancha/arcos/balón (`Field`, `Goal`, `Ball`), personajes (`dominio.personajes`), modalidades y controles (`dominio.modalidades`), reglas de partido (`dominio.partidos`), poderes y efectos (`dominio.poderes`, `dominio.efectos`) y excepciones (`dominio.excepciones`).
-* **`src/presentacion/`**: Ventana principal `HeadSoccerGUI`, menú, diálogos de configuración/selección/edición de personajes y renderizado Swing sin lógica de reglas.
-* **`test/dominio/`**: Pruebas unitarias de reglas de negocio, colisiones, poderes y fachada.
+- `src/dominio/`: Fachada `HeadSoccer`, simulación `Match`, física (`Field`, `Goal`, `Ball`), DTOs de lectura (`ResumenJugador`, `FichaPersonaje`), personajes (`dominio.personajes`), modalidades (`dominio.modalidades`), reglas (`dominio.partidos`), poderes y efectos (`dominio.poderes`, `dominio.efectos`) y excepciones (`dominio.excepciones`).
+- `src/presentacion/`: Ventana principal `HeadSoccerGUI`, menú, diálogos sobre `DialogoBase`, utilidades visuales en `Estilo` y dibujo en Swing sin lógica de negocio.
+- `test/dominio/`: Pruebas unitarias separadas por módulo (`BallTest`, `CharacterTest`, `SurvivalMatchTest`, `CatalogosTest`, `HeadSoccerTest`).
 
----
+## Uso de herramientas de IA
 
-## Autores y Colaboradores
+Durante el desarrollo de este proyecto se utilizaron herramientas de inteligencia artificial como apoyo para estructurar prototipos iniciales, revisar errores de compilación y refactorizar partes del diseño, pruebas y documentación. El código, las reglas del juego, los diagramas y las pruebas fueron revisados, ajustados y validados por los autores.
 
-* **Desarrollo del proyecto:**
-  * Santiago Córdoba
-  * Camilo Rivas
-* **Propuesta:**
-  * Mateo Sánchez García
-  * María Angélica Pérez Mesa
-* **Colaboradores:**
-  * Wilmar Edison Beltrán
-  * Santiago Hernández Sarmiento
+## Autores y colaboradores
 
----
+- **Desarrollo:** Santiago Córdoba, Camilo Rivas
+- **Propuesta:** Mateo Sánchez García, María Angélica Pérez Mesa
+- **Colaboradores:** Wilmar Edison Beltrán, Santiago Hernández Sarmiento
 
 ## Referencias
 
-* D&D Dream. (s. f.). *Head Soccer*. https://dnddream.com/dnddream_web/app_game_06.htm
-* TouchArcade. (s. f.). *Head Soccer*. https://toucharcade.com/games/head-soccer
-* TV Tropes. (s. f.). *Head Sports (serie de videojuegos)*. https://tvtropes.org/pmwiki/pmwiki.php/VideoGame/HeadBoxing
+- D&D Dream. *Head Soccer*. https://dnddream.com/dnddream_web/app_game_06.htm
+- TouchArcade. *Head Soccer*. https://toucharcade.com/games/head-soccer
+- TV Tropes. *Head Sports*. https://tvtropes.org/pmwiki/pmwiki.php/VideoGame/HeadBoxing

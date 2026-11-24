@@ -1,22 +1,19 @@
 package dominio.efectos;
 
 /**
- * Efecto de aturdimiento que impide actuar durante 3 segundos.
+ * Aturde al jugador durante 3 segundos sin dejarlo actuar.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
 public class StunEffect extends Effect {
 
-    private static final String NOMBRE = "Aturdido";
-    private static final double SEGUNDOS_ATURDIMIENTO = 3.0;
-
     public StunEffect() {
-        super(NOMBRE, SEGUNDOS_ATURDIMIENTO);
+        super("Aturdido", 3.0);
     }
 
     @Override
-    boolean permiteAcciones() {
-        return false;
+    void aplicarSobre(StatusEffects estado) {
+        estado.bloquear();
     }
 }

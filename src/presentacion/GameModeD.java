@@ -1,7 +1,5 @@
 package presentacion;
 
-import static presentacion.Texts.texto;
-
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -25,7 +23,7 @@ import dominio.excepciones.POOBSoccerException;
  * @version 1.0
  */
 @SuppressWarnings("serial")
-final class GameModeD extends StreetDialog {
+final class GameModeD extends DialogoBase {
 
     private final HeadSoccerGUI ventana;
     private final HeadSoccer modelo;
@@ -34,40 +32,47 @@ final class GameModeD extends StreetDialog {
     private final JButton seleccionar;
 
     GameModeD(HeadSoccerGUI ventana, HeadSoccer modelo) {
-        super(ventana, texto("setup.title"));
+        super(ventana, Texts.t("Modo de juego", "Game mode"));
         this.ventana = ventana;
         this.modelo = modelo;
-        modos = recursos.crearLista(modelo.obtenerNombresModos());
-        tiposPartido = recursos.crearLista(modelo.obtenerNombresTiposPartido());
-        JPanel listas = recursos.crearPanel(new GridLayout(1, 2, Resources.ESPACIO, 0));
-        listas.add(columna("setup.mode", modos));
-        listas.add(columna("setup.type", tiposPartido));
-        establecerCuerpo(listas);
-        seleccionar = agregarBoton(texto("common.select"), new ActionListener() {
+
+        modos = Estilo.lista(modelo.obtenerNombresModos());
+        tiposPartido = Estilo.lista(modelo.obtenerNombresTiposPartido());
+
+        JPanel listas = new JPanel(new GridLayout(1, 2, Estilo.MARGEN, 0));
+        listas.setBackground(Estilo.FONDO);
+        listas.add(columna(Texts.t("Modalidad", "Mode"), modos));
+        listas.add(columna(Texts.t("Tipo de partido", "Match type"), tiposPartido));
+        ponerCentro(listas);
+
+        seleccionar = Estilo.boton(Texts.t("Seleccionar", "Select"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 seleccionar();
             }
         });
-        agregarBoton(texto("common.back"), new ActionListener() {
+        agregarBoton(seleccionar);
+        agregarBoton(Estilo.boton(Texts.t("Volver", "Back"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cerrar();
+                alCerrar();
             }
-        });
-        ListSelectionListener completo = new ListSelectionListener() {
+        }));
+
+        ListSelectionListener cambio = new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 seleccionar.setEnabled(!modos.isSelectionEmpty() && !tiposPartido.isSelectionEmpty());
             }
         };
-        modos.addListSelectionListener(completo);
-        tiposPartido.addListSelectionListener(completo);
+        modos.addListSelectionListener(cambio);
+        tiposPartido.addListSelectionListener(cambio);
     }
 
-    private JPanel columna(String claveTitulo, JList<String> lista) {
-        JPanel columna = recursos.crearPanel(new BorderLayout(0, Resources.ESPACIO / 2));
-        columna.add(recursos.crearEtiqueta(texto(claveTitulo), Resources.FUENTE_TEXTO), BorderLayout.NORTH);
+    private JPanel columna(String titulo, JList<String> lista) {
+        JPanel columna = new JPanel(new BorderLayout(0, 6));
+        columna.setBackground(Estilo.FONDO);
+        columna.add(Estilo.etiqueta(titulo, Estilo.FUENTE_NORMAL), BorderLayout.NORTH);
         columna.add(new JScrollPane(lista), BorderLayout.CENTER);
         return columna;
     }
@@ -76,7 +81,7 @@ final class GameModeD extends StreetDialog {
         try {
             modelo.seleccionarModo(modos.getSelectedIndex());
             modelo.seleccionarTipoPartido(tiposPartido.getSelectedIndex());
-            cerrar();
+            alCerrar();
             ventana.abrirSeleccionPersonajes();
         } catch (POOBSoccerException e) {
             HeadSoccerGUI.reportarError(this, e);

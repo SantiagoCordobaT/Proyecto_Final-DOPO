@@ -7,12 +7,12 @@ import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Dibuja el balón y su sombra usando la posición que reporta el dominio.
+ * Dibuja el balón y su sombra en la cancha.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-final class BallSprite implements Actor {
+final class BallSprite {
 
     private final HeadSoccer modelo;
     private final double radio;
@@ -24,15 +24,13 @@ final class BallSprite implements Actor {
         this.radio = modelo.obtenerRadioBalon();
     }
 
-    @Override
-    public void actualizar(double segundos) throws POOBSoccerException {
+    void actualizar() throws POOBSoccerException {
         double[] posicion = modelo.obtenerPosicionBalon();
-        this.x = posicion[0];
-        this.y = posicion[1];
+        x = posicion[0];
+        y = posicion[1];
     }
 
-    @Override
-    public void dibujar(Graphics2D g) {
+    void dibujar(Graphics2D g) {
         int diametro = (int) (radio * 2);
         int esquinaX = (int) (x - radio);
         int esquinaY = (int) (y - radio);

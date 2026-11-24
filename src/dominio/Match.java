@@ -9,8 +9,8 @@ import dominio.personajes.Character;
 import dominio.personajes.CharacterCatalog;
 
 /**
- * Controla un partido en curso con la cancha, el balón, los dos jugadores y las
- * reglas del modo elegido.
+ * Lleva la simulación de un partido: cancha, balón, los dos personajes y las
+ * reglas del tipo de partido elegido.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -19,8 +19,6 @@ final class Match {
 
     private static final double PASO_BALON = 1.0 / 60.0;
     static final int JUGADORES = 2;
-    private static final int JUGADOR_IZQUIERDO = 0;
-    private static final int JUGADOR_DERECHO = 1;
 
     private final Field cancha = new Field();
     private final Ball balon = new Ball();
@@ -44,8 +42,8 @@ final class Match {
         tipo.iniciar();
     }
 
-    void actualizarTick(double segundosTranscurridos) throws POOBSoccerException {
-        if (segundosTranscurridos < 0) {
+    void actualizarTick(double segundos) throws POOBSoccerException {
+        if (segundos < 0) {
             throw new POOBSoccerException(POOBSoccerException.TIEMPO_INVALIDO);
         }
         if (pausado || tipo.estaTerminado()) {
@@ -53,30 +51,28 @@ final class Match {
         }
         for (int i = 0; i < jugadores.length; i++) {
             controladores[i].controlar(jugadores[i], balon);
-            jugadores[i].actualizar(segundosTranscurridos);
+            jugadores[i].actualizar(segundos);
         }
-        // El balón avanza en pasos de 1/60 s para que no dependa de los FPS
-        tiempoBalon += segundosTranscurridos;
+
+        // El balón avanza a pasos fijos de 1/60 s para que la física sea estable
+        tiempoBalon += segundos;
         while (tiempoBalon >= PASO_BALON) {
             tiempoBalon -= PASO_BALON;
-            avanzarBalon();
+            cancha.actualizarBalon(balon);
+            procesarContacto(jugadores[0], jugadores[1]);
+            procesarContacto(jugadores[1], jugadores[0]);
+            cancha.mantenerBalonDentro(balon);
+
             int anotador = cancha.anotadorDe(balon);
             if (anotador != Field.SIN_GOL) {
                 anotarGol(anotador);
                 tiempoBalon = 0.0;
             }
         }
-        tipo.avanzar(segundosTranscurridos);
+        tipo.avanzar(segundos);
     }
 
-    private void avanzarBalon() {
-        cancha.actualizarBalon(balon);
-        resolverContacto(jugadores[JUGADOR_IZQUIERDO], jugadores[JUGADOR_DERECHO]);
-        resolverContacto(jugadores[JUGADOR_DERECHO], jugadores[JUGADOR_IZQUIERDO]);
-        cancha.mantenerBalonDentro(balon);
-    }
-
-    private void resolverContacto(Character personaje, Character oponente) {
+    private void procesarContacto(Character personaje, Character oponente) {
         if (personaje.intentarPatear(balon, oponente)) {
             ultimoPateador = personaje;
             return;
@@ -84,7 +80,6 @@ final class Match {
         if (!personaje.toca(balon)) {
             return;
         }
-        // Si recibe un balonazo fuerte del otro jugador, queda aturdido
         if (personaje != ultimoPateador && balon.esGolpeFuerte()) {
             personaje.aturdir();
             balon.frenar();
@@ -93,27 +88,21 @@ final class Match {
     }
 
     void anotarGol(int anotador) throws POOBSoccerException {
-        Character jugadorAnotador = jugador(anotador);
+        Character jugadorAnotador = jugadores[indiceJugador(anotador)];
         jugadorAnotador.sumarGol();
         tipo.golAnotado(anotador, jugadorAnotador.obtenerGoles());
-        if (tipo.consumirCambioRival()) {
-            reemplazarRival();
-        }
-        reiniciarJugada();
-    }
 
-    private void reiniciarJugada() {
-        for (int i = 0; i < jugadores.length; i++) {
-            jugadores[i].reiniciarJugada();
+        // En supervivencia, cuando cae la máquina entra el siguiente rival
+        if (tipo.consumirCambioRival()) {
+            jugadores[1] = rivales.siguienteDespuesDe(jugadores[1]);
+            Side.RIGHT.ubicar(jugadores[1]);
+            jugadores[0].reiniciarGoles();
         }
+
+        jugadores[0].reiniciarJugada();
+        jugadores[1].reiniciarJugada();
         cancha.soltarBalon(balon);
         ultimoPateador = null;
-    }
-
-    private void reemplazarRival() throws POOBSoccerException {
-        jugadores[JUGADOR_DERECHO] = rivales.siguienteDespuesDe(jugadores[JUGADOR_DERECHO]);
-        Side.RIGHT.ubicar(jugadores[JUGADOR_DERECHO]);
-        jugadores[JUGADOR_IZQUIERDO].reiniciarGoles();
     }
 
     void pausar() {
@@ -146,52 +135,15 @@ final class Match {
         return numero - 1;
     }
 
-    private Character jugador(int numero) throws POOBSoccerException {
-        return jugadores[indiceJugador(numero)];
-    }
-
-    int obtenerGoles(int jugador) throws POOBSoccerException {
-        return jugador(jugador).obtenerGoles();
-    }
-
-    String obtenerNombreJugador(int numero) throws POOBSoccerException {
-        return jugador(numero).obtenerNombre();
-    }
-
-    String obtenerPaisJugador(int numero) throws POOBSoccerException {
-        return jugador(numero).obtenerPais();
-    }
-
-    double[] obtenerLimitesJugador(int numero) throws POOBSoccerException {
-        return jugador(numero).obtenerLimites();
-    }
-
-    double obtenerCargaPoderJugador(int numero) throws POOBSoccerException {
-        return jugador(numero).obtenerCargaPoder();
-    }
-
-    String obtenerNombrePoderJugador(int numero) throws POOBSoccerException {
-        return jugador(numero).obtenerNombrePoder();
-    }
-
-    boolean estaPoderJugadorArmado(int numero) throws POOBSoccerException {
-        return jugador(numero).estaPoderArmado();
-    }
-
-    String[] obtenerEfectosJugador(int numero) throws POOBSoccerException {
-        return jugador(numero).obtenerNombresEfectos();
+    ResumenJugador obtenerResumenJugador(int numero) throws POOBSoccerException {
+        Character j = jugadores[indiceJugador(numero)];
+        return new ResumenJugador(j.obtenerNombre(), j.obtenerPais(), j.obtenerLimites(), j.obtenerGoles(),
+                j.obtenerCargaPoder(), j.obtenerNombrePoder(), j.estaPoderArmado(), j.obtenerNombresEfectos(),
+                j.obtenerOrientacion(), j.estaPateando());
     }
 
     double[][] obtenerLimitesArcos() {
         return cancha.obtenerLimitesArcos();
-    }
-
-    int obtenerOrientacionJugador(int numero) throws POOBSoccerException {
-        return jugador(numero).obtenerOrientacion();
-    }
-
-    boolean estaJugadorPateando(int numero) throws POOBSoccerException {
-        return jugador(numero).estaPateando();
     }
 
     double[] obtenerPosicionBalon() {
@@ -210,6 +162,6 @@ final class Match {
         if (!tipo.estaTerminado()) {
             throw new POOBSoccerException(POOBSoccerException.PARTIDO_EN_CURSO);
         }
-        return obtenerNombreJugador(tipo.obtenerGanador());
+        return jugadores[indiceJugador(tipo.obtenerGanador())].obtenerNombre();
     }
 }

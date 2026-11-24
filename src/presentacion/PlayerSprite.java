@@ -5,18 +5,18 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 
 import dominio.HeadSoccer;
+import dominio.ResumenJugador;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Dibuja un jugador en la cancha con los colores de su país, animación de
- * patada y efectos activos.
+ * Dibuja un personaje en la cancha a partir de su resumen actual.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-final class PlayerSprite implements Actor {
+final class PlayerSprite {
 
-    private static final double ANCHO_NOMINAL = 60.0;
+    private static final double ANCHO_BASE = 60.0;
     private static final Color PIEL = new Color(246, 205, 160);
     private static final Color CABELLO = new Color(40, 28, 22);
     private static final Color ZAPATO = new Color(28, 28, 32);
@@ -38,25 +38,23 @@ final class PlayerSprite implements Actor {
     PlayerSprite(HeadSoccer modelo, int numero) {
         this.modelo = modelo;
         this.numero = numero;
-        this.colorIndicador = Resources.obtenerInstancia().colorJugador(numero);
-        this.equipo = Resources.obtenerInstancia().coloresEquipo("");
+        this.colorIndicador = Estilo.colorJugador(numero);
+        this.equipo = Estilo.coloresPais("");
     }
 
-    @Override
-    public void actualizar(double segundos) throws POOBSoccerException {
-        double[] limites = modelo.obtenerLimitesJugador(numero);
-        centroX = limites[0] + limites[2] / 2.0;
-        baseY = limites[1] + limites[3];
-        escala = limites[2] / ANCHO_NOMINAL;
-        orientacion = modelo.obtenerOrientacionJugador(numero);
-        armado = modelo.estaPoderJugadorArmado(numero);
-        pateando = modelo.estaJugadorPateando(numero);
-        equipo = Resources.obtenerInstancia().coloresEquipo(modelo.obtenerPaisJugador(numero));
-        efectos = modelo.obtenerEfectosJugador(numero);
+    void actualizar() throws POOBSoccerException {
+        ResumenJugador j = modelo.obtenerResumenJugador(numero);
+        centroX = j.x + j.ancho / 2.0;
+        baseY = j.y + j.alto;
+        escala = j.ancho / ANCHO_BASE;
+        orientacion = j.orientacion;
+        armado = j.poderArmado;
+        pateando = j.pateando;
+        equipo = Estilo.coloresPais(j.pais);
+        efectos = j.efectos;
     }
 
-    @Override
-    public void dibujar(Graphics2D g) {
+    void dibujar(Graphics2D g) {
         AffineTransform guardado = g.getTransform();
         g.translate(centroX, baseY);
         g.scale(escala, escala);
@@ -65,7 +63,7 @@ final class PlayerSprite implements Actor {
         g.drawOval(-25, -6, 50, 12);
 
         if (armado) {
-            g.setColor(Resources.LISTO);
+            g.setColor(Estilo.RESALTE);
             g.drawOval(-35, -95, 70, 95);
         }
 
@@ -76,10 +74,7 @@ final class PlayerSprite implements Actor {
         g.setColor(Color.BLACK);
         g.drawRect(-17, -38, 34, 30);
 
-        int desplazamientoPatada = 0;
-        if (pateando) {
-            desplazamientoPatada = orientacion * 18;
-        }
+        int desplazamientoPatada = pateando ? orientacion * 18 : 0;
         g.setColor(ZAPATO);
         g.fillRect(-16, -10, 14, 10);
         g.fillRect(2 + desplazamientoPatada, -10, 14, 10);
@@ -103,10 +98,7 @@ final class PlayerSprite implements Actor {
         g.setColor(Color.BLACK);
         g.drawOval(centroCara - 14, -68, 10, 12);
         g.drawOval(centroCara + 4, -68, 10, 12);
-        int pupila = 1;
-        if (orientacion > 0) {
-            pupila = 4;
-        }
+        int pupila = orientacion > 0 ? 4 : 1;
         g.fillOval(centroCara - 14 + pupila, -64, 5, 5);
         g.fillOval(centroCara + 4 + pupila, -64, 5, 5);
 

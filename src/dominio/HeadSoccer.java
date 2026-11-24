@@ -11,7 +11,8 @@ import dominio.personajes.CharacterCatalog;
 import dominio.poderes.PowerCatalog;
 
 /**
- * Punto de entrada del juego para la interfaz gráfica.
+ * Fachada principal de POOBSoccer. Conecta la interfaz gráfica con los
+ * catálogos y el partido activo.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -31,10 +32,10 @@ public final class HeadSoccer {
     private Match partido;
 
     private HeadSoccer() throws POOBSoccerException {
-        this.modos = new GameModeCatalog();
-        this.tiposPartido = new MatchTypeCatalog();
-        this.poderes = new PowerCatalog();
-        this.personajes = new CharacterCatalog();
+        modos = new GameModeCatalog();
+        tiposPartido = new MatchTypeCatalog();
+        poderes = new PowerCatalog();
+        personajes = new CharacterCatalog();
     }
 
     public static HeadSoccer obtenerInstancia() throws POOBSoccerException {
@@ -64,36 +65,14 @@ public final class HeadSoccer {
         return personajes.obtenerNombres();
     }
 
-    public String obtenerPaisPersonaje(int indice) throws POOBSoccerException {
-        return personajes.obtenerPais(indice);
-    }
-
-    public int obtenerVelocidadPersonaje(int indice) throws POOBSoccerException {
-        return personajes.obtenerVelocidad(indice);
-    }
-
-    public int obtenerSaltoPersonaje(int indice) throws POOBSoccerException {
-        return personajes.obtenerSalto(indice);
-    }
-
-    public int obtenerFuerzaPersonaje(int indice) throws POOBSoccerException {
-        return personajes.obtenerFuerza(indice);
-    }
-
-    public int obtenerNivelPoderPersonaje(int indice) throws POOBSoccerException {
-        return personajes.obtenerNivelPoder(indice);
-    }
-
-    public String obtenerNombrePoderPersonaje(int indice) throws POOBSoccerException {
-        return personajes.obtenerNombrePoder(indice);
-    }
-
-    public String obtenerDescripcionPoderPersonaje(int indice) throws POOBSoccerException {
-        return personajes.obtenerDescripcionPoder(indice);
-    }
-
     public String[] obtenerNombresPoderes() {
         return poderes.obtenerNombres();
+    }
+
+    public FichaPersonaje obtenerFichaPersonaje(int indice) throws POOBSoccerException {
+        Character p = personajes.obtener(indice);
+        return new FichaPersonaje(p.obtenerNombre(), p.obtenerPais(), p.obtenerVelocidad(), p.obtenerSalto(),
+                p.obtenerFuerza(), p.obtenerNivelPoder(), p.obtenerNombrePoder(), p.obtenerDescripcionPoder());
     }
 
     public int crearPersonaje(String nombre, String pais, int velocidad, int salto, int fuerza, int nivelPoder,
@@ -142,100 +121,64 @@ public final class HeadSoccer {
         if (elegidos[0] == null || elegidos[1] == null) {
             throw new POOBSoccerException(POOBSoccerException.JUGADORES_INCOMPLETOS);
         }
-        // Se copian los personajes para que una revancha no conserve goles ni efectos
+        // Copiamos para que una revancha empiece desde cero
         partido = new Match(modoSeleccionado, tipoPartidoSeleccionado, elegidos[0].copiar(), elegidos[1].copiar(),
                 personajes);
     }
 
-    private Match requerirPartido() throws POOBSoccerException {
+    private Match partidoActivo() throws POOBSoccerException {
         if (partido == null) {
             throw new POOBSoccerException(POOBSoccerException.PARTIDO_NO_INICIADO);
         }
         return partido;
     }
 
-    public void actualizarTick(double segundosTranscurridos) throws POOBSoccerException {
-        requerirPartido().actualizarTick(segundosTranscurridos);
+    public void actualizarTick(double segundos) throws POOBSoccerException {
+        partidoActivo().actualizarTick(segundos);
     }
 
     public void pausar() throws POOBSoccerException {
-        requerirPartido().pausar();
-    }
-
-    public void soltarTodasLasAcciones() throws POOBSoccerException {
-        requerirPartido().soltarTodo();
+        partidoActivo().pausar();
     }
 
     public void reanudar() throws POOBSoccerException {
-        requerirPartido().reanudar();
+        partidoActivo().reanudar();
+    }
+
+    public void soltarTodasLasAcciones() throws POOBSoccerException {
+        partidoActivo().soltarTodo();
     }
 
     public void presionarAccion(int numero, String accion) throws POOBSoccerException {
-        requerirPartido().presionar(numero, Action.porNombre(accion));
+        partidoActivo().presionar(numero, Action.porNombre(accion));
     }
 
     public void soltarAccion(int numero, String accion) throws POOBSoccerException {
-        requerirPartido().soltar(numero, Action.porNombre(accion));
+        partidoActivo().soltar(numero, Action.porNombre(accion));
     }
 
-    public String obtenerNombreJugador(int numero) throws POOBSoccerException {
-        return requerirPartido().obtenerNombreJugador(numero);
-    }
-
-    public String obtenerPaisJugador(int numero) throws POOBSoccerException {
-        return requerirPartido().obtenerPaisJugador(numero);
-    }
-
-    public double[] obtenerLimitesJugador(int numero) throws POOBSoccerException {
-        return requerirPartido().obtenerLimitesJugador(numero);
-    }
-
-    public int obtenerGolesJugador(int numero) throws POOBSoccerException {
-        return requerirPartido().obtenerGoles(numero);
-    }
-
-    public double obtenerBarraPoderJugador(int numero) throws POOBSoccerException {
-        return requerirPartido().obtenerCargaPoderJugador(numero);
-    }
-
-    public String obtenerNombrePoderJugador(int numero) throws POOBSoccerException {
-        return requerirPartido().obtenerNombrePoderJugador(numero);
-    }
-
-    public boolean estaPoderJugadorArmado(int numero) throws POOBSoccerException {
-        return requerirPartido().estaPoderJugadorArmado(numero);
-    }
-
-    public String[] obtenerEfectosJugador(int numero) throws POOBSoccerException {
-        return requerirPartido().obtenerEfectosJugador(numero);
-    }
-
-    public int obtenerOrientacionJugador(int numero) throws POOBSoccerException {
-        return requerirPartido().obtenerOrientacionJugador(numero);
-    }
-
-    public boolean estaJugadorPateando(int numero) throws POOBSoccerException {
-        return requerirPartido().estaJugadorPateando(numero);
+    public ResumenJugador obtenerResumenJugador(int numero) throws POOBSoccerException {
+        return partidoActivo().obtenerResumenJugador(numero);
     }
 
     public double[] obtenerPosicionBalon() throws POOBSoccerException {
-        return requerirPartido().obtenerPosicionBalon();
-    }
-
-    public String obtenerEstadoPartido() throws POOBSoccerException {
-        return requerirPartido().obtenerEstado();
-    }
-
-    public boolean estaPartidoTerminado() throws POOBSoccerException {
-        return requerirPartido().estaTerminado();
+        return partidoActivo().obtenerPosicionBalon();
     }
 
     public double[][] obtenerLimitesArcos() throws POOBSoccerException {
-        return requerirPartido().obtenerLimitesArcos();
+        return partidoActivo().obtenerLimitesArcos();
+    }
+
+    public String obtenerEstadoPartido() throws POOBSoccerException {
+        return partidoActivo().obtenerEstado();
+    }
+
+    public boolean estaPartidoTerminado() throws POOBSoccerException {
+        return partidoActivo().estaTerminado();
     }
 
     public String obtenerNombreGanador() throws POOBSoccerException {
-        return requerirPartido().obtenerNombreGanador();
+        return partidoActivo().obtenerNombreGanador();
     }
 
     public double obtenerRadioBalon() {

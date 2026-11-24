@@ -1,7 +1,5 @@
 package presentacion;
 
-import static presentacion.Texts.texto;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridLayout;
@@ -12,11 +10,12 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
 import dominio.HeadSoccer;
+import dominio.ResumenJugador;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Placa lateral de un jugador en el marcador con su escudo, nombre y barra de
- * poder.
+ * Placa lateral del marcador con el escudo, el nombre y la barra de poder de un
+ * jugador.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -24,7 +23,6 @@ import dominio.excepciones.POOBSoccerException;
 @SuppressWarnings("serial")
 final class PlayerPlateP extends JPanel {
 
-    private static final int PORCENTAJE = 100;
     private final HeadSoccer modelo;
     private final int numero;
     private final Color color;
@@ -33,36 +31,37 @@ final class PlayerPlateP extends JPanel {
     private final JProgressBar poder;
 
     PlayerPlateP(HeadSoccer modelo, int numero, String ladoEscudo) {
-        super(new BorderLayout(Resources.ESPACIO, 0));
-        Resources recursos = Resources.obtenerInstancia();
+        super(new BorderLayout(Estilo.MARGEN, 0));
         this.modelo = modelo;
         this.numero = numero;
-        this.color = recursos.colorJugador(numero);
-        nombre = recursos.crearEtiqueta("", Resources.FUENTE_ENCABEZADO);
-        poder = recursos.crearBarra(PORCENTAJE, color);
+        this.color = Estilo.colorJugador(numero);
+        nombre = Estilo.etiqueta("", Estilo.FUENTE_SUBTITULO);
+        poder = Estilo.barra(100, color);
         poder.setStringPainted(true);
-        JPanel datos = new JPanel(new GridLayout(2, 1, 0, Resources.ESPACIO / 3));
+
+        JPanel datos = new JPanel(new GridLayout(2, 1, 0, 4));
         datos.setOpaque(false);
         datos.add(nombre);
         datos.add(poder);
-        setBackground(Resources.ASFALTO);
-        setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 0, 4, 0, color),
-                BorderFactory.createEmptyBorder(Resources.ESPACIO / 2, Resources.ESPACIO, Resources.ESPACIO / 2,
-                        Resources.ESPACIO)));
+
+        setBackground(Estilo.FONDO);
+        setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 4, 0, color),
+                BorderFactory.createEmptyBorder(6, Estilo.MARGEN, 6, Estilo.MARGEN)));
         add(escudo, ladoEscudo);
         add(datos, BorderLayout.CENTER);
     }
 
     void refrescar() throws POOBSoccerException {
-        boolean armado = modelo.estaPoderJugadorArmado(numero);
-        escudo.establecerPais(modelo.obtenerPaisJugador(numero));
-        nombre.setText(modelo.obtenerNombreJugador(numero).toUpperCase());
-        poder.setValue((int) Math.round(modelo.obtenerBarraPoderJugador(numero) * PORCENTAJE));
-        if (armado) {
-            poder.setString(texto("hud.armed"));
-            poder.setForeground(Resources.LISTO);
+        ResumenJugador jugador = modelo.obtenerResumenJugador(numero);
+        escudo.establecerPais(jugador.pais);
+        nombre.setText(jugador.nombre.toUpperCase());
+        poder.setValue((int) Math.round(jugador.cargaPoder * 100));
+        if (jugador.poderArmado) {
+            poder.setString(Texts.t("¡PODER LISTO!", "POWER READY!"));
+            poder.setForeground(Estilo.RESALTE);
         } else {
-            poder.setString(modelo.obtenerNombrePoderJugador(numero));
+            poder.setString(jugador.nombrePoder);
             poder.setForeground(color);
         }
     }

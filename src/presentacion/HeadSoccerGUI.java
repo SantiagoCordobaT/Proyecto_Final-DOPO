@@ -1,7 +1,5 @@
 package presentacion;
 
-import static presentacion.Texts.texto;
-
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
@@ -91,7 +89,7 @@ public final class HeadSoccerGUI extends JFrame {
     }
 
     static void reportarError(Component padre, POOBSoccerException e) {
-        JOptionPane.showMessageDialog(padre, e.getMessage(), texto("error.title"), JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(padre, e.getMessage(), Texts.t("Error", "Error"), JOptionPane.ERROR_MESSAGE);
     }
 
     private static void iniciarInterfaz() {

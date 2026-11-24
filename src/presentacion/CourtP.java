@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.Toolkit;
 
 import javax.swing.JPanel;
 
@@ -13,7 +12,8 @@ import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Lienzo donde se dibuja el fondo de la cancha y todos los actores del partido.
+ * Lienzo donde se dibujan la cancha, los dos jugadores, el balón, los arcos y
+ * el letrero de gol.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -21,57 +21,70 @@ import dominio.excepciones.POOBSoccerException;
 @SuppressWarnings("serial")
 final class CourtP extends JPanel {
 
-    private final Resources recursos = Resources.obtenerInstancia();
-    private final GoalCelebration celebracion;
-    private final Actor[] actores;
-    private final Dimension tamano;
+    private static final int ALTO_CANCHA = 490;
+    private static final double SEGUNDOS_AVISO_GOL = 1.4;
+
+    private final HeadSoccer modelo;
+    private final PlayerSprite jugador1;
+    private final PlayerSprite jugador2;
+    private final BallSprite balon;
+    private final GoalSprite arcos;
+
+    private int totalGoles = -1;
+    private double tiempoAvisoGol;
 
     CourtP(HeadSoccer modelo) {
-        Particles particulas = new Particles();
-        GoalSprite arcos = new GoalSprite(modelo);
-        celebracion = new GoalCelebration(modelo);
-        actores = new Actor[] {
-                new PlayerSprite(modelo, 1),
-                new PlayerSprite(modelo, 2),
-                new BallSprite(modelo),
-                arcos,
-                particulas,
-                celebracion
-        };
-        tamano = new Dimension((int) modelo.obtenerAnchoCancha(), recursos.altoCancha(modelo.obtenerSueloY()));
-        setPreferredSize(tamano);
-        setBackground(Color.BLACK);
+        this.modelo = modelo;
+        jugador1 = new PlayerSprite(modelo, 1);
+        jugador2 = new PlayerSprite(modelo, 2);
+        balon = new BallSprite(modelo);
+        arcos = new GoalSprite(modelo);
+        setPreferredSize(new Dimension((int) modelo.obtenerAnchoCancha(), ALTO_CANCHA));
+        setBackground(Estilo.FONDO);
     }
 
     void entrar() {
-        celebracion.olvidar();
+        totalGoles = -1;
+        tiempoAvisoGol = 0.0;
     }
 
     void animar(double segundos) throws POOBSoccerException {
-        for (int i = 0; i < actores.length; i++) {
-            actores[i].actualizar(segundos);
+        jugador1.actualizar();
+        jugador2.actualizar();
+        balon.actualizar();
+        arcos.actualizar();
+
+        int golesActuales = modelo.obtenerResumenJugador(1).goles + modelo.obtenerResumenJugador(2).goles;
+        if (totalGoles >= 0 && golesActuales != totalGoles) {
+            tiempoAvisoGol = SEGUNDOS_AVISO_GOL;
+        }
+        totalGoles = golesActuales;
+        if (tiempoAvisoGol > 0.0) {
+            tiempoAvisoGol -= segundos;
         }
         repaint();
     }
 
     @Override
-    protected void paintComponent(Graphics graficos) {
-        super.paintComponent(graficos);
-        Graphics2D g = (Graphics2D) graficos.create();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        double escalaX = getWidth() / (double) tamano.width;
-        double escalaY = getHeight() / (double) tamano.height;
-        double escala = escalaX;
-        if (escalaY < escala) {
-            escala = escalaY;
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        Estilo.dibujarFondoCancha(g2, getWidth(), getHeight(), (int) modelo.obtenerSueloY());
+        jugador1.dibujar(g2);
+        jugador2.dibujar(g2);
+        balon.dibujar(g2);
+        arcos.dibujar(g2);
+
+        if (tiempoAvisoGol > 0.0) {
+            g2.setFont(Estilo.FUENTE_TITULO);
+            String texto = Texts.t("¡GOL!", "GOAL!");
+            int x = (getWidth() - g2.getFontMetrics().stringWidth(texto)) / 2;
+            int y = (int) (modelo.obtenerSueloY() * 0.42);
+            g2.setColor(Color.BLACK);
+            g2.drawString(texto, x + 3, y + 3);
+            g2.setColor(Estilo.RESALTE);
+            g2.drawString(texto, x, y);
         }
-        g.translate((getWidth() - tamano.width * escala) / 2.0, (getHeight() - tamano.height * escala) / 2.0);
-        recursos.dibujarFondo(g, (int) Math.round(tamano.width * escala), (int) Math.round(tamano.height * escala));
-        g.scale(escala, escala);
-        for (int i = 0; i < actores.length; i++) {
-            actores[i].dibujar(g);
-        }
-        g.dispose();
-        Toolkit.getDefaultToolkit().sync();
     }
 }

@@ -1,8 +1,8 @@
 package dominio.efectos;
 
 /**
- * Clase base para los efectos temporales que alteran acciones, tamaño o
- * dirección de un personaje.
+ * Base para los efectos temporales que afectan a un personaje durante un
+ * tiempo limitado. Cada subclase aplica su propio cambio sobre el estado.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -17,11 +17,13 @@ public abstract class Effect {
         this.segundosRestantes = duracionSegundos;
     }
 
-    void transcurrir(double segundosTranscurridos) {
-        if (segundosTranscurridos <= 0.0) {
+    abstract void aplicarSobre(StatusEffects estado);
+
+    void transcurrir(double segundos) {
+        if (segundos <= 0.0) {
             return;
         }
-        segundosRestantes -= segundosTranscurridos;
+        segundosRestantes -= segundos;
         if (segundosRestantes < 0.0) {
             segundosRestantes = 0.0;
         }
@@ -32,25 +34,10 @@ public abstract class Effect {
     }
 
     boolean esMismoTipoQue(Effect otro) {
-        if (otro == null) {
-            return false;
-        }
-        return nombre.equals(otro.nombre);
+        return otro != null && nombre.equals(otro.nombre);
     }
 
     String obtenerNombre() {
         return nombre;
-    }
-
-    boolean permiteAcciones() {
-        return true;
-    }
-
-    double obtenerEscala() {
-        return 1.0;
-    }
-
-    int obtenerSignoHorizontal() {
-        return 1;
     }
 }

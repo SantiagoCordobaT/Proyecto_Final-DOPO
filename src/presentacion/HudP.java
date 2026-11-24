@@ -1,7 +1,5 @@
 package presentacion;
 
-import static presentacion.Texts.texto;
-
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 
@@ -12,8 +10,8 @@ import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Barra superior del partido que muestra la placa de cada jugador, el estado
- * del partido, los goles y el aviso de pausa.
+ * Barra superior del partido con las placas de los dos jugadores, el marcador y
+ * el estado del encuentro.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -21,55 +19,42 @@ import dominio.excepciones.POOBSoccerException;
 @SuppressWarnings("serial")
 final class HudP extends JPanel {
 
-    private static final String SEPARADOR_MARCADOR = " - ";
-    private static final double SEGUNDOS_DESTELLO = 0.8;
-
     private final HeadSoccer modelo;
     private final PlayerPlateP izquierda;
     private final PlayerPlateP derecha;
     private final JLabel estado;
     private final JLabel marcador;
     private final JLabel ayuda;
-    private double destello;
 
     HudP(HeadSoccer modelo) {
         super(new GridLayout(1, 3));
-        Resources recursos = Resources.obtenerInstancia();
         this.modelo = modelo;
         izquierda = new PlayerPlateP(modelo, 1, BorderLayout.WEST);
         derecha = new PlayerPlateP(modelo, 2, BorderLayout.EAST);
-        estado = recursos.crearEtiqueta("", Resources.FUENTE_TEXTO);
-        marcador = recursos.crearEtiqueta("", Resources.FUENTE_MARCADOR);
-        ayuda = recursos.crearEtiqueta("", Resources.FUENTE_AYUDA);
-        estado.setForeground(Resources.LISTO);
-        JPanel centro = recursos.crearPanel(new BorderLayout());
+        estado = Estilo.etiqueta("", Estilo.FUENTE_NORMAL);
+        marcador = Estilo.etiqueta("", Estilo.FUENTE_MARCADOR);
+        ayuda = Estilo.etiqueta("", Estilo.FUENTE_PEQUENA);
+        estado.setForeground(Estilo.RESALTE);
+
+        JPanel centro = new JPanel(new BorderLayout());
+        centro.setBackground(Estilo.FONDO);
         centro.add(estado, BorderLayout.NORTH);
         centro.add(marcador, BorderLayout.CENTER);
         centro.add(ayuda, BorderLayout.SOUTH);
+
         add(izquierda);
         add(centro);
         add(derecha);
     }
 
     void rotular() {
-        ayuda.setText(texto("match.hint"));
+        ayuda.setText(Texts.t("P / Esc: pausa", "P / Esc: pause"));
     }
 
-    void refrescar(double segundos) throws POOBSoccerException {
-        String actual = modelo.obtenerGolesJugador(1) + SEPARADOR_MARCADOR + modelo.obtenerGolesJugador(2);
-        if (!actual.equals(marcador.getText())) {
-            destello = SEGUNDOS_DESTELLO;
-            marcador.setText(actual);
-        }
-        destello -= segundos;
-        if (destello < 0.0) {
-            destello = 0.0;
-        }
-        if (destello > 0.0) {
-            marcador.setForeground(Resources.LISTO);
-        } else {
-            marcador.setForeground(Resources.TEXTO);
-        }
+    void refrescar() throws POOBSoccerException {
+        int goles1 = modelo.obtenerResumenJugador(1).goles;
+        int goles2 = modelo.obtenerResumenJugador(2).goles;
+        marcador.setText(goles1 + " - " + goles2);
         izquierda.refrescar();
         derecha.refrescar();
         estado.setText(modelo.obtenerEstadoPartido());
