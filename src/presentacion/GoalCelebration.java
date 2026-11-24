@@ -8,6 +8,13 @@ import java.awt.Graphics2D;
 import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
 
+/**
+ * Muestra el letrero de gol en la cancha durante unos instantes cuando cambia
+ * el marcador.
+ *
+ * @author Santiago Cordoba - Camilo Rivas
+ * @version 1.0
+ */
 final class GoalCelebration implements Actor {
 
     private static final int MARCADOR_DESCONOCIDO = -1;
@@ -19,7 +26,7 @@ final class GoalCelebration implements Actor {
     private int marcador = MARCADOR_DESCONOCIDO;
     private double tiempo;
 
-    GoalCelebration(HeadSoccer modelo, Particles particulas, GoalSprite arcos) {
+    GoalCelebration(HeadSoccer modelo) {
         this.modelo = modelo;
         this.ancho = modelo.obtenerAnchoCancha();
         this.suelo = modelo.obtenerSueloY();
@@ -30,10 +37,6 @@ final class GoalCelebration implements Actor {
         tiempo = 0.0;
     }
 
-    double obtenerSacudida() {
-        return 0.0;
-    }
-
     @Override
     public void actualizar(double segundos) throws POOBSoccerException {
         int actual = modelo.obtenerGolesJugador(1) + modelo.obtenerGolesJugador(2);
@@ -41,7 +44,10 @@ final class GoalCelebration implements Actor {
             tiempo = SEGUNDOS;
         }
         marcador = actual;
-        tiempo = Math.max(0.0, tiempo - segundos);
+        tiempo -= segundos;
+        if (tiempo < 0.0) {
+            tiempo = 0.0;
+        }
     }
 
     @Override

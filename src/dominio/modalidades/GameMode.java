@@ -1,8 +1,8 @@
 package dominio.modalidades;
 
 /**
- * Modalidad de juego: define qué controlador usa cada jugador y si permite
- * jugar en modo Supervivencia.
+ * Define los controladores de cada jugador y si la modalidad admite el modo
+ * Supervivencia.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

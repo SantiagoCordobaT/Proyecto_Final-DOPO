@@ -1,7 +1,7 @@
 package dominio.efectos;
 
 /**
- * Congelamiento en un bloque de hielo: bloquea acciones durante 3 segundos.
+ * Efecto de congelamiento que bloquea las acciones durante 3 segundos.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

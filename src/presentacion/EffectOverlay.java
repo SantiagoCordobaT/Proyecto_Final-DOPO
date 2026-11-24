@@ -3,6 +3,12 @@ package presentacion;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
+/**
+ * Dibuja los indicadores visuales de los efectos temporales sobre un jugador.
+ *
+ * @author Santiago Cordoba - Camilo Rivas
+ * @version 1.0
+ */
 final class EffectOverlay {
 
     private static final Color HIELO = new Color(150, 220, 255, 130);
@@ -10,7 +16,7 @@ final class EffectOverlay {
     private static final Color ESTRELLA = new Color(255, 230, 50);
     private static final Color MAREO = new Color(220, 150, 255);
 
-    void dibujar(Graphics2D g, String[] efectos, double tiempo) {
+    void dibujar(Graphics2D g, String[] efectos) {
         for (int i = 0; i < efectos.length; i++) {
             dibujarEfecto(g, efectos[i]);
         }

@@ -6,6 +6,12 @@ import java.awt.Graphics2D;
 import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
 
+/**
+ * Dibuja el balón y su sombra usando la posición que reporta el dominio.
+ *
+ * @author Santiago Cordoba - Camilo Rivas
+ * @version 1.0
+ */
 final class BallSprite implements Actor {
 
     private final HeadSoccer modelo;
@@ -13,7 +19,7 @@ final class BallSprite implements Actor {
     private double x;
     private double y;
 
-    BallSprite(HeadSoccer modelo, Particles particulas) {
+    BallSprite(HeadSoccer modelo) {
         this.modelo = modelo;
         this.radio = modelo.obtenerRadioBalon();
     }

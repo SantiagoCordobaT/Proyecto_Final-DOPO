@@ -7,7 +7,7 @@ import java.awt.Graphics;
 import javax.swing.JPanel;
 
 /**
- * Escudo de un equipo: franjas con los colores de su pais.
+ * Panel pequeño que dibuja las franjas con los colores del país del jugador.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -19,12 +19,10 @@ final class TeamBadge extends JPanel {
 
     private String pais = "";
 
-    /** Crea el escudo con colores neutros hasta que se le indique un pais. */
     TeamBadge() {
         setPreferredSize(TAMANO);
     }
 
-    /** @param pais Pais cuyos colores debe mostrar el escudo. */
     void establecerPais(String pais) {
         if (!pais.equals(this.pais)) {
             this.pais = pais;

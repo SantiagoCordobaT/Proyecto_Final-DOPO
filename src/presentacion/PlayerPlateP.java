@@ -15,8 +15,8 @@ import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Placa de un jugador en el marcador: escudo del pais, nombre y barra de poder
- * (con el nombre del poder, o el aviso de poder listo cuando esta armado).
+ * Placa lateral de un jugador en el marcador con su escudo, nombre y barra de
+ * poder.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -32,12 +32,6 @@ final class PlayerPlateP extends JPanel {
     private final JLabel nombre;
     private final JProgressBar poder;
 
-    /**
-     * @param modelo    Fachada del dominio.
-     * @param numero    Jugador (1 o 2) que muestra la placa.
-     * @param ladoEscudo Lado del escudo ({@link BorderLayout#WEST} o
-     *                  {@link BorderLayout#EAST}).
-     */
     PlayerPlateP(HeadSoccer modelo, int numero, String ladoEscudo) {
         super(new BorderLayout(Resources.ESPACIO, 0));
         Resources recursos = Resources.obtenerInstancia();
@@ -59,22 +53,16 @@ final class PlayerPlateP extends JPanel {
         add(datos, BorderLayout.CENTER);
     }
 
-    /**
-     * Actualiza la placa con el estado actual del jugador; la barra late mientras
-     * el poder esta armado.
-     *
-     * @param segundos Segundos reales transcurridos desde el cuadro anterior.
-     * @throws POOBSoccerException Si no hay un partido iniciado.
-     */
-    void refrescar(double segundos) throws POOBSoccerException {
+    void refrescar() throws POOBSoccerException {
         boolean armado = modelo.estaPoderJugadorArmado(numero);
         escudo.establecerPais(modelo.obtenerPaisJugador(numero));
         nombre.setText(modelo.obtenerNombreJugador(numero).toUpperCase());
         poder.setValue((int) Math.round(modelo.obtenerBarraPoderJugador(numero) * PORCENTAJE));
-        poder.setString(armado ? texto("hud.armed") : modelo.obtenerNombrePoderJugador(numero));
         if (armado) {
+            poder.setString(texto("hud.armed"));
             poder.setForeground(Resources.LISTO);
         } else {
+            poder.setString(modelo.obtenerNombrePoderJugador(numero));
             poder.setForeground(color);
         }
     }

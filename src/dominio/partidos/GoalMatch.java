@@ -1,8 +1,7 @@
 package dominio.partidos;
 
 /**
- * Partido por goles: sin límite de tiempo, gana quien alcance la meta (3, 5 o
- * 7).
+ * Reglas del partido por goles, donde gana el primero en llegar a la meta (3, 5 o 7).
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

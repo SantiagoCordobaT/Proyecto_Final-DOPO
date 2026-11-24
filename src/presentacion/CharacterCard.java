@@ -19,8 +19,8 @@ import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Ficha de seleccion de un jugador: lista de personajes, escudo del pais,
- * estadisticas en barras y poder especial. Solo consulta a la fachada.
+ * Panel con la lista de personajes, escudo, barras de estadísticas y poder del
+ * personaje elegido por un jugador.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -46,11 +46,6 @@ final class CharacterCard extends JPanel {
     private boolean recargando;
     private Runnable alSeleccionar;
 
-    /**
-     * @param modelo  Fachada del dominio.
-     * @param numero  Jugador (1 o 2) al que pertenece la ficha.
-     * @param inicial Personaje seleccionado al abrir.
-     */
     CharacterCard(HeadSoccer modelo, int numero, int inicial) {
         super(new BorderLayout(Resources.ESPACIO, Resources.ESPACIO));
         this.modelo = modelo;
@@ -97,32 +92,27 @@ final class CharacterCard extends JPanel {
         refrescar();
     }
 
-    /** @return Indice del personaje elegido en el catalogo. */
     int obtenerIndiceSeleccionado() {
         return personajes.getSelectedIndex();
     }
 
-    /** Registra un aviso para saber que ficha toco el usuario por ultima vez. */
     void alSeleccionar(Runnable accion) {
         this.alSeleccionar = accion;
     }
 
-    /**
-     * Recarga los nombres del catalogo manteniendo un indice valido.
-     *
-     * @param indicePreferido Indice deseado tras recargar.
-     */
     void recargar(int indicePreferido) {
         recargando = true;
-        try {
-            String[] nombres = modelo.obtenerNombresPersonajes();
-            personajes.setListData(nombres);
-            int indice = Math.max(0, Math.min(indicePreferido, nombres.length - 1));
-            personajes.setSelectedIndex(indice);
-            refrescar();
-        } finally {
-            recargando = false;
+        String[] nombres = modelo.obtenerNombresPersonajes();
+        personajes.setListData(nombres);
+        int indice = indicePreferido;
+        if (indice < 0) {
+            indice = 0;
+        } else if (indice >= nombres.length) {
+            indice = nombres.length - 1;
         }
+        personajes.setSelectedIndex(indice);
+        refrescar();
+        recargando = false;
     }
 
     private JProgressBar agregarEstadistica(String clave) {
@@ -135,9 +125,6 @@ final class CharacterCard extends JPanel {
         return barra;
     }
 
-    /**
-     * Muestra los datos del personaje seleccionado tal como los entrega el dominio.
-     */
     private void refrescar() {
         int indice = personajes.getSelectedIndex();
         if (indice < 0) {

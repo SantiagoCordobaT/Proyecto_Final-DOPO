@@ -3,8 +3,7 @@ package dominio.poderes;
 import dominio.personajes.Character;
 
 /**
- * Poder especial de un personaje según su país: cada poder aplica un efecto
- * sobre el oponente.
+ * Clase base de los poderes especiales que aplican un efecto sobre el rival.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

@@ -1,8 +1,7 @@
 package dominio.excepciones;
 
 /**
- * Excepción única del dominio para reportar incumplimientos de reglas del
- * juego.
+ * Excepción para errores de reglas y validaciones del dominio.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

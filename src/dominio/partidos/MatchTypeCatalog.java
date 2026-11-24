@@ -3,8 +3,7 @@ package dominio.partidos;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Lista de tipos de partido disponibles en el orden del menú:
- * Por Goles (3, 5 y 7) y Supervivencia.
+ * Contiene los tipos de partido que se muestran en el menú.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

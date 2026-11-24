@@ -1,7 +1,7 @@
 package dominio;
 
 /**
- * Balón de fútbol 2D con física discreta por impulsos.
+ * Balón del partido que se mueve por impulsos y rebota con la cancha y jugadores.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -9,7 +9,7 @@ package dominio;
 public class Ball {
 
     static final double RADIO = 15.0;
-    private static final double MARGEN_BORDE = 1e-6;
+    private static final double MARGEN_BORDE = 0.0001;
     private static final double RAPIDEZ_BASE_X = 6.0;
     private static final double RAPIDEZ_BASE_Y = 5.0;
     private static final int MULTIPLICADOR_PATADA_X = 18;
@@ -27,7 +27,6 @@ public class Ball {
     private int impulsoIzquierda;
     private int impulsoArriba;
 
-    /** Coloca el balón quieto en un punto de la cancha. */
     void ubicarEn(double x, double y) {
         this.x = x;
         this.y = y;
@@ -37,9 +36,6 @@ public class Ball {
         velocidadX = RAPIDEZ_BASE_X;
     }
 
-    /**
-     * Mueve el balón un paso según sus impulsos activos, frenando en techo y suelo.
-     */
     void actualizarFisica(double sueloY, double techoY) {
         if (impulsoDerecha > 0) {
             x += velocidadX;
@@ -62,11 +58,13 @@ public class Ball {
             impulsoArriba = 0;
         }
         if (!subio && y + RADIO < sueloY) {
-            y = Math.min(sueloY - RADIO, y + RAPIDEZ_BASE_Y);
+            y += RAPIDEZ_BASE_Y;
+            if (y > sueloY - RADIO) {
+                y = sueloY - RADIO;
+            }
         }
     }
 
-    /** Invierte la dirección horizontal si choca con las paredes laterales. */
     void rebotarEnParedes(double paredIzquierdaX, double paredDerechaX) {
         if (x - RADIO <= paredIzquierdaX) {
             x = paredIzquierdaX + RADIO;
@@ -100,7 +98,6 @@ public class Ball {
         impulsoArriba = impulsoVertical;
     }
 
-    /** Comprueba si el círculo del balón toca o entra en un rectángulo. */
     public boolean seSolapaCon(double izquierda, double arriba, double derecha, double abajo) {
         double cercanoX = x;
         if (cercanoX < izquierda) {
@@ -148,13 +145,29 @@ public class Ball {
 
     void rebotarDeLado(double bordeX, int direccion) {
         x = bordeX + direccion * RADIO;
-        int impulsoRebote = Math.max(direccion > 0 ? impulsoIzquierda : impulsoDerecha, IMPULSO_REBOTE_LADO);
+        int impulsoRebote;
+        if (direccion > 0) {
+            impulsoRebote = impulsoIzquierda;
+        } else {
+            impulsoRebote = impulsoDerecha;
+        }
+        if (impulsoRebote < IMPULSO_REBOTE_LADO) {
+            impulsoRebote = IMPULSO_REBOTE_LADO;
+        }
         establecerImpulsoHorizontal(direccion, impulsoRebote);
     }
 
     public void empujarDeLado(double bordeX, int direccion) {
         x = bordeX + direccion * RADIO;
-        int impulsoEmpuje = Math.max(direccion > 0 ? impulsoDerecha : impulsoIzquierda, IMPULSO_EMPUJE);
+        int impulsoEmpuje;
+        if (direccion > 0) {
+            impulsoEmpuje = impulsoDerecha;
+        } else {
+            impulsoEmpuje = impulsoIzquierda;
+        }
+        if (impulsoEmpuje < IMPULSO_EMPUJE) {
+            impulsoEmpuje = IMPULSO_EMPUJE;
+        }
         establecerImpulsoHorizontal(direccion, impulsoEmpuje);
     }
 
@@ -171,11 +184,14 @@ public class Ball {
     }
 
     public int ladoRespectoA(double referenciaX) {
-        return x >= referenciaX ? 1 : -1;
+        if (x >= referenciaX) {
+            return 1;
+        }
+        return -1;
     }
 
     boolean esGolpeFuerte() {
-        return Math.max(impulsoDerecha, impulsoIzquierda) >= UMBRAL_GOLPE_FUERTE;
+        return impulsoDerecha >= UMBRAL_GOLPE_FUERTE || impulsoIzquierda >= UMBRAL_GOLPE_FUERTE;
     }
 
     void frenar() {

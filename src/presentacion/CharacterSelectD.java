@@ -12,8 +12,8 @@ import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Dialogo que enfrenta las fichas de los dos jugadores y, al aceptar, inicia el
- * partido.
+ * Diálogo para escoger los personajes de ambos jugadores y gestionar el
+ * catálogo antes de iniciar el partido.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -30,10 +30,6 @@ final class CharacterSelectD extends StreetDialog {
     private final CharacterCard segundo;
     private CharacterCard fichaActiva;
 
-    /**
-     * @param ventana Ventana principal.
-     * @param modelo  Fachada del dominio.
-     */
     CharacterSelectD(HeadSoccerGUI ventana, HeadSoccer modelo) {
         super(ventana, texto("select.title"));
         this.ventana = ventana;
@@ -117,15 +113,24 @@ final class CharacterSelectD extends StreetDialog {
         int indice = fichaActiva.obtenerIndiceSeleccionado();
         try {
             modelo.eliminarPersonaje(indice);
-            recargarFichas(Math.max(0, indice - 1));
+            int nuevoIndice = indice - 1;
+            if (nuevoIndice < 0) {
+                nuevoIndice = 0;
+            }
+            recargarFichas(nuevoIndice);
         } catch (POOBSoccerException e) {
             HeadSoccerGUI.reportarError(this, e);
         }
     }
 
     private void recargarFichas(int indiceEnActiva) {
-        int indicePrimero = fichaActiva == primero ? indiceEnActiva : primero.obtenerIndiceSeleccionado();
-        int indiceSegundo = fichaActiva == segundo ? indiceEnActiva : segundo.obtenerIndiceSeleccionado();
+        int indicePrimero = primero.obtenerIndiceSeleccionado();
+        int indiceSegundo = segundo.obtenerIndiceSeleccionado();
+        if (fichaActiva == primero) {
+            indicePrimero = indiceEnActiva;
+        } else {
+            indiceSegundo = indiceEnActiva;
+        }
         primero.recargar(indicePrimero);
         segundo.recargar(indiceSegundo);
         pack();

@@ -1,14 +1,11 @@
 package dominio.modalidades;
 
-import java.util.Arrays;
-
 import dominio.Ball;
 import dominio.personajes.Character;
 
 /**
- * Base para los controladores de jugador (humano o máquina). Guarda qué
- * acciones
- * están presionadas y cada subclase decide cómo mover al personaje en el turno.
+ * Clase base para controlar un personaje en cada turno, ya sea por teclado o
+ * de forma automática.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -26,7 +23,9 @@ public abstract class Controller {
     }
 
     public void soltarTodo() {
-        Arrays.fill(mantenidas, false);
+        for (int i = 0; i < mantenidas.length; i++) {
+            mantenidas[i] = false;
+        }
     }
 
     protected boolean estaPresionada(Action accion) {

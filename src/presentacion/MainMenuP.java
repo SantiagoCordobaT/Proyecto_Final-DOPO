@@ -15,8 +15,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 /**
- * Menu principal sobre el fondo de la cancha callejera: titulo al norte y
- * botones al sur. Cada boton solo avisa a la ventana principal.
+ * Panel del menú principal con el título del juego y los botones de inicio,
+ * configuración y salida.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -32,7 +32,6 @@ final class MainMenuP extends JPanel {
     private final JButton configuracion;
     private final JButton salir;
 
-    /** @param ventana Ventana principal. */
     MainMenuP(HeadSoccerGUI ventana) {
         super(new BorderLayout());
         setBorder(BorderFactory.createEmptyBorder(Resources.ESPACIO * 2, Resources.ESPACIO, Resources.ESPACIO * 2,
@@ -72,7 +71,6 @@ final class MainMenuP extends JPanel {
         refrescar();
     }
 
-    /** Rotula el menu en el idioma actual. */
     void refrescar() {
         subtitulo.setText(texto("menu.subtitle"));
         jugar.setText(texto("menu.play").toUpperCase());

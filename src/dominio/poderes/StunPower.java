@@ -4,7 +4,7 @@ import dominio.efectos.StunEffect;
 import dominio.personajes.Character;
 
 /**
- * Poder de aturdimiento (Japón): deja al oponente aturdido durante 3 segundos.
+ * Poder que aturde al oponente durante 3 segundos.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

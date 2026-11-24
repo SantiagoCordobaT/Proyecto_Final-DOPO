@@ -1,8 +1,7 @@
 package dominio.modalidades;
 
 /**
- * Jugador vs Máquina: el jugador 1 es humano y el 2 usa IA. Es la única
- * modalidad que permite Supervivencia.
+ * Modalidad de un jugador contra la máquina; única compatible con Supervivencia.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

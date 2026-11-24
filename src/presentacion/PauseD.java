@@ -10,8 +10,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JTextArea;
 
 /**
- * Dialogo de pausa: recuerda los controles y permite reanudar o abandonar.
- * Cerrar la ventana equivale a reanudar, para no dejar el partido congelado.
+ * Diálogo de pausa que muestra los controles y permite reanudar o abandonar el
+ * partido.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -22,10 +22,6 @@ final class PauseD extends StreetDialog {
     private final MatchP partido;
     private final JTextArea controles;
 
-    /**
-     * @param dueno   Ventana principal.
-     * @param partido Pantalla del partido en pausa.
-     */
     PauseD(Frame dueno, MatchP partido) {
         super(dueno, texto("pause.title"));
         this.partido = partido;

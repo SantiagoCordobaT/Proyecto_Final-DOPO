@@ -3,10 +3,8 @@ package dominio.modalidades;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Acciones que puede ejecutar un jugador (moverse, saltar, patear o armar
- * poder).
- * 
- * 
+ * Acciones disponibles para controlar a un jugador.
+ *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */

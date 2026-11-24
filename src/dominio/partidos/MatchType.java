@@ -3,8 +3,8 @@ package dominio.partidos;
 import dominio.modalidades.GameMode;
 
 /**
- * Reglas base de un tipo de partido (por goles o supervivencia): lleva el
- * reloj, si ya terminó y qué jugador ganó.
+ * Clase base para los tipos de partido. Lleva el tiempo transcurrido, el
+ * ganador y si la partida ya terminó.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -12,11 +12,7 @@ import dominio.modalidades.GameMode;
 public abstract class MatchType {
 
     protected static final int JUGADOR_DOS = 2;
-    /**
-     * Pequeño margen para que los decimales de double no quiten un segundo al
-     * reloj.
-     */
-    protected static final double TOLERANCIA = 1e-9;
+    protected static final double TOLERANCIA = 0.0001;
 
     private final String nombre;
     private boolean terminado;
@@ -67,8 +63,14 @@ public abstract class MatchType {
         }
         int minutos = segundos / 60;
         int resto = segundos % 60;
-        String textoMinutos = (minutos < 10) ? "0" + minutos : String.valueOf(minutos);
-        String textoSegundos = (resto < 10) ? "0" + resto : String.valueOf(resto);
+        String textoMinutos = String.valueOf(minutos);
+        if (minutos < 10) {
+            textoMinutos = "0" + textoMinutos;
+        }
+        String textoSegundos = String.valueOf(resto);
+        if (resto < 10) {
+            textoSegundos = "0" + textoSegundos;
+        }
         return textoMinutos + ":" + textoSegundos;
     }
 

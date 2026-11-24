@@ -1,9 +1,8 @@
 package dominio.efectos;
 
 /**
- * Efecto temporal sobre un personaje (congelamiento, aturdimiento, reducción
- * o confusión). Por defecto no cambia acciones, tamaño ni dirección; cada
- * subclase sobrescribe lo que altera.
+ * Clase base para los efectos temporales que alteran acciones, tamaño o
+ * dirección de un personaje.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

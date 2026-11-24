@@ -1,7 +1,7 @@
 package dominio.efectos;
 
 /**
- * Confusión: invierte el movimiento horizontal durante 5 segundos.
+ * Efecto que invierte el movimiento horizontal durante 5 segundos.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

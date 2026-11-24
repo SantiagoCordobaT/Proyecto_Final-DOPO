@@ -13,8 +13,8 @@ import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Dialogo de fin del partido: ganador, tanteador y estado final. Ofrece la
- * revancha (volver a elegir personajes) o regresar al menu.
+ * Diálogo que muestra el ganador, el marcador final y la opción de revancha o
+ * volver al menú.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -27,10 +27,6 @@ final class ResultD extends StreetDialog {
     private final JLabel marcador;
     private final JLabel estado;
 
-    /**
-     * @param ventana Ventana principal.
-     * @param modelo  Fachada del dominio, con el partido ya terminado.
-     */
     ResultD(HeadSoccerGUI ventana, HeadSoccer modelo) {
         super(ventana, texto("result.title"));
         this.ventana = ventana;

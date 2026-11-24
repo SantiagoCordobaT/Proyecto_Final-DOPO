@@ -20,6 +20,13 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
+/**
+ * Centraliza los colores, fuentes, fondo de la cancha y componentes Swing con
+ * el estilo visual del juego.
+ *
+ * @author Santiago Cordoba - Camilo Rivas
+ * @version 1.0
+ */
 final class Resources {
 
     static final Color ASFALTO = new Color(22, 22, 26);
@@ -44,7 +51,7 @@ final class Resources {
 
     private static Resources instancia;
 
-    private final Map<String, Color[]> equipos = new HashMap<String, Color[]>();
+    private final Map<String, Color[]> equipos = new HashMap<>();
     private final Color[] coloresJugador = { ACENTO, RIVAL };
     private BufferedImage fondo;
 

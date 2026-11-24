@@ -4,7 +4,7 @@ import dominio.efectos.FreezeEffect;
 import dominio.personajes.Character;
 
 /**
- * Poder de Canadá: congela al oponente en un bloque de hielo.
+ * Poder que congela al oponente en un bloque de hielo.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

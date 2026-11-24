@@ -10,9 +10,8 @@ import dominio.poderes.Power;
 import dominio.poderes.PowerBar;
 
 /**
- * Personaje jugable de POOBSoccer. Su posición (x, y) marca el centro
- * horizontal
- * y los pies sobre el suelo.
+ * Representa un personaje del juego. Las coordenadas (x, y) indican su centro
+ * horizontal y la posición de los pies en el suelo.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -54,9 +53,6 @@ public class Character {
     private double esperaPatada;
     private double enfriamientoPatada;
 
-    /**
-     * Crea un personaje validando nombre, país, poder y estadísticas entre 1 y 5.
-     */
     public Character(String nombre, String pais, int velocidad, int salto, int fuerza, int nivelPoder,
             Power poder) throws POOBSoccerException {
         if (nombre == null || nombre.trim().isEmpty() || pais == null || pais.trim().isEmpty() || poder == null) {
@@ -74,10 +70,6 @@ public class Character {
         this.barraPoder = new PowerBar(poder, nivelPoder);
     }
 
-    /**
-     * Devuelve un personaje nuevo con los mismos atributos y barra vacía para no
-     * compartir estado.
-     */
     public Character copiar() throws POOBSoccerException {
         return new Character(nombre, pais, velocidad, salto, fuerza, barraPoder.obtenerNivel(),
                 barraPoder.obtenerPoder());
@@ -89,7 +81,6 @@ public class Character {
         }
     }
 
-    /** Ubica al personaje en su lado inicial, con goles y barra en cero. */
     public void entrarEn(double xInicial, int orientacion) {
         this.xInicial = xInicial;
         this.orientacion = orientacion;
@@ -102,7 +93,6 @@ public class Character {
         goles = 0;
     }
 
-    /** Vuelve a la posición inicial tras un gol y limpia efectos temporales. */
     public void reiniciarJugada() {
         this.x = xInicial;
         this.y = Field.SUELO_Y;
@@ -115,7 +105,13 @@ public class Character {
     }
 
     public void establecerDireccionMovimiento(int direccion) {
-        this.direccionMovimiento = Integer.signum(direccion);
+        if (direccion > 0) {
+            this.direccionMovimiento = 1;
+        } else if (direccion < 0) {
+            this.direccionMovimiento = -1;
+        } else {
+            this.direccionMovimiento = 0;
+        }
     }
 
     public void saltar() {
@@ -131,10 +127,6 @@ public class Character {
         }
     }
 
-    /**
-     * Ejecuta la patada si alcanza al balón o al rival: aturde cuerpo a cuerpo
-     * y dispara el poder armado si patea el balón.
-     */
     public boolean intentarPatear(Ball balon, Character oponente) {
         boolean balonAlAlcance = seSolapaCon(balon, ALCANCE_PATADA);
         boolean oponenteAlAlcance = estaEnRangoCuerpoACuerpo(oponente);
@@ -161,14 +153,10 @@ public class Character {
         return seSolapaCon(balon, 0.0);
     }
 
-    /**
-     * Resuelve el contacto corporal con el balón.
-     * Cabezazo intencional: si toca sobre la cabeza y puede actuar, lo eleva
-     * hacia adelante; si está bloqueado por un efecto, solo rebota arriba.
-     */
     public void empujar(Ball balon) {
         if (estaEnZonaCabeza(balon)) {
             balon.rebotarArriba(obtenerBordeSuperior());
+            // Si no está bloqueado por un efecto, cabecea hacia adelante
             if (puedeActuar()) {
                 balon.patearArriba(fuerza, orientacion);
             }
@@ -194,12 +182,17 @@ public class Character {
         agregarEfecto(new StunEffect());
     }
 
-    /** Actualiza efectos, barra de poder, desplazamiento lateral y salto. */
     public void actualizar(double segundosTranscurridos) {
         efectos.transcurrir(segundosTranscurridos);
         barraPoder.recargar(segundosTranscurridos);
-        esperaPatada = Math.max(0.0, esperaPatada - segundosTranscurridos);
-        enfriamientoPatada = Math.max(0.0, enfriamientoPatada - segundosTranscurridos);
+        esperaPatada -= segundosTranscurridos;
+        if (esperaPatada < 0.0) {
+            esperaPatada = 0.0;
+        }
+        enfriamientoPatada -= segundosTranscurridos;
+        if (enfriamientoPatada < 0.0) {
+            enfriamientoPatada = 0.0;
+        }
 
         if (puedeActuar()) {
             x += direccionMovimiento * efectos.signoHorizontal() * velocidad * VELOCIDAD_POR_PUNTO
@@ -215,7 +208,6 @@ public class Character {
         actualizarSalto(segundosTranscurridos);
     }
 
-    /** Sube a rapidez fija hasta el tope del salto y luego cae al suelo. */
     private void actualizarSalto(double segundosTranscurridos) {
         double alturaMaximaY = Field.SUELO_Y - (ALTURA_SALTO_BASE + salto * ALTURA_SALTO_POR_PUNTO);
         if (subiendo) {

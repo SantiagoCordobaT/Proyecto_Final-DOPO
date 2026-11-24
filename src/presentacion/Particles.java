@@ -3,6 +3,12 @@ package presentacion;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
+/**
+ * Maneja pequeñas partículas visuales temporales en la cancha.
+ *
+ * @author Santiago Cordoba - Camilo Rivas
+ * @version 1.0
+ */
 final class Particles implements Actor {
 
     private static final int CAPACIDAD = 50;

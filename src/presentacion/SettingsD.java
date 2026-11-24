@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 /**
- * Dialogo de configuracion: elige el idioma de la interfaz.
+ * Diálogo de configuración para cambiar el idioma de la interfaz.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -23,7 +23,6 @@ final class SettingsD extends StreetDialog {
     private final Texts textos = Texts.obtenerInstancia();
     private final JList<String> idiomas;
 
-    /** @param dueno Ventana principal. */
     SettingsD(Frame dueno) {
         super(dueno, texto("settings.title"));
         idiomas = recursos.crearLista(textos.obtenerIdiomas());

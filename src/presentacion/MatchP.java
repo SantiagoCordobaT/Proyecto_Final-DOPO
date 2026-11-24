@@ -17,10 +17,8 @@ import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Pantalla del partido: marcador al norte y lienzo de la cancha al
- * centro. Su temporizador entrega el tiempo real a la fachada y repinta; su
- * escuchador de teclado traduce las teclas de los dos jugadores en acciones de
- * la fachada. No contiene reglas del juego.
+ * Pantalla donde se juega el partido, con el marcador arriba, la cancha en el
+ * centro, el temporizador de cuadros y el manejo de teclado.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -29,24 +27,18 @@ import dominio.excepciones.POOBSoccerException;
 final class MatchP extends JPanel {
 
     private static final int MILIS_CUADRO = 16;
-    private static final double NANOS_POR_SEGUNDO = 1e9;
-    // Tope de tiempo por cuadro: una pausa de la ventana no hace saltar la fisica
+    private static final double NANOS_POR_SEGUNDO = 1_000_000_000.0;
     private static final double MAX_SEGUNDOS_CUADRO = 0.1;
     private static final int RANGO_UBICACION = 8;
-    private static final String[] ACCIONES = { "LEFT", "RIGHT", "JUMP", "KICK", "POWER" };
 
     private final HeadSoccerGUI ventana;
     private final HeadSoccer modelo;
     private final HudP marcador;
     private final CourtP cancha;
     private final Timer temporizador;
-    private final Map<Integer, PlayerKey> teclas = new HashMap<Integer, PlayerKey>();
+    private final Map<Integer, PlayerKey> teclas = new HashMap<>();
     private long ultimoNano;
 
-    /**
-     * @param ventana Ventana principal.
-     * @param modelo  Fachada del dominio.
-     */
     MatchP(HeadSoccerGUI ventana, HeadSoccer modelo) {
         super(new BorderLayout());
         this.ventana = ventana;
@@ -61,11 +53,18 @@ final class MatchP extends JPanel {
                 avanzar();
             }
         });
-        asignarJugador(1, teclaEstandar(KeyEvent.VK_A), teclaEstandar(KeyEvent.VK_D), teclaEstandar(KeyEvent.VK_W),
-                teclaEstandar(KeyEvent.VK_S), teclaEstandar(KeyEvent.VK_Q));
-        asignarJugador(2, teclaEstandar(KeyEvent.VK_LEFT), teclaEstandar(KeyEvent.VK_RIGHT),
-                teclaEstandar(KeyEvent.VK_UP), teclaEstandar(KeyEvent.VK_DOWN),
-                ranuraTecla(KeyEvent.VK_CONTROL, KeyEvent.KEY_LOCATION_RIGHT));
+        registrarTecla(1, KeyEvent.VK_A, KeyEvent.KEY_LOCATION_STANDARD, "LEFT");
+        registrarTecla(1, KeyEvent.VK_D, KeyEvent.KEY_LOCATION_STANDARD, "RIGHT");
+        registrarTecla(1, KeyEvent.VK_W, KeyEvent.KEY_LOCATION_STANDARD, "JUMP");
+        registrarTecla(1, KeyEvent.VK_S, KeyEvent.KEY_LOCATION_STANDARD, "KICK");
+        registrarTecla(1, KeyEvent.VK_Q, KeyEvent.KEY_LOCATION_STANDARD, "POWER");
+
+        registrarTecla(2, KeyEvent.VK_LEFT, KeyEvent.KEY_LOCATION_STANDARD, "LEFT");
+        registrarTecla(2, KeyEvent.VK_RIGHT, KeyEvent.KEY_LOCATION_STANDARD, "RIGHT");
+        registrarTecla(2, KeyEvent.VK_UP, KeyEvent.KEY_LOCATION_STANDARD, "JUMP");
+        registrarTecla(2, KeyEvent.VK_DOWN, KeyEvent.KEY_LOCATION_STANDARD, "KICK");
+        registrarTecla(2, KeyEvent.VK_CONTROL, KeyEvent.KEY_LOCATION_RIGHT, "POWER");
+
         setFocusable(true);
         addKeyListener(new Keyboard());
         addFocusListener(new FocusAdapter() {
@@ -76,7 +75,6 @@ final class MatchP extends JPanel {
         });
     }
 
-    /** Arranca el ciclo del partido ya iniciado en la fachada y toma el teclado. */
     void iniciar() {
         marcador.rotular();
         cancha.entrar();
@@ -85,12 +83,10 @@ final class MatchP extends JPanel {
         requestFocusInWindow();
     }
 
-    /** Detiene el ciclo del partido. */
     void detener() {
         temporizador.stop();
     }
 
-    /** Reanuda el partido pausado y recupera el teclado. */
     void reanudarPartido() {
         try {
             modelo.reanudar();
@@ -100,19 +96,17 @@ final class MatchP extends JPanel {
         }
     }
 
-    /** Abandona el partido en curso y vuelve al menu. */
     void abandonar() {
         temporizador.stop();
         ventana.mostrarMenu();
     }
 
-    /**
-     * Un cuadro: avanza el dominio el tiempo real transcurrido, refresca y detecta
-     * el final.
-     */
     private void avanzar() {
         long ahora = System.nanoTime();
-        double segundos = Math.min((ahora - ultimoNano) / NANOS_POR_SEGUNDO, MAX_SEGUNDOS_CUADRO);
+        double segundos = (ahora - ultimoNano) / NANOS_POR_SEGUNDO;
+        if (segundos > MAX_SEGUNDOS_CUADRO) {
+            segundos = MAX_SEGUNDOS_CUADRO;
+        }
         ultimoNano = ahora;
         try {
             modelo.actualizarTick(segundos);
@@ -146,20 +140,11 @@ final class MatchP extends JPanel {
         }
     }
 
-    /**
-     * Asigna a un jugador, en el orden de {@link #ACCIONES}, las teclas indicadas.
-     */
-    private void asignarJugador(int jugador, int... codigos) {
-        for (int i = 0; i < ACCIONES.length; i++) {
-            teclas.put(codigos[i], new PlayerKey(jugador, ACCIONES[i]));
-        }
+    private void registrarTecla(int jugador, int codigoTecla, int ubicacion, String accion) {
+        teclas.put(ranuraTecla(codigoTecla, ubicacion), new PlayerKey(jugador, accion));
     }
 
-    private static int teclaEstandar(int codigoTecla) {
-        return ranuraTecla(codigoTecla, KeyEvent.KEY_LOCATION_STANDARD);
-    }
-
-    /** Combina tecla y ubicacion: distingue el Ctrl derecho del izquierdo. */
+    // Combina código y ubicación para distinguir Ctrl derecho del izquierdo
     private static int ranuraTecla(int codigoTecla, int ubicacion) {
         return codigoTecla * RANGO_UBICACION + ubicacion;
     }

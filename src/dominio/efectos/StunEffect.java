@@ -1,7 +1,7 @@
 package dominio.efectos;
 
 /**
- * Aturdimiento: impide moverse, saltar y patear durante 3 segundos.
+ * Efecto de aturdimiento que impide actuar durante 3 segundos.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

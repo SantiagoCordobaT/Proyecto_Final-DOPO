@@ -1,7 +1,7 @@
 package dominio.efectos;
 
 /**
- * Reducción: divide a la mitad el tamaño y el hitbox durante 6 segundos.
+ * Efecto que reduce a la mitad el tamaño y el hitbox durante 6 segundos.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

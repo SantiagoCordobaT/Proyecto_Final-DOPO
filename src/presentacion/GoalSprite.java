@@ -6,6 +6,12 @@ import java.awt.Graphics2D;
 import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
 
+/**
+ * Dibuja los dos arcos de la cancha con su red, travesaño y poste.
+ *
+ * @author Santiago Cordoba - Camilo Rivas
+ * @version 1.0
+ */
 final class GoalSprite implements Actor {
 
     private final HeadSoccer modelo;
@@ -14,9 +20,6 @@ final class GoalSprite implements Actor {
 
     GoalSprite(HeadSoccer modelo) {
         this.modelo = modelo;
-    }
-
-    void sacudirCerca(double x) {
     }
 
     @Override
@@ -47,7 +50,10 @@ final class GoalSprite implements Actor {
             g.setColor(Color.WHITE);
             g.fillRect(izquierda, arriba, ancho, grosor);
 
-            int posteX = bocaDerecha ? izquierda + ancho - grosor : izquierda;
+            int posteX = izquierda;
+            if (bocaDerecha) {
+                posteX = izquierda + ancho - grosor;
+            }
             g.fillRect(posteX, arriba, grosor, alto);
 
             g.setColor(Color.GRAY);

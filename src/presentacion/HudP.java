@@ -12,8 +12,8 @@ import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Marcador del partido: placa de cada jugador a los lados y, en el centro, el
- * estado del partido (reloj, meta o balones), el tanteador y la ayuda de pausa.
+ * Barra superior del partido que muestra la placa de cada jugador, el estado
+ * del partido, los goles y el aviso de pausa.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -32,7 +32,6 @@ final class HudP extends JPanel {
     private final JLabel ayuda;
     private double destello;
 
-    /** @param modelo Fachada del dominio. */
     HudP(HeadSoccer modelo) {
         super(new GridLayout(1, 3));
         Resources recursos = Resources.obtenerInstancia();
@@ -52,28 +51,27 @@ final class HudP extends JPanel {
         add(derecha);
     }
 
-    /** Rotula la ayuda del marcador en el idioma actual. */
     void rotular() {
         ayuda.setText(texto("match.hint"));
     }
 
-    /**
-     * Actualiza todo el marcador con el estado actual del partido; el tanteador
-     * destella un instante cada vez que cambia.
-     *
-     * @param segundos Segundos reales transcurridos desde el cuadro anterior.
-     * @throws POOBSoccerException Si no hay un partido iniciado.
-     */
     void refrescar(double segundos) throws POOBSoccerException {
         String actual = modelo.obtenerGolesJugador(1) + SEPARADOR_MARCADOR + modelo.obtenerGolesJugador(2);
         if (!actual.equals(marcador.getText())) {
             destello = SEGUNDOS_DESTELLO;
             marcador.setText(actual);
         }
-        destello = Math.max(0.0, destello - segundos);
-        marcador.setForeground(destello > 0.0 ? Resources.LISTO : Resources.TEXTO);
-        izquierda.refrescar(segundos);
-        derecha.refrescar(segundos);
+        destello -= segundos;
+        if (destello < 0.0) {
+            destello = 0.0;
+        }
+        if (destello > 0.0) {
+            marcador.setForeground(Resources.LISTO);
+        } else {
+            marcador.setForeground(Resources.TEXTO);
+        }
+        izquierda.refrescar();
+        derecha.refrescar();
         estado.setText(modelo.obtenerEstadoPartido());
     }
 }

@@ -1,7 +1,7 @@
 package dominio.modalidades;
 
 /**
- * Jugador vs Jugador: ambos jugadores controlados por teclado.
+ * Modalidad donde los dos jugadores usan el teclado.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

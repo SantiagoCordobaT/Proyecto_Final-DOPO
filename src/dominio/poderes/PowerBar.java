@@ -3,8 +3,8 @@ package dominio.poderes;
 import dominio.personajes.Character;
 
 /**
- * Barra de poder de un personaje: va de 0.0 a 1.0, carga con el tiempo según
- * el nivel y se descarga cuando dispara el poder en una patada.
+ * Lleva la carga del poder de un personaje (de 0.0 a 1.0) y lo dispara al
+ * patear cuando está armado.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -22,7 +22,6 @@ public class PowerBar {
         this.nivel = nivel;
     }
 
-    /** Suma carga según el tiempo y el nivel sin pasar de 1.0. */
     public void recargar(double segundosTranscurridos) {
         if (segundosTranscurridos <= 0.0 || carga >= 1.0) {
             return;
@@ -33,14 +32,12 @@ public class PowerBar {
         }
     }
 
-    /** Arma el poder solo si la barra ya está completa (1.0). */
     public void armar() {
         if (carga >= 1.0) {
             armado = true;
         }
     }
 
-    /** Aplica el poder al oponente si estaba armado y vacía la barra. */
     public void dispararSobre(Character oponente) {
         if (!armado) {
             return;

@@ -9,8 +9,8 @@ import dominio.personajes.Character;
 import dominio.personajes.CharacterCatalog;
 
 /**
- * Simulación de un partido: cancha, balón, jugadores con sus controladores
- * y reglas de MatchType.
+ * Controla un partido en curso con la cancha, el balón, los dos jugadores y las
+ * reglas del modo elegido.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -44,10 +44,6 @@ final class Match {
         tipo.iniciar();
     }
 
-    /**
-     * Avanza personajes con el tiempo real y el balón en pasos fijos de 1/60 s
-     * para que no cambie su velocidad según los FPS del equipo.
-     */
     void actualizarTick(double segundosTranscurridos) throws POOBSoccerException {
         if (segundosTranscurridos < 0) {
             throw new POOBSoccerException(POOBSoccerException.TIEMPO_INVALIDO);
@@ -59,6 +55,7 @@ final class Match {
             controladores[i].controlar(jugadores[i], balon);
             jugadores[i].actualizar(segundosTranscurridos);
         }
+        // El balón avanza en pasos de 1/60 s para que no dependa de los FPS
         tiempoBalon += segundosTranscurridos;
         while (tiempoBalon >= PASO_BALON) {
             tiempoBalon -= PASO_BALON;
@@ -79,10 +76,6 @@ final class Match {
         cancha.mantenerBalonDentro(balon);
     }
 
-    /**
-     * Si patea queda como último pateador; si solo toca un balón rápido de otro, se
-     * aturde.
-     */
     private void resolverContacto(Character personaje, Character oponente) {
         if (personaje.intentarPatear(balon, oponente)) {
             ultimoPateador = personaje;
@@ -91,6 +84,7 @@ final class Match {
         if (!personaje.toca(balon)) {
             return;
         }
+        // Si recibe un balonazo fuerte del otro jugador, queda aturdido
         if (personaje != ultimoPateador && balon.esGolpeFuerte()) {
             personaje.aturdir();
             balon.frenar();
@@ -109,17 +103,13 @@ final class Match {
     }
 
     private void reiniciarJugada() {
-        for (Character jugador : jugadores) {
-            jugador.reiniciarJugada();
+        for (int i = 0; i < jugadores.length; i++) {
+            jugadores[i].reiniciarJugada();
         }
         cancha.soltarBalon(balon);
         ultimoPateador = null;
     }
 
-    /**
-     * Supervivencia: entra el siguiente rival y el marcador del jugador 1 vuelve a
-     * cero.
-     */
     private void reemplazarRival() throws POOBSoccerException {
         jugadores[JUGADOR_DERECHO] = rivales.siguienteDespuesDe(jugadores[JUGADOR_DERECHO]);
         Side.RIGHT.ubicar(jugadores[JUGADOR_DERECHO]);
@@ -132,8 +122,8 @@ final class Match {
     }
 
     void soltarTodo() {
-        for (Controller controlador : controladores) {
-            controlador.soltarTodo();
+        for (int i = 0; i < controladores.length; i++) {
+            controladores[i].soltarTodo();
         }
     }
 
@@ -149,7 +139,6 @@ final class Match {
         controladores[indiceJugador(numero)].soltar(accion);
     }
 
-    /** Convierte jugador 1 o 2 en índice 0 o 1 validando el rango. */
     static int indiceJugador(int numero) throws POOBSoccerException {
         if (numero < 1 || numero > JUGADORES) {
             throw new POOBSoccerException(POOBSoccerException.JUGADOR_INVALIDO);

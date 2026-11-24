@@ -3,7 +3,7 @@ package dominio.modalidades;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Lista con las tres modalidades de juego en el orden del menú.
+ * Agrupa las tres modalidades disponibles en el menú principal.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

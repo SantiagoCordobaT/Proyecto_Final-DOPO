@@ -4,9 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Tabla de textos de la interfaz en los idiomas disponibles (Singleton): toda
- * la
- * vista comparte un unico idioma activo.
+ * Guarda los textos de la interfaz en español e inglés y el idioma activo.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -17,7 +15,7 @@ final class Texts {
 
     private static Texts instancia;
 
-    private final Map<String, String[]> tabla = new HashMap<String, String[]>();
+    private final Map<String, String[]> tabla = new HashMap<>();
     private int idioma;
 
     private Texts() {
@@ -71,7 +69,6 @@ final class Texts {
         registrar("error.title", "Error", "Error");
     }
 
-    /** @return La unica instancia de la tabla de textos. */
     static Texts obtenerInstancia() {
         if (instancia == null) {
             instancia = new Texts();
@@ -79,25 +76,18 @@ final class Texts {
         return instancia;
     }
 
-    /**
-     * @param clave Clave del texto.
-     * @return El texto en el idioma activo.
-     */
     static String texto(String clave) {
         return obtenerInstancia().traducir(clave);
     }
 
-    /** @return Nombres de los idiomas disponibles. */
     String[] obtenerIdiomas() {
         return IDIOMAS.clone();
     }
 
-    /** @return Indice del idioma activo. */
     int obtenerIdioma() {
         return idioma;
     }
 
-    /** @param idioma Indice del idioma que pasa a estar activo. */
     void establecerIdioma(int idioma) {
         this.idioma = idioma;
     }

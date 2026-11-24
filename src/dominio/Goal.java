@@ -1,8 +1,7 @@
 package dominio;
 
 /**
- * Arco lateral de la cancha: detecta goles completos y resuelve rebotes en el
- * borde superior (travesaño).
+ * Modela un arco lateral para detectar goles y rebotes en el travesaño.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -38,9 +37,6 @@ class Goal {
         return balon.estaDentroDe(izquierdaX, BORDE_ABAJO, derechaX, Field.SUELO_Y);
     }
 
-    /**
-     * Rebota el balón por arriba, por debajo o de frente en la punta del travesaño.
-     */
     void resolverBorde(Ball balon) {
         if (!balon.seSolapaCon(izquierdaX, BORDE_ARRIBA, derechaX, BORDE_ABAJO)) {
             return;

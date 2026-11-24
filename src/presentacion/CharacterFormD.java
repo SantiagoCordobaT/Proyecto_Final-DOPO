@@ -18,8 +18,7 @@ import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Dialogo sencillo para crear o editar un personaje personalizado; todas las
- * validaciones de reglas las realiza la fachada {@link HeadSoccer}.
+ * Formulario para crear o editar un personaje personalizado.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -75,12 +74,10 @@ final class CharacterFormD extends StreetDialog {
         });
     }
 
-    /** Abre el formulario vacio para crear un personaje nuevo. */
     static CharacterFormD paraCrear(Frame dueno, HeadSoccer modelo) {
         return new CharacterFormD(dueno, modelo, texto("editor.createTitle"), NUEVO);
     }
 
-    /** Abre el formulario precargado para editar un personaje existente. */
     static CharacterFormD paraEditar(Frame dueno, HeadSoccer modelo, int indice) throws POOBSoccerException {
         CharacterFormD dialogo = new CharacterFormD(dueno, modelo, texto("editor.editTitle"), indice);
         dialogo.nombre.setText(modelo.obtenerNombresPersonajes()[indice]);
@@ -93,7 +90,6 @@ final class CharacterFormD extends StreetDialog {
         return dialogo;
     }
 
-    /** @return Indice creado/editado, o -1 si el usuario cancelo. */
     int obtenerIndiceResultado() {
         return indiceResultado;
     }
@@ -108,7 +104,7 @@ final class CharacterFormD extends StreetDialog {
     }
 
     private static int valor(JSpinner selector) {
-        return ((Integer) selector.getValue()).intValue();
+        return (Integer) selector.getValue();
     }
 
     private void guardar() {

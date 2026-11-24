@@ -3,7 +3,7 @@ package dominio.poderes;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Poderes disponibles para asignar al crear o editar un personaje.
+ * Lista de poderes que se pueden asignar al crear o editar un personaje.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

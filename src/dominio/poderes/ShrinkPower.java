@@ -4,7 +4,7 @@ import dominio.efectos.ShrinkEffect;
 import dominio.personajes.Character;
 
 /**
- * Poder de reducción: encoge al oponente a la mitad de su tamaño.
+ * Poder que reduce al oponente a la mitad de su tamaño.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

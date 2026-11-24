@@ -18,9 +18,8 @@ import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Dialogo que elige la modalidad y el tipo de partido. Solo reenvia la
- * seleccion
- * a la fachada; las combinaciones invalidas las rechaza el dominio.
+ * Diálogo para escoger la modalidad y el tipo de partido antes de elegir
+ * personajes.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -34,10 +33,6 @@ final class GameModeD extends StreetDialog {
     private final JList<String> tiposPartido;
     private final JButton seleccionar;
 
-    /**
-     * @param ventana Ventana principal.
-     * @param modelo  Fachada del dominio.
-     */
     GameModeD(HeadSoccerGUI ventana, HeadSoccer modelo) {
         super(ventana, texto("setup.title"));
         this.ventana = ventana;

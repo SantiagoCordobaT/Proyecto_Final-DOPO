@@ -10,8 +10,8 @@ import dominio.poderes.ShrinkPower;
 import dominio.poderes.StunPower;
 
 /**
- * Catálogo de personajes jugables: inicia con cuatro personajes base y permite
- * crear, editar, eliminar y rotar rivales en Supervivencia.
+ * Administra los personajes disponibles del juego, incluyendo creación, edición,
+ * eliminación y rotación de rivales en Supervivencia.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -45,20 +45,17 @@ public class CharacterCatalog {
         return personajes.get(indice);
     }
 
-    /** Crea un personaje nuevo verificando estadísticas válidas y nombre único. */
     public void crear(String nombre, String pais, int velocidad, int salto, int fuerza, int nivelPoder, Power poder)
             throws POOBSoccerException {
         personajes.add(construirPersonaje(nombre, pais, velocidad, salto, fuerza, nivelPoder, poder, -1));
     }
 
-    /** Reemplaza un personaje existente validando índice, datos y nombre único. */
     public void editar(int indice, String nombre, String pais, int velocidad, int salto, int fuerza, int nivelPoder,
             Power poder) throws POOBSoccerException {
         validarIndice(indice);
         personajes.set(indice, construirPersonaje(nombre, pais, velocidad, salto, fuerza, nivelPoder, poder, indice));
     }
 
-    /** Elimina un personaje dejando al menos dos disponibles para jugar. */
     public void eliminarPersonaje(int indice) throws POOBSoccerException {
         if (personajes.size() <= MINIMO_PERSONAJES) {
             throw new POOBSoccerException(POOBSoccerException.MINIMO_PERSONAJES);
@@ -69,8 +66,14 @@ public class CharacterCatalog {
 
     private Character construirPersonaje(String nombre, String pais, int velocidad, int salto, int fuerza,
             int nivelPoder, Power poder, int indiceExcluido) throws POOBSoccerException {
-        String nombreLimpio = nombre == null ? null : nombre.trim();
-        String paisLimpio = pais == null ? null : pais.trim();
+        String nombreLimpio = nombre;
+        if (nombreLimpio != null) {
+            nombreLimpio = nombreLimpio.trim();
+        }
+        String paisLimpio = pais;
+        if (paisLimpio != null) {
+            paisLimpio = paisLimpio.trim();
+        }
         Character nuevo = new Character(nombreLimpio, paisLimpio, velocidad, salto, fuerza, nivelPoder, poder);
         for (int i = 0; i < personajes.size(); i++) {
             if (i != indiceExcluido && personajes.get(i).obtenerNombre().equalsIgnoreCase(nuevo.obtenerNombre())) {
@@ -86,9 +89,6 @@ public class CharacterCatalog {
         }
     }
 
-    /**
-     * Devuelve una copia del siguiente personaje en la lista (circular al final).
-     */
     public Character siguienteDespuesDe(Character actual) throws POOBSoccerException {
         int indiceActual = 0;
         for (int i = 0; i < personajes.size(); i++) {

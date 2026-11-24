@@ -3,9 +3,8 @@ package dominio.partidos;
 import dominio.modalidades.GameMode;
 
 /**
- * Partido Supervivencia (solo Jugador vs Máquina).
- * Ambos inician con 3 balones; quien recibe gol pierde uno. Si cae el rival
- * sube la racha y entra otro oponente; si cae el jugador 1 termina la serie.
+ * Modo Supervivencia para Jugador vs Máquina. Cada lado empieza con 3 balones
+ * y al quedarse sin balones el rival rota y suma la racha.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

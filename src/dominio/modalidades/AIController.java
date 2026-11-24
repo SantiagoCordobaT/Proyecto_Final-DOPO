@@ -4,8 +4,8 @@ import dominio.Ball;
 import dominio.personajes.Character;
 
 /**
- * Controlador automático de la máquina: persigue el balón, salta si está
- * alto, patea cuando entra en rango y arma el poder en cuanto se llena.
+ * Controla un personaje controlado por la máquina persiguiendo el balón,
+ * saltando cuando está alto y pateando al acercarse.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

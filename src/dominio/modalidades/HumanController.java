@@ -4,7 +4,7 @@ import dominio.Ball;
 import dominio.personajes.Character;
 
 /**
- * Controlador de jugador humano según las teclas mantenidas en este turno.
+ * Mueve al personaje según las teclas que el jugador tenga presionadas.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

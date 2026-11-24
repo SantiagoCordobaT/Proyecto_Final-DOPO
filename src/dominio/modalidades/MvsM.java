@@ -1,7 +1,7 @@
 package dominio.modalidades;
 
 /**
- * Máquina vs Máquina: ambos jugadores controlados por IA.
+ * Modalidad donde ambos personajes son controlados por la máquina.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0

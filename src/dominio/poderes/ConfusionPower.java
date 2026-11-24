@@ -4,7 +4,7 @@ import dominio.efectos.ConfusionEffect;
 import dominio.personajes.Character;
 
 /**
- * Poder de confusión: invierte los controles horizontales del oponente.
+ * Poder que invierte los controles horizontales del oponente.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
