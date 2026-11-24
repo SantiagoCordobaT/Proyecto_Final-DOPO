@@ -1,7 +1,10 @@
 package dominio.partidos;
 
+import dominio.personajes.Character;
+import dominio.personajes.CharacterCatalog;
+
 /**
- * Reglas del partido por goles, donde gana el primero en llegar a la meta (3, 5 o 7).
+ * Reglas del partido por goles: gana el primero en alcanzar la meta (3, 5 o 7).
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -16,10 +19,12 @@ class GoalMatch extends MatchType {
     }
 
     @Override
-    public void golAnotado(int anotador, int golesAnotador) {
+    public Character registrarGol(int anotador, int golesAnotador, Character rivalActual,
+            CharacterCatalog catalogo) {
         if (golesAnotador >= metaGoles) {
             finalizar(anotador);
         }
+        return null;
     }
 
     @Override

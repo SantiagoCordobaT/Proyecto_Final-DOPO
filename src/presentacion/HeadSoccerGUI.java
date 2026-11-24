@@ -17,7 +17,7 @@ import dominio.excepciones.POOBSoccerException;
 
 /**
  * Ventana principal del juego. Administra el menú, la pantalla del partido y
- * los diálogos usando únicamente la fachada HeadSoccer.
+ * los diálogos usando la instancia de HeadSoccer.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -34,6 +34,9 @@ public final class HeadSoccerGUI extends JFrame {
     private final JPanel baraja = new JPanel(tarjetas);
     private final MainMenuP menu;
     private final MatchP partido;
+
+    private int modoElegido;
+    private int tipoElegido;
 
     private HeadSoccerGUI(HeadSoccer modelo) {
         super(TITULO);
@@ -66,12 +69,17 @@ public final class HeadSoccerGUI extends JFrame {
     }
 
     void abrirModosJuego() {
-        modelo.nuevoJuego();
         new GameModeD(this, modelo).abrir();
     }
 
+    void abrirSeleccionPersonajes(int indiceModo, int indiceTipo) {
+        this.modoElegido = indiceModo;
+        this.tipoElegido = indiceTipo;
+        abrirSeleccionPersonajes();
+    }
+
     void abrirSeleccionPersonajes() {
-        new CharacterSelectD(this, modelo).abrir();
+        new CharacterSelectD(this, modelo, modoElegido, tipoElegido).abrir();
     }
 
     void abrirConfiguracion() {
@@ -94,7 +102,7 @@ public final class HeadSoccerGUI extends JFrame {
 
     private static void iniciarInterfaz() {
         try {
-            new HeadSoccerGUI(HeadSoccer.obtenerInstancia()).setVisible(true);
+            new HeadSoccerGUI(new HeadSoccer()).setVisible(true);
         } catch (POOBSoccerException e) {
             reportarError(null, e);
         }

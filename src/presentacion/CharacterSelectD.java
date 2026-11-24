@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JPanel;
 
 import dominio.HeadSoccer;
+import dominio.MatchSetup;
 import dominio.excepciones.POOBSoccerException;
 
 /**
@@ -21,13 +22,17 @@ final class CharacterSelectD extends BaseDialog {
 
     private final HeadSoccerGUI ventana;
     private final HeadSoccer modelo;
+    private final int indiceModo;
+    private final int indiceTipo;
     private final CharacterCard primero;
     private final CharacterCard segundo;
 
-    CharacterSelectD(HeadSoccerGUI ventana, HeadSoccer modelo) {
+    CharacterSelectD(HeadSoccerGUI ventana, HeadSoccer modelo, int indiceModo, int indiceTipo) {
         super(ventana, Texts.t("Escoge tu personaje", "Choose your character"));
         this.ventana = ventana;
         this.modelo = modelo;
+        this.indiceModo = indiceModo;
+        this.indiceTipo = indiceTipo;
 
         primero = new CharacterCard(this, modelo, 1, 0);
         segundo = new CharacterCard(this, modelo, 2, 1);
@@ -107,9 +112,9 @@ final class CharacterSelectD extends BaseDialog {
 
     private void jugar() {
         try {
-            modelo.seleccionarJugador(1, primero.obtenerIndiceSeleccionado());
-            modelo.seleccionarJugador(2, segundo.obtenerIndiceSeleccionado());
-            modelo.iniciarPartido();
+            MatchSetup configuracion = new MatchSetup(indiceModo, indiceTipo,
+                    primero.obtenerIndiceSeleccionado(), segundo.obtenerIndiceSeleccionado());
+            modelo.iniciarPartido(configuracion);
             alCerrar();
             ventana.mostrarPartido();
         } catch (POOBSoccerException e) {

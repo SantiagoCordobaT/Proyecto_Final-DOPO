@@ -1,10 +1,13 @@
 package dominio.partidos;
 
+import dominio.excepciones.POOBSoccerException;
 import dominio.modalidades.GameMode;
+import dominio.personajes.Character;
+import dominio.personajes.CharacterCatalog;
 
 /**
- * Modo Supervivencia para Jugador vs Máquina. Cada lado empieza con 3 balones
- * y al quedarse sin balones el rival rota y suma la racha.
+ * Modo Supervivencia (solo Jugador vs Máquina). Cuando la máquina se queda sin
+ * balones, este tipo de partido entrega directamente el siguiente rival.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -15,7 +18,6 @@ class SurvivalMatch extends MatchType {
     private int balonesJugador;
     private int balonesRival;
     private int racha;
-    private boolean cambioRivalPendiente;
 
     SurvivalMatch() {
         super("Supervivencia");
@@ -32,20 +34,20 @@ class SurvivalMatch extends MatchType {
         balonesJugador = BALONES_INICIALES;
         balonesRival = BALONES_INICIALES;
         racha = 0;
-        cambioRivalPendiente = false;
     }
 
     @Override
-    public void golAnotado(int anotador, int golesAnotador) {
+    public Character registrarGol(int anotador, int golesAnotador, Character rivalActual,
+            CharacterCatalog catalogo) throws POOBSoccerException {
         if (estaTerminado()) {
-            return;
+            return null;
         }
         if (anotador == 1) {
             balonesRival--;
             if (balonesRival == 0) {
                 racha++;
                 balonesRival = BALONES_INICIALES;
-                cambioRivalPendiente = true;
+                return catalogo.siguienteDespuesDe(rivalActual);
             }
         } else {
             balonesJugador--;
@@ -53,15 +55,7 @@ class SurvivalMatch extends MatchType {
                 finalizar(JUGADOR_DOS);
             }
         }
-    }
-
-    @Override
-    public boolean consumirCambioRival() {
-        if (!cambioRivalPendiente) {
-            return false;
-        }
-        cambioRivalPendiente = false;
-        return true;
+        return null;
     }
 
     @Override

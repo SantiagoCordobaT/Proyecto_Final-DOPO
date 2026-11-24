@@ -126,7 +126,7 @@ public class CatalogsTest {
 
     @Test
     public void fichaPersonajeDesdeFachada() throws POOBSoccerException {
-        HeadSoccer juego = HeadSoccer.obtenerInstancia();
+        HeadSoccer juego = new HeadSoccer();
         CharacterInfo ficha = juego.obtenerFichaPersonaje(0);
         assertEquals("Jacob", ficha.obtenerNombre());
         assertEquals("Canadá", ficha.obtenerPais());

@@ -1,8 +1,8 @@
 package dominio;
 
 /**
- * Balón del partido. Se mueve por impulsos discretos y detecta choques usando
- * su caja alrededor del centro.
+ * Balón del partido. Se mueve con velocidad continua en píxeles por segundo,
+ * gravedad y rozamiento horizontal.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -10,92 +10,82 @@ package dominio;
 public class Ball {
 
     static final double RADIO = 15.0;
-    private static final double RAPIDEZ_X = 6.0;
-    private static final double RAPIDEZ_Y = 5.0;
-    private static final int PATADA_X = 18;
-    private static final int PATADA_Y = 8;
-    private static final int PATADA_ALTA_X = 10;
-    private static final int PATADA_ALTA_Y = 12;
-    private static final int REBOTE_ARRIBA = 12;
-    private static final int REBOTE_LADO = 10;
-    private static final int EMPUJE = 8;
-    private static final int UMBRAL_GOLPE_FUERTE = 40;
+    private static final double GRAVEDAD = 1150.0;
+    private static final double ROZAMIENTO_X = 280.0;
+    private static final double REBOTE_SUELO = 0.55;
+    private static final double REBOTE_PARED = 0.85;
+    private static final double UMBRAL_GOLPE_FUERTE = 480.0;
 
     private double x;
     private double y;
-    private double velocidadX = RAPIDEZ_X;
-    private int impulsoDerecha;
-    private int impulsoIzquierda;
-    private int impulsoArriba;
+    private double vx;
+    private double vy;
 
     void ubicarEn(double x, double y) {
         this.x = x;
         this.y = y;
-        impulsoDerecha = 0;
-        impulsoIzquierda = 0;
-        impulsoArriba = 0;
-        velocidadX = RAPIDEZ_X;
+        this.vx = 0.0;
+        this.vy = 0.0;
     }
 
-    void actualizarFisica(double sueloY, double techoY) {
-        if (impulsoDerecha > 0) {
-            x += velocidadX;
-            impulsoDerecha--;
-            impulsoIzquierda = 0;
-        } else if (impulsoIzquierda > 0) {
-            x += velocidadX;
-            impulsoIzquierda--;
-            impulsoDerecha = 0;
+    void avanzar(double segundos, double sueloY, double techoY) {
+        if (segundos <= 0.0) {
+            return;
         }
+        vy += GRAVEDAD * segundos;
+        x += vx * segundos;
+        y += vy * segundos;
 
-        boolean subio = false;
-        if (impulsoArriba > 0) {
-            subio = true;
-            impulsoArriba--;
-            y -= RAPIDEZ_Y;
-        }
+        aplicarRozamiento(segundos);
+
         if (y - RADIO <= techoY) {
             y = techoY + RADIO;
-            impulsoArriba = 0;
-        }
-        if (!subio && y + RADIO < sueloY) {
-            y += RAPIDEZ_Y;
-            if (y > sueloY - RADIO) {
-                y = sueloY - RADIO;
+            if (vy < 0.0) {
+                vy = -vy * 0.5;
             }
+        }
+        if (y + RADIO >= sueloY) {
+            y = sueloY - RADIO;
+            if (Math.abs(vy) > 90.0) {
+                vy = -vy * REBOTE_SUELO;
+            } else {
+                vy = 0.0;
+            }
+        }
+    }
+
+    private void aplicarRozamiento(double segundos) {
+        double perdida = ROZAMIENTO_X * segundos;
+        if (Math.abs(vx) <= perdida) {
+            vx = 0.0;
+        } else if (vx > 0.0) {
+            vx -= perdida;
+        } else {
+            vx += perdida;
         }
     }
 
     void rebotarEnParedes(double paredIzquierdaX, double paredDerechaX) {
         if (x - RADIO <= paredIzquierdaX) {
             x = paredIzquierdaX + RADIO;
-            velocidadX = Math.abs(velocidadX);
-            if (impulsoIzquierda > 0) {
-                impulsoDerecha = impulsoIzquierda;
-                impulsoIzquierda = 0;
-            }
+            vx = Math.abs(vx) * REBOTE_PARED;
         }
         if (x + RADIO >= paredDerechaX) {
             x = paredDerechaX - RADIO;
-            velocidadX = -Math.abs(velocidadX);
-            if (impulsoDerecha > 0) {
-                impulsoIzquierda = impulsoDerecha;
-                impulsoDerecha = 0;
-            }
+            vx = -Math.abs(vx) * REBOTE_PARED;
         }
     }
 
     public void patear(int fuerza, int direccion) {
-        establecerImpulsoHorizontal(direccion, PATADA_X * fuerza);
-        impulsoArriba = PATADA_Y * fuerza;
+        vx = direccion * (260.0 + fuerza * 85.0);
+        vy = -(110.0 + fuerza * 20.0);
     }
 
     public void patearArriba(int fuerza, int direccion) {
-        establecerImpulsoHorizontal(direccion, PATADA_ALTA_X * fuerza);
-        impulsoArriba = PATADA_ALTA_Y * fuerza;
+        vx = direccion * (140.0 + fuerza * 45.0);
+        vy = -(310.0 + fuerza * 45.0);
     }
 
-    // Colisión simple de rectángulos entre la caja del balón y un área dada
     public boolean seSolapaCon(double izquierda, double arriba, double derecha, double abajo) {
         return x + RADIO >= izquierda && x - RADIO <= derecha
                 && y + RADIO >= arriba && y - RADIO <= abajo;
@@ -116,42 +106,39 @@ public class Ball {
 
     public void rebotarArriba(double superficieY) {
         y = superficieY - RADIO;
-        impulsoArriba = REBOTE_ARRIBA;
+        vy = -220.0;
+    }
+
+    void rebotarSobreTravesano(double superficieY, int haciaCancha) {
+        rebotarArriba(superficieY);
+        if (Math.abs(vx) < 140.0) {
+            vx = haciaCancha * 140.0;
+        }
     }
 
     void rebotarAbajo(double superficieY) {
         y = superficieY + RADIO;
-        impulsoArriba = 0;
+        if (vy < 0.0) {
+            vy = 0.0;
+        }
     }
 
     void rebotarDeLado(double bordeX, int direccion) {
         x = bordeX + direccion * RADIO;
-        int impulsoRebote = direccion > 0 ? impulsoIzquierda : impulsoDerecha;
-        if (impulsoRebote < REBOTE_LADO) {
-            impulsoRebote = REBOTE_LADO;
+        double rapidez = Math.abs(vx) * REBOTE_PARED;
+        if (rapidez < 220.0) {
+            rapidez = 220.0;
         }
-        establecerImpulsoHorizontal(direccion, impulsoRebote);
+        vx = direccion * rapidez;
     }
 
     public void empujarDeLado(double bordeX, int direccion) {
         x = bordeX + direccion * RADIO;
-        int impulsoEmpuje = direccion > 0 ? impulsoDerecha : impulsoIzquierda;
-        if (impulsoEmpuje < EMPUJE) {
-            impulsoEmpuje = EMPUJE;
+        double rapidez = Math.abs(vx);
+        if (rapidez < 180.0) {
+            rapidez = 180.0;
         }
-        establecerImpulsoHorizontal(direccion, impulsoEmpuje);
-    }
-
-    private void establecerImpulsoHorizontal(int direccion, int impulso) {
-        if (direccion > 0) {
-            velocidadX = RAPIDEZ_X;
-            impulsoDerecha = impulso;
-            impulsoIzquierda = 0;
-        } else if (direccion < 0) {
-            velocidadX = -RAPIDEZ_X;
-            impulsoIzquierda = impulso;
-            impulsoDerecha = 0;
-        }
+        vx = direccion * rapidez;
     }
 
     public int ladoRespectoA(double referenciaX) {
@@ -159,13 +146,12 @@ public class Ball {
     }
 
     boolean esGolpeFuerte() {
-        return impulsoDerecha >= UMBRAL_GOLPE_FUERTE || impulsoIzquierda >= UMBRAL_GOLPE_FUERTE;
+        return Math.abs(vx) >= UMBRAL_GOLPE_FUERTE;
     }
 
     void frenar() {
-        impulsoDerecha /= 2;
-        impulsoIzquierda /= 2;
-        impulsoArriba /= 2;
+        vx *= 0.5;
+        vy *= 0.5;
     }
 
     public double obtenerX() {

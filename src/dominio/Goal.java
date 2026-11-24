@@ -42,7 +42,7 @@ class Goal {
             return;
         }
         if (balon.estaPorEncimaDe(BORDE_ARRIBA)) {
-            balon.rebotarArriba(BORDE_ARRIBA);
+            balon.rebotarSobreTravesano(BORDE_ARRIBA, direccionBoca);
         } else if (balon.estaPorDebajoDe(BORDE_ABAJO)) {
             balon.rebotarAbajo(BORDE_ABAJO);
         } else {

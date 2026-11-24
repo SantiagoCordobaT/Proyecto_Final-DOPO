@@ -15,6 +15,7 @@ public class Field {
     private static final double TECHO_Y = 0.0;
     private static final double CENTRO_X = ANCHO / 2.0;
     private static final double CAIDA_BALON_Y = 60.0;
+
     private final Goal arcoIzquierdo;
     private final Goal arcoDerecho;
 
@@ -23,10 +24,10 @@ public class Field {
         this.arcoDerecho = new Goal(ANCHO, ANCHO - Goal.ANCHO, 1);
     }
 
-    void actualizarBalon(Ball balon) {
-        balon.actualizarFisica(SUELO_Y, TECHO_Y);
-        this.arcoIzquierdo.resolverBorde(balon);
-        this.arcoDerecho.resolverBorde(balon);
+    void actualizarBalon(Ball balon, double segundos) {
+        balon.avanzar(segundos, SUELO_Y, TECHO_Y);
+        arcoIzquierdo.resolverBorde(balon);
+        arcoDerecho.resolverBorde(balon);
     }
 
     void mantenerBalonDentro(Ball balon) {

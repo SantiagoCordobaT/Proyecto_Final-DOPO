@@ -79,10 +79,11 @@ final class GameModeD extends BaseDialog {
 
     private void seleccionar() {
         try {
-            modelo.seleccionarModo(modos.getSelectedIndex());
-            modelo.seleccionarTipoPartido(tiposPartido.getSelectedIndex());
+            int modo = modos.getSelectedIndex();
+            int tipo = tiposPartido.getSelectedIndex();
+            modelo.validarModoYTipo(modo, tipo);
             alCerrar();
-            ventana.abrirSeleccionPersonajes();
+            ventana.abrirSeleccionPersonajes(modo, tipo);
         } catch (POOBSoccerException e) {
             HeadSoccerGUI.reportarError(this, e);
         }

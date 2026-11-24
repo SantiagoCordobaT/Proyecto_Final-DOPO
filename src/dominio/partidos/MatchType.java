@@ -1,10 +1,13 @@
 package dominio.partidos;
 
+import dominio.excepciones.POOBSoccerException;
 import dominio.modalidades.GameMode;
+import dominio.personajes.Character;
+import dominio.personajes.CharacterCatalog;
 
 /**
- * Clase base para los tipos de partido. Lleva el tiempo transcurrido, el
- * ganador y si la partida ya terminó.
+ * Base para las reglas de los tipos de partido. Lleva el reloj, el ganador y si
+ * el encuentro ya terminó.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -28,20 +31,17 @@ public abstract class MatchType {
     }
 
     public void iniciar() {
-        this.terminado = false;
-        this.ganador = 0;
-        this.segundosTranscurridos = 0.0;
+        terminado = false;
+        ganador = 0;
+        segundosTranscurridos = 0.0;
     }
 
     public void avanzar(double segundos) {
         segundosTranscurridos += segundos;
     }
 
-    public abstract void golAnotado(int anotador, int golesAnotador);
-
-    public boolean consumirCambioRival() {
-        return false;
-    }
+    public abstract Character registrarGol(int anotador, int golesAnotador, Character rivalActual,
+            CharacterCatalog catalogo) throws POOBSoccerException;
 
     public abstract String obtenerTextoEstado();
 
@@ -63,15 +63,9 @@ public abstract class MatchType {
         }
         int minutos = segundos / 60;
         int resto = segundos % 60;
-        String textoMinutos = String.valueOf(minutos);
-        if (minutos < 10) {
-            textoMinutos = "0" + textoMinutos;
-        }
-        String textoSegundos = String.valueOf(resto);
-        if (resto < 10) {
-            textoSegundos = "0" + textoSegundos;
-        }
-        return textoMinutos + ":" + textoSegundos;
+        String m = minutos < 10 ? "0" + minutos : String.valueOf(minutos);
+        String s = resto < 10 ? "0" + resto : String.valueOf(resto);
+        return m + ":" + s;
     }
 
     public boolean estaTerminado() {

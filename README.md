@@ -14,7 +14,7 @@ El proyecto incluye:
 
 ## Mecánicas y reglas
 
-- **Movimiento y física:** Los personajes corren dentro de la cancha, saltan hasta una altura según su atributo de salto y patean al balón o al rival si están muy cerca. El balón se mueve por impulsos discretos y rebota contra paredes, suelo, techo y travesaños.
+- **Movimiento y física:** Los personajes corren dentro de la cancha, saltan hasta una altura según su atributo de salto y patean al balón o al rival si están muy cerca. El balón se mueve con velocidad continua, gravedad y rozamiento, rebotando contra paredes, suelo, techo y travesaños.
 - **Cabeza y patada:** Si el balón toca la parte superior de la cabeza, sale elevado hacia el campo rival (salvo si el jugador está aturdido o congelado, caso en el que solo rebota arriba).
 - **Goles:** Cuenta como gol cuando el balón entra por completo en un arco por debajo del travesaño (+1 punto al atacante, o +1 al rival si es autogol). Luego del gol ambos jugadores y el balón vuelven a su posición inicial.
 - **Aturdimiento:** Una patada cuerpo a cuerpo o recibir un balonazo muy fuerte del oponente deja al jugador aturdido por 3 segundos.
@@ -45,7 +45,7 @@ Cada personaje tiene 4 estadísticas de **1 a 5**: Velocidad, Salto, Fuerza y Po
 
 ## Arquitectura
 
-- `src/dominio/`: Fachada `HeadSoccer`, simulación `Match`, física (`Field`, `Goal`, `Ball`), resúmenes de solo lectura (`PlayerSummary`, `CharacterInfo`), personajes (`dominio.personajes`), modalidades (`dominio.modalidades`), reglas (`dominio.partidos`), poderes y efectos (`dominio.poderes`, `dominio.efectos`) y excepciones (`dominio.excepciones`).
+- `src/dominio/`: Fachada `HeadSoccer` con configuración en `MatchSetup`, simulación `Match`, contactos en `ContactResolver`, física (`Field`, `Goal`, `Ball`), resúmenes de solo lectura (`PlayerSummary`, `CharacterInfo`), personajes (`dominio.personajes`), modalidades (`dominio.modalidades`), reglas (`dominio.partidos`), poderes y efectos (`dominio.poderes`, `dominio.efectos`) y excepciones (`dominio.excepciones`).
 - `src/presentacion/`: Ventana principal `HeadSoccerGUI`, menú, diálogos sobre `BaseDialog`, utilidades visuales en `Style` y dibujo en Swing sin lógica de negocio.
 - `test/dominio/`: Pruebas unitarias separadas por módulo (`BallTest`, `CharacterTest`, `SurvivalMatchTest`, `CatalogsTest`, `HeadSoccerTest`).
 

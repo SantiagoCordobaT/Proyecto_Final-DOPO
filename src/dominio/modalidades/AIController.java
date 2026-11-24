@@ -1,22 +1,25 @@
 package dominio.modalidades;
 
 import dominio.Ball;
+import dominio.Field;
 import dominio.personajes.Character;
 
 /**
- * Controla un personaje controlado por la máquina persiguiendo el balón,
- * saltando cuando está alto y pateando al acercarse.
+ * Controla un personaje manejado por la máquina: se ubica detrás del balón para
+ * patearlo hacia el arco contrario y salta solo cuando el balón está alto en el
+ * mediocampo.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
 class AIController extends Controller {
 
-    private static final double DISTANCIA_DETRAS_BALON = 30.0;
+    private static final double DISTANCIA_DETRAS_BALON = 45.0;
     private static final double ZONA_MUERTA = 8.0;
-    private static final double RANGO_SALTO_X = 120.0;
-    private static final double MARGEN_BALON_ALTO = 20.0;
-    private static final double RANGO_PATADA = 100.0;
+    private static final double MARGEN_ARCO = 150.0;
+    private static final double RANGO_SALTO_X = 70.0;
+    private static final double MARGEN_BALON_ALTO = 55.0;
+    private static final double RANGO_PATADA = 95.0;
 
     @Override
     public void controlar(Character personaje, Ball balon) {
@@ -30,7 +33,8 @@ class AIController extends Controller {
             personaje.establecerDireccionMovimiento(0);
         }
 
-        if (balon.obtenerY() < personaje.obtenerBordeSuperior() - MARGEN_BALON_ALTO
+        boolean enMediocampo = balon.obtenerX() > MARGEN_ARCO && balon.obtenerX() < Field.ANCHO - MARGEN_ARCO;
+        if (enMediocampo && balon.obtenerY() < personaje.obtenerBordeSuperior() - MARGEN_BALON_ALTO
                 && Math.abs(balon.obtenerX() - personaje.obtenerX()) < RANGO_SALTO_X) {
             personaje.saltar();
         }
