@@ -532,7 +532,7 @@ public class HeadSoccerTest {
         double travesanoArriba = Field.SUELO_Y - Goal.ALTO;
         Ball balon = new Ball();
         balon.ubicarEn(Goal.ANCHO / 2.0, travesanoArriba - Ball.RADIO + 3.0);
-        arco.resolverTravesano(balon);
+        arco.resolverBorde(balon);
         assertEquals(travesanoArriba - Ball.RADIO, balon.obtenerY(), 1e-9);
     }
 
@@ -542,7 +542,7 @@ public class HeadSoccerTest {
         double centroTravesanoY = Field.SUELO_Y - Goal.ALTO + Goal.GROSOR_BORDE / 2.0;
         Ball balon = new Ball();
         balon.ubicarEn(Goal.ANCHO + 10.0, centroTravesanoY);
-        arco.resolverTravesano(balon);
+        arco.resolverBorde(balon);
         assertEquals(Goal.ANCHO + Ball.RADIO, balon.obtenerX(), 1e-9);
         assertEquals(centroTravesanoY, balon.obtenerY(), 1e-9);
     }

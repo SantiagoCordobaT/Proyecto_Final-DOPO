@@ -1,10 +1,10 @@
 package dominio;
 
 /**
- * Representa un arco lateral de la cancha con su travesano superior.
+ * Representa un arco lateral de la cancha con su borde superior.
  * Calcula los bordes horizontales segun si esta en la pared izquierda o
  * derecha,
- * detecta cuando entra un gol completo y resuelve los rebotes en el travesano.
+ * detecta cuando entra un gol completo y resuelve los rebotes en el borde.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -13,9 +13,9 @@ class Goal {
 
     /** Ancho horizontal del arco. */
     static final double ANCHO = 90.0;
-    /** Altura total del arco desde el suelo hasta lo alto del travesano. */
+    /** Altura total del arco desde el suelo hasta la parte superior del borde. */
     static final double ALTO = 140.0;
-    /** Grosor vertical del travesano. */
+    /** Grosor vertical del borde superior (travesano). */
     static final double GROSOR_BORDE = 10.0;
     private static final double BORDE_ARRIBA = Field.SUELO_Y - ALTO;
     private static final double BORDE_ABAJO = BORDE_ARRIBA + GROSOR_BORDE;
@@ -51,7 +51,7 @@ class Goal {
 
     /**
      * Comprueba si todo el balon quedo dentro del area valida del arco
-     * (entre sus bordes laterales y por debajo del travesano hasta el suelo).
+     * (entre sus bordes laterales y por debajo del borde hasta el suelo).
      *
      * @param balon Balon en juego.
      * @return true solo si el balon esta completamente dentro del arco.
@@ -61,13 +61,13 @@ class Goal {
     }
 
     /**
-     * Resuelve la colision del balon contra el travesano: si pega por arriba
+     * Resuelve la colision del balon contra el borde: si pega por arriba
      * rebota hacia arriba; si pega por debajo cae hacia el arco; si pega de
      * frente en la punta sale rebotado horizontalmente hacia la cancha.
      *
-     * @param balon Balon a corregir si toca el travesano.
+     * @param balon Balon a corregir si toca el borde.
      */
-    void resolverTravesano(Ball balon) {
+    void resolverBorde(Ball balon) {
         if (!balon.seSolapaCon(izquierdaX, BORDE_ARRIBA, derechaX, BORDE_ABAJO)) {
             return;
         }
@@ -81,7 +81,7 @@ class Goal {
     }
 
     /**
-     * Entrega el rectangulo completo del arco (desde el techo del travesano hasta
+     * Entrega el rectangulo completo del arco (desde el techo del borde hasta
      * el suelo) para que la vista pueda dibujarlo.
      *
      * @return Arreglo {izquierda, arriba, ancho, alto}.
