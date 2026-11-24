@@ -1,14 +1,13 @@
 package dominio.modalidades;
 
 /**
- * Maquina vs Maquina: ambos jugadores usan IA.
+ * Máquina vs Máquina: ambos jugadores controlados por IA.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
 class MvsM extends GameMode {
 
-    /** Crea la modalidad MvsM; solo la crea {@link GameModeCatalog}. */
     MvsM() {
         super("Máquina vs Máquina");
     }

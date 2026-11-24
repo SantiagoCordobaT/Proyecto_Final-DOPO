@@ -4,9 +4,7 @@ import dominio.Ball;
 import dominio.personajes.Character;
 
 /**
- * Controlador de un jugador humano: cada paso lee las acciones que la
- * presentacion mantiene presionadas (teclado). Recibe el personaje y el balon
- * porque es la firma comun del metodo plantilla, pero no los necesita.
+ * Controlador de jugador humano según las teclas mantenidas en este turno.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -14,30 +12,23 @@ import dominio.personajes.Character;
 class HumanController extends Controller {
 
     @Override
-    protected int direccion(Character personaje, Ball balon) {
-        return valorPresionada(Action.RIGHT) - valorPresionada(Action.LEFT);
-    }
-
-    @Override
-    protected boolean quiereSaltar(Character personaje, Ball balon) {
-        return estaPresionada(Action.JUMP);
-    }
-
-    @Override
-    protected boolean quierePatear(Character personaje, Ball balon) {
-        return estaPresionada(Action.KICK);
-    }
-
-    @Override
-    protected boolean quierePoder() {
-        return estaPresionada(Action.POWER);
-    }
-
-    /**
-     * @return 1 si la accion esta presionada, 0 si no (dos teclas opuestas se
-     *         cancelan).
-     */
-    private int valorPresionada(Action accion) {
-        return estaPresionada(accion) ? 1 : 0;
+    public void controlar(Character personaje, Ball balon) {
+        int direccion = 0;
+        if (estaPresionada(Action.RIGHT)) {
+            direccion++;
+        }
+        if (estaPresionada(Action.LEFT)) {
+            direccion--;
+        }
+        personaje.establecerDireccionMovimiento(direccion);
+        if (estaPresionada(Action.JUMP)) {
+            personaje.saltar();
+        }
+        if (estaPresionada(Action.KICK)) {
+            personaje.solicitarPatada();
+        }
+        if (estaPresionada(Action.POWER)) {
+            personaje.armarPoder();
+        }
     }
 }

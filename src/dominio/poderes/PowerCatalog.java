@@ -1,23 +1,34 @@
 package dominio.poderes;
 
-import dominio.Catalog;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Catalogo de poderes disponibles (Creator): expone los poderes creables para
- * asignarlos al crear o editar un personaje.
+ * Poderes disponibles para asignar al crear o editar un personaje.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-public final class PowerCatalog extends Catalog<Power> {
+public class PowerCatalog {
 
-    /** Crea el catalogo con los poderes del juego. */
-    public PowerCatalog() {
-        super(POOBSoccerException.PODER_INVALIDO);
-        agregar(new FreezePower());
-        agregar(new StunPower());
-        agregar(new ConfusionPower());
-        agregar(new ShrinkPower());
+    private final Power[] poderes = {
+            new FreezePower(),
+            new StunPower(),
+            new ConfusionPower(),
+            new ShrinkPower()
+    };
+
+    public String[] obtenerNombres() {
+        String[] nombres = new String[poderes.length];
+        for (int i = 0; i < poderes.length; i++) {
+            nombres[i] = poderes[i].obtenerNombre();
+        }
+        return nombres;
+    }
+
+    public Power obtener(int indice) throws POOBSoccerException {
+        if (indice < 0 || indice >= poderes.length) {
+            throw new POOBSoccerException(POOBSoccerException.PODER_INVALIDO);
+        }
+        return poderes[indice];
     }
 }

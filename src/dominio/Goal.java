@@ -1,21 +1,16 @@
 package dominio;
 
 /**
- * Representa un arco lateral de la cancha con su borde superior.
- * Calcula los bordes horizontales segun si esta en la pared izquierda o
- * derecha,
- * detecta cuando entra un gol completo y resuelve los rebotes en el borde.
+ * Arco lateral de la cancha: detecta goles completos y resuelve rebotes en el
+ * borde superior (travesaño).
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
 class Goal {
 
-    /** Ancho horizontal del arco. */
     static final double ANCHO = 90.0;
-    /** Altura total del arco desde el suelo hasta la parte superior del borde. */
     static final double ALTO = 140.0;
-    /** Grosor vertical del borde superior (travesano). */
     static final double GROSOR_BORDE = 10.0;
     private static final double BORDE_ARRIBA = Field.SUELO_Y - ALTO;
     private static final double BORDE_ABAJO = BORDE_ARRIBA + GROSOR_BORDE;
@@ -25,16 +20,6 @@ class Goal {
     private final int direccionBoca;
     private final int anotador;
 
-    /**
-     * Construye un arco a partir de su pared de fondo y su entrada hacia la cancha,
-     * determinando sus limites horizontales y el sentido de rebote frontal (1 o
-     * -1).
-     *
-     * @param fondoX   Coordenada X pegada a la pared.
-     * @param bocaX    Coordenada X de la entrada del arco (hacia la cancha).
-     * @param anotador Jugador (1 o 2) que recibe el gol a favor cuando entra aqui
-     *                 el balon.
-     */
     Goal(double fondoX, double bocaX, int anotador) {
         this.bocaX = bocaX;
         if (fondoX < bocaX) {
@@ -49,23 +34,12 @@ class Goal {
         this.anotador = anotador;
     }
 
-    /**
-     * Comprueba si todo el balon quedo dentro del area valida del arco
-     * (entre sus bordes laterales y por debajo del borde hasta el suelo).
-     *
-     * @param balon Balon en juego.
-     * @return true solo si el balon esta completamente dentro del arco.
-     */
     boolean contieneBalon(Ball balon) {
         return balon.estaDentroDe(izquierdaX, BORDE_ABAJO, derechaX, Field.SUELO_Y);
     }
 
     /**
-     * Resuelve la colision del balon contra el borde: si pega por arriba
-     * rebota hacia arriba; si pega por debajo cae hacia el arco; si pega de
-     * frente en la punta sale rebotado horizontalmente hacia la cancha.
-     *
-     * @param balon Balon a corregir si toca el borde.
+     * Rebota el balón por arriba, por debajo o de frente en la punta del travesaño.
      */
     void resolverBorde(Ball balon) {
         if (!balon.seSolapaCon(izquierdaX, BORDE_ARRIBA, derechaX, BORDE_ABAJO)) {
@@ -80,21 +54,10 @@ class Goal {
         }
     }
 
-    /**
-     * Entrega el rectangulo completo del arco (desde el techo del borde hasta
-     * el suelo) para que la vista pueda dibujarlo.
-     *
-     * @return Arreglo {izquierda, arriba, ancho, alto}.
-     */
     double[] obtenerLimites() {
         return new double[] { izquierdaX, BORDE_ARRIBA, ANCHO, ALTO };
     }
 
-    /**
-     * Devuelve el numero del jugador al que se le suma el gol en este arco.
-     *
-     * @return Jugador anotador (1 o 2).
-     */
     int obtenerAnotador() {
         return anotador;
     }

@@ -1,12 +1,15 @@
 package dominio.excepciones;
 
 /**
- * Excepcion unica del dominio de POOBSoccer (violaciones en reglas de negocio).
+ * Excepción única del dominio para reportar incumplimientos de reglas del
+ * juego.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
 public class POOBSoccerException extends Exception {
+
+    private static final long serialVersionUID = 1L;
 
     public static final String PERSONAJE_INVALIDO = "El personaje seleccionado no existe o no es válido.";
     public static final String PERSONAJE_REPETIDO = "Ya existe un personaje con ese nombre.";
@@ -22,11 +25,6 @@ public class POOBSoccerException extends Exception {
     public static final String ACCION_INVALIDA = "La acción indicada no existe.";
     public static final String PARTIDO_EN_CURSO = "El partido aún no ha terminado.";
 
-    /**
-     * Crea la excepcion con el mensaje indicado.
-     *
-     * @param mensaje Mensaje.
-     */
     public POOBSoccerException(String mensaje) {
         super(mensaje);
     }

@@ -1,13 +1,11 @@
 package dominio.partidos;
 
-import dominio.excepciones.POOBSoccerException;
 import dominio.modalidades.GameMode;
 
 /**
- * Tipo de partido Supervivencia (exclusivo de Jugador vs Maquina).
- * Ambos empiezan con 3 balones (vidas). Quien recibe un gol pierde un balon:
- * si la maquina llega a 0 sube la racha y entra un nuevo rival con 3 balones;
- * si el jugador 1 llega a 0 termina la serie.
+ * Partido Supervivencia (solo Jugador vs Máquina).
+ * Ambos inician con 3 balones; quien recibe gol pierde uno. Si cae el rival
+ * sube la racha y entra otro oponente; si cae el jugador 1 termina la serie.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -18,42 +16,37 @@ class SurvivalMatch extends MatchType {
     private int balonesJugador;
     private int balonesRival;
     private int racha;
+    private boolean cambioRivalPendiente;
 
-    /** Crea el tipo de partido Supervivencia. */
     SurvivalMatch() {
         super("Supervivencia");
     }
 
-    /** Solo permite jugar Supervivencia en modalidades compatibles (PvsM). */
     @Override
     public boolean admite(GameMode modo) {
         return modo.admiteSupervivencia();
     }
 
-    /** Reinicia el estado base y devuelve ambos equipos a 3 balones con racha en 0. */
     @Override
-    public void iniciar(MatchContext contexto) {
-        super.iniciar(contexto);
+    public void iniciar() {
+        super.iniciar();
         balonesJugador = BALONES_INICIALES;
         balonesRival = BALONES_INICIALES;
         racha = 0;
+        cambioRivalPendiente = false;
     }
 
-    /**
-     * Descuenta un balon al equipo que recibio el gol.
-     * Si cae el rival, suma racha y pide un nuevo oponente; si cae el jugador 1,
-     * termina el partido dando la victoria al jugador 2.
-     *
-     * @param anotador Jugador que anoto el gol (1 o 2).
-     */
     @Override
-    protected void alAnotarGol(int anotador) throws POOBSoccerException {
+    public void golAnotado(int anotador, int golesAnotador) {
+        if (estaTerminado()) {
+            return;
+        }
         if (anotador == 1) {
             balonesRival--;
             if (balonesRival == 0) {
                 racha++;
                 balonesRival = BALONES_INICIALES;
-                reemplazarRival();
+                cambioRivalPendiente = true;
             }
         } else {
             balonesJugador--;
@@ -63,7 +56,15 @@ class SurvivalMatch extends MatchType {
         }
     }
 
-    /** @return Balones restantes de cada lado y racha actual en formato legible. */
+    @Override
+    public boolean consumirCambioRival() {
+        if (!cambioRivalPendiente) {
+            return false;
+        }
+        cambioRivalPendiente = false;
+        return true;
+    }
+
     @Override
     public String obtenerTextoEstado() {
         return "Balones " + balonesJugador + "-" + balonesRival + " | Racha " + racha;

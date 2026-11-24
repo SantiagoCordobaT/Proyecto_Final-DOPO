@@ -28,7 +28,7 @@ import dominio.excepciones.POOBSoccerException;
 @SuppressWarnings("serial")
 final class MatchP extends JPanel {
 
-    private static final int MILIS_CUADRO = 8;
+    private static final int MILIS_CUADRO = 16;
     private static final double NANOS_POR_SEGUNDO = 1e9;
     // Tope de tiempo por cuadro: una pausa de la ventana no hace saltar la fisica
     private static final double MAX_SEGUNDOS_CUADRO = 0.1;

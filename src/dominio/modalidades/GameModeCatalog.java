@@ -1,22 +1,33 @@
 package dominio.modalidades;
 
-import dominio.Catalog;
 import dominio.excepciones.POOBSoccerException;
 
 /**
- * Catalogo de modalidades de juego (Creator): Jugador vs Jugador, Jugador vs
- * Maquina y Maquina vs Maquina, en ese orden.
+ * Lista con las tres modalidades de juego en el orden del menú.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-public final class GameModeCatalog extends Catalog<GameMode> {
+public class GameModeCatalog {
 
-    /** Crea el catalogo con las tres modalidades. */
-    public GameModeCatalog() {
-        super(POOBSoccerException.MODO_INVALIDO);
-        agregar(new PvsP());
-        agregar(new PvsM());
-        agregar(new MvsM());
+    private final GameMode[] modos = {
+            new PvsP(),
+            new PvsM(),
+            new MvsM()
+    };
+
+    public String[] obtenerNombres() {
+        String[] nombres = new String[modos.length];
+        for (int i = 0; i < modos.length; i++) {
+            nombres[i] = modos[i].obtenerNombre();
+        }
+        return nombres;
+    }
+
+    public GameMode obtener(int indice) throws POOBSoccerException {
+        if (indice < 0 || indice >= modos.length) {
+            throw new POOBSoccerException(POOBSoccerException.MODO_INVALIDO);
+        }
+        return modos[indice];
     }
 }

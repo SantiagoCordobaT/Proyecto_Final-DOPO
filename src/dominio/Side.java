@@ -3,8 +3,8 @@ package dominio;
 import dominio.personajes.Character;
 
 /**
- * Lado de la cancha de cada jugador: posicion inicial y sentido de vista.
- * Reemplaza los enteros sueltos por un tipo con nombre.
+ * Lado inicial de cada jugador en la cancha: coordenada X de arranque y
+ * orientación hacia el arco rival (1 derecha, -1 izquierda).
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -21,11 +21,6 @@ enum Side {
         this.orientacion = orientacion;
     }
 
-    /**
-     * Ubica al personaje en este lado para empezar un partido.
-     *
-     * @param personaje Personaje que entra a la cancha.
-     */
     void ubicar(Character personaje) {
         personaje.entrarEn(xInicial, orientacion);
     }
