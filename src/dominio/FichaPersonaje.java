@@ -9,14 +9,14 @@ package dominio;
  */
 public class FichaPersonaje {
 
-    public final String nombre;
-    public final String pais;
-    public final int velocidad;
-    public final int salto;
-    public final int fuerza;
-    public final int nivelPoder;
-    public final String nombrePoder;
-    public final String descripcionPoder;
+    private final String nombre;
+    private final String pais;
+    private final int velocidad;
+    private final int salto;
+    private final int fuerza;
+    private final int nivelPoder;
+    private final String nombrePoder;
+    private final String descripcionPoder;
 
     FichaPersonaje(String nombre, String pais, int velocidad, int salto, int fuerza, int nivelPoder,
             String nombrePoder, String descripcionPoder) {
@@ -28,5 +28,37 @@ public class FichaPersonaje {
         this.nivelPoder = nivelPoder;
         this.nombrePoder = nombrePoder;
         this.descripcionPoder = descripcionPoder;
+    }
+
+    public String obtenerNombre() {
+        return nombre;
+    }
+
+    public String obtenerPais() {
+        return pais;
+    }
+
+    public int obtenerVelocidad() {
+        return velocidad;
+    }
+
+    public int obtenerSalto() {
+        return salto;
+    }
+
+    public int obtenerFuerza() {
+        return fuerza;
+    }
+
+    public int obtenerNivelPoder() {
+        return nivelPoder;
+    }
+
+    public String obtenerNombrePoder() {
+        return nombrePoder;
+    }
+
+    public String obtenerDescripcionPoder() {
+        return descripcionPoder;
     }
 }

@@ -52,8 +52,8 @@ final class HudP extends JPanel {
     }
 
     void refrescar() throws POOBSoccerException {
-        int goles1 = modelo.obtenerResumenJugador(1).goles;
-        int goles2 = modelo.obtenerResumenJugador(2).goles;
+        int goles1 = modelo.obtenerResumenJugador(1).obtenerGoles();
+        int goles2 = modelo.obtenerResumenJugador(2).obtenerGoles();
         marcador.setText(goles1 + " - " + goles2);
         izquierda.refrescar();
         derecha.refrescar();

@@ -98,9 +98,9 @@ public class HeadSoccerTest {
             juego.iniciarPartido();
 
             ResumenJugador rival = juego.obtenerResumenJugador(2);
-            assertEquals("Lucas", rival.nombre);
-            assertEquals("Perú", rival.pais);
-            assertEquals(juego.obtenerNombresPoderes()[2], rival.nombrePoder);
+            assertEquals("Lucas", rival.obtenerNombre());
+            assertEquals("Perú", rival.obtenerPais());
+            assertEquals(juego.obtenerNombresPoderes()[2], rival.obtenerNombrePoder());
         } finally {
             juego.eliminarPersonaje(indice);
         }
@@ -120,7 +120,7 @@ public class HeadSoccerTest {
         juego.reanudar();
         juego.actualizarTick(1.0 / 60.0);
         ResumenJugador j1 = juego.obtenerResumenJugador(1);
-        assertEquals(200.0, j1.x + j1.ancho / 2.0, 0.001);
+        assertEquals(200.0, j1.obtenerX() + j1.obtenerAncho() / 2.0, 0.001);
 
         juego.actualizarTick(1.0);
         assertEquals("Meta: 3 goles | 00:01", juego.obtenerEstadoPartido());
@@ -136,8 +136,8 @@ public class HeadSoccerTest {
 
         ResumenJugador j1 = juego.obtenerResumenJugador(1);
         ResumenJugador j2 = juego.obtenerResumenJugador(2);
-        assertEquals(200.0, j1.x + j1.ancho / 2.0, 0.001);
-        assertEquals(700.0, j2.x + j2.ancho / 2.0, 0.001);
+        assertEquals(200.0, j1.obtenerX() + j1.obtenerAncho() / 2.0, 0.001);
+        assertEquals(700.0, j2.obtenerX() + j2.obtenerAncho() / 2.0, 0.001);
         assertEquals("Meta: 3 goles | 00:01", juego.obtenerEstadoPartido());
     }
 
@@ -146,38 +146,37 @@ public class HeadSoccerTest {
         arrancar(PVSP, GOLES_3, 0, 1);
         juego.presionarAccion(1, "RIGHT");
         juego.actualizarTick(1.0 / 60.0);
-        double xDespues = juego.obtenerResumenJugador(1).x;
+        double xDespues = juego.obtenerResumenJugador(1).obtenerX();
         assertTrue(xDespues > 170.0);
 
         juego.soltarAccion(1, "RIGHT");
         juego.actualizarTick(1.0 / 60.0);
-        assertEquals(xDespues, juego.obtenerResumenJugador(1).x, 0.001);
+        assertEquals(xDespues, juego.obtenerResumenJugador(1).obtenerX(), 0.001);
 
-        double yAntes = juego.obtenerResumenJugador(1).y;
+        double yAntes = juego.obtenerResumenJugador(1).obtenerY();
         juego.presionarAccion(1, "JUMP");
         juego.actualizarTick(1.0 / 60.0);
-        assertTrue(juego.obtenerResumenJugador(1).y < yAntes);
+        assertTrue(juego.obtenerResumenJugador(1).obtenerY() < yAntes);
 
         // Teclas opuestas en jugador 2 se cancelan
-        double x2Antes = juego.obtenerResumenJugador(2).x;
+        double x2Antes = juego.obtenerResumenJugador(2).obtenerX();
         juego.presionarAccion(2, "LEFT");
         juego.presionarAccion(2, "RIGHT");
         juego.actualizarTick(1.0 / 60.0);
-        assertEquals(x2Antes, juego.obtenerResumenJugador(2).x, 0.001);
+        assertEquals(x2Antes, juego.obtenerResumenJugador(2).obtenerX(), 0.001);
     }
 
     @Test
     public void tecladoNoControlaALaMaquina() throws POOBSoccerException {
         arrancar(PVSM, GOLES_3, 0, 1);
-        double xAntes = juego.obtenerResumenJugador(2).x;
+        double xAntes = juego.obtenerResumenJugador(2).obtenerX();
         juego.presionarAccion(2, "RIGHT");
         juego.presionarAccion(2, "POWER");
         juego.actualizarTick(1.0 / 60.0);
         // El balón cae en el centro (450), así que la máquina debe moverse hacia la izquierda
-        assertTrue(juego.obtenerResumenJugador(2).x < xAntes);
+        assertTrue(juego.obtenerResumenJugador(2).obtenerX() < xAntes);
     }
 
-    
     @Test
     public void accionInvalidaYJugadorInvalido() throws POOBSoccerException {
         arrancar(PVSP, GOLES_3, 0, 1);
@@ -201,26 +200,26 @@ public class HeadSoccerTest {
         arrancar(PVSP, GOLES_3, 0, 1);
         juego.presionarAccion(1, "POWER");
         juego.actualizarTick(1.0 / 60.0);
-        assertFalse(juego.obtenerResumenJugador(1).poderArmado);
+        assertFalse(juego.obtenerResumenJugador(1).estaPoderArmado());
 
         juego.actualizarTick(17.0);
-        assertEquals(1.0, juego.obtenerResumenJugador(1).cargaPoder, 0.001);
+        assertEquals(1.0, juego.obtenerResumenJugador(1).obtenerCargaPoder(), 0.001);
         juego.actualizarTick(1.0 / 60.0);
-        assertTrue(juego.obtenerResumenJugador(1).poderArmado);
+        assertTrue(juego.obtenerResumenJugador(1).estaPoderArmado());
     }
 
     @Test
     public void revanchaIniciaEnCeroConMismosPersonajes() throws POOBSoccerException {
         arrancar(PVSP, GOLES_3, 0, 1);
-        String j1Nombre = juego.obtenerResumenJugador(1).nombre;
-        String j2Nombre = juego.obtenerResumenJugador(2).nombre;
+        String j1Nombre = juego.obtenerResumenJugador(1).obtenerNombre();
+        String j2Nombre = juego.obtenerResumenJugador(2).obtenerNombre();
         juego.actualizarTick(2.0);
-        assertTrue(juego.obtenerResumenJugador(2).cargaPoder > 0.0);
+        assertTrue(juego.obtenerResumenJugador(2).obtenerCargaPoder() > 0.0);
 
         juego.iniciarPartido();
-        assertEquals(j1Nombre, juego.obtenerResumenJugador(1).nombre);
-        assertEquals(j2Nombre, juego.obtenerResumenJugador(2).nombre);
-        assertEquals(0.0, juego.obtenerResumenJugador(2).cargaPoder, 0.001);
+        assertEquals(j1Nombre, juego.obtenerResumenJugador(1).obtenerNombre());
+        assertEquals(j2Nombre, juego.obtenerResumenJugador(2).obtenerNombre());
+        assertEquals(0.0, juego.obtenerResumenJugador(2).obtenerCargaPoder(), 0.001);
         assertEquals("Meta: 3 goles | 00:00", juego.obtenerEstadoPartido());
     }
 
@@ -240,10 +239,10 @@ public class HeadSoccerTest {
         ResumenJugador j1 = juego.obtenerResumenJugador(1);
         ResumenJugador j2 = juego.obtenerResumenJugador(2);
 
-        assertEquals(1, j1.orientacion);
-        assertEquals(-1, j2.orientacion);
-        assertFalse(j1.pateando);
-        assertEquals(juego.obtenerFichaPersonaje(0).nombrePoder, j1.nombrePoder);
+        assertEquals(1, j1.obtenerOrientacion());
+        assertEquals(-1, j2.obtenerOrientacion());
+        assertFalse(j1.estaPateando());
+        assertEquals(juego.obtenerFichaPersonaje(0).obtenerNombrePoder(), j1.obtenerNombrePoder());
 
         assertEquals(Field.ANCHO, juego.obtenerAnchoCancha(), 0.001);
         assertEquals(Field.SUELO_Y, juego.obtenerSueloY(), 0.001);

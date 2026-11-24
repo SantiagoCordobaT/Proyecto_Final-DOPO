@@ -54,7 +54,8 @@ final class CourtP extends JPanel {
         balon.actualizar();
         arcos.actualizar();
 
-        int golesActuales = modelo.obtenerResumenJugador(1).goles + modelo.obtenerResumenJugador(2).goles;
+        int golesActuales = modelo.obtenerResumenJugador(1).obtenerGoles()
+                + modelo.obtenerResumenJugador(2).obtenerGoles();
         if (totalGoles >= 0 && golesActuales != totalGoles) {
             tiempoAvisoGol = SEGUNDOS_AVISO_GOL;
         }

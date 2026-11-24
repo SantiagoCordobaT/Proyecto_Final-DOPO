@@ -66,13 +66,13 @@ java -jar "lib\junit-platform-console-standalone.jar" execute --class-path out -
 
 ## Arquitectura
 
-- `src/dominio/`: Fachada `HeadSoccer`, simulación `Match`, física (`Field`, `Goal`, `Ball`), DTOs de lectura (`ResumenJugador`, `FichaPersonaje`), personajes (`dominio.personajes`), modalidades (`dominio.modalidades`), reglas (`dominio.partidos`), poderes y efectos (`dominio.poderes`, `dominio.efectos`) y excepciones (`dominio.excepciones`).
+- `src/dominio/`: Fachada `HeadSoccer`, simulación `Match`, física (`Field`, `Goal`, `Ball`), resúmenes de solo lectura (`ResumenJugador`, `FichaPersonaje`), personajes (`dominio.personajes`), modalidades (`dominio.modalidades`), reglas (`dominio.partidos`), poderes y efectos (`dominio.poderes`, `dominio.efectos`) y excepciones (`dominio.excepciones`).
 - `src/presentacion/`: Ventana principal `HeadSoccerGUI`, menú, diálogos sobre `DialogoBase`, utilidades visuales en `Estilo` y dibujo en Swing sin lógica de negocio.
 - `test/dominio/`: Pruebas unitarias separadas por módulo (`BallTest`, `CharacterTest`, `SurvivalMatchTest`, `CatalogosTest`, `HeadSoccerTest`).
 
 ## Uso de herramientas de IA
 
-Durante el desarrollo de este proyecto se utilizaron herramientas de inteligencia artificial como apoyo para estructurar prototipos iniciales, revisar errores de compilación y refactorizar partes del diseño, pruebas y documentación. El código, las reglas del juego, los diagramas y las pruebas fueron revisados, ajustados y validados por los autores.
+Una primera versión del código, las pruebas y la documentación se generó con ayuda de herramientas de IA (Claude). Después, los autores rediseñaron y reescribieron el dominio, la interfaz y las pruebas, siguiendo en parte recomendaciones de la misma herramienta, y verificaron el resultado con pruebas propias.
 
 ## Autores y colaboradores
 

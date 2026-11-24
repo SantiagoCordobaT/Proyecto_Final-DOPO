@@ -141,14 +141,14 @@ final class CharacterCard extends JPanel {
         }
         try {
             FichaPersonaje ficha = modelo.obtenerFichaPersonaje(indice);
-            escudo.establecerPais(ficha.pais);
-            pais.setText(ficha.pais);
-            velocidad.setValue(ficha.velocidad);
-            salto.setValue(ficha.salto);
-            fuerza.setValue(ficha.fuerza);
-            poder.setValue(ficha.nivelPoder);
-            especial.setText(Texts.t("Poder especial:", "Special power:") + " " + ficha.nombrePoder);
-            descripcion.setText(ficha.descripcionPoder);
+            escudo.establecerPais(ficha.obtenerPais());
+            pais.setText(ficha.obtenerPais());
+            velocidad.setValue(ficha.obtenerVelocidad());
+            salto.setValue(ficha.obtenerSalto());
+            fuerza.setValue(ficha.obtenerFuerza());
+            poder.setValue(ficha.obtenerNivelPoder());
+            especial.setText(Texts.t("Poder especial:", "Special power:") + " " + ficha.obtenerNombrePoder());
+            descripcion.setText(ficha.obtenerDescripcionPoder());
         } catch (POOBSoccerException e) {
             HeadSoccerGUI.reportarError(this, e);
         }

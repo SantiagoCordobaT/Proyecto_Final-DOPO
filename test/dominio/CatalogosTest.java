@@ -128,13 +128,13 @@ public class CatalogosTest {
     public void fichaPersonajeDesdeFachada() throws POOBSoccerException {
         HeadSoccer juego = HeadSoccer.obtenerInstancia();
         FichaPersonaje ficha = juego.obtenerFichaPersonaje(0);
-        assertEquals("Jacob", ficha.nombre);
-        assertEquals("Canadá", ficha.pais);
-        assertEquals(3, ficha.velocidad);
-        assertEquals(3, ficha.salto);
-        assertEquals(4, ficha.fuerza);
-        assertEquals(3, ficha.nivelPoder);
-        assertFalse(ficha.descripcionPoder.isEmpty());
+        assertEquals("Jacob", ficha.obtenerNombre());
+        assertEquals("Canadá", ficha.obtenerPais());
+        assertEquals(3, ficha.obtenerVelocidad());
+        assertEquals(3, ficha.obtenerSalto());
+        assertEquals(4, ficha.obtenerFuerza());
+        assertEquals(3, ficha.obtenerNivelPoder());
+        assertFalse(ficha.obtenerDescripcionPoder().isEmpty());
 
         POOBSoccerException ex = assertThrows(POOBSoccerException.class, () -> juego.obtenerFichaPersonaje(-1));
         assertEquals(POOBSoccerException.PERSONAJE_INVALIDO, ex.getMessage());

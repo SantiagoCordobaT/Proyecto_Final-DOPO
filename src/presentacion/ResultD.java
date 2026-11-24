@@ -57,7 +57,8 @@ final class ResultD extends DialogoBase {
             ResumenJugador j1 = modelo.obtenerResumenJugador(1);
             ResumenJugador j2 = modelo.obtenerResumenJugador(2);
             ganador.setText(Texts.t("Ganador:", "Winner:") + " " + modelo.obtenerNombreGanador());
-            marcador.setText(j1.nombre + "  " + j1.goles + " - " + j2.goles + "  " + j2.nombre);
+            marcador.setText(j1.obtenerNombre() + "  " + j1.obtenerGoles() + " - " + j2.obtenerGoles() + "  "
+                    + j2.obtenerNombre());
             estado.setText(modelo.obtenerEstadoPartido());
         } catch (POOBSoccerException e) {
             HeadSoccerGUI.reportarError(this, e);

@@ -44,14 +44,14 @@ final class PlayerSprite {
 
     void actualizar() throws POOBSoccerException {
         ResumenJugador j = modelo.obtenerResumenJugador(numero);
-        centroX = j.x + j.ancho / 2.0;
-        baseY = j.y + j.alto;
-        escala = j.ancho / ANCHO_BASE;
-        orientacion = j.orientacion;
-        armado = j.poderArmado;
-        pateando = j.pateando;
-        equipo = Estilo.coloresPais(j.pais);
-        efectos = j.efectos;
+        centroX = j.obtenerX() + j.obtenerAncho() / 2.0;
+        baseY = j.obtenerY() + j.obtenerAlto();
+        escala = j.obtenerAncho() / ANCHO_BASE;
+        orientacion = j.obtenerOrientacion();
+        armado = j.estaPoderArmado();
+        pateando = j.estaPateando();
+        equipo = Estilo.coloresPais(j.obtenerPais());
+        efectos = j.obtenerEfectos();
     }
 
     void dibujar(Graphics2D g) {

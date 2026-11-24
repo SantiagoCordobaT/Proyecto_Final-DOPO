@@ -61,7 +61,7 @@ public class SurvivalMatchTest {
 
         assertTrue(partido.estaTerminado());
         assertEquals("Balones 0-3 | Racha 0", partido.obtenerEstado());
-        assertEquals(partido.obtenerResumenJugador(2).nombre, partido.obtenerNombreGanador());
+        assertEquals(partido.obtenerResumenJugador(2).obtenerNombre(), partido.obtenerNombreGanador());
     }
 
     @Test
@@ -71,9 +71,9 @@ public class SurvivalMatchTest {
                 new MatchTypeCatalog().obtener(SUPERVIVENCIA),
                 catalogo.obtener(0).copiar(), catalogo.obtener(0).copiar(), catalogo);
 
-        String primerRival = partido.obtenerResumenJugador(2).nombre;
+        String primerRival = partido.obtenerResumenJugador(2).obtenerNombre();
         partido.actualizarTick(1.0 / 60.0);
-        assertTrue(partido.obtenerResumenJugador(2).cargaPoder > 0.0);
+        assertTrue(partido.obtenerResumenJugador(2).obtenerCargaPoder() > 0.0);
 
         partido.anotarGol(1);
         partido.anotarGol(1);
@@ -82,10 +82,10 @@ public class SurvivalMatchTest {
         ResumenJugador nuevoRival = partido.obtenerResumenJugador(2);
         assertFalse(partido.estaTerminado());
         assertEquals("Balones 3-3 | Racha 1", partido.obtenerEstado());
-        assertNotEquals(primerRival, nuevoRival.nombre);
-        assertEquals(0, nuevoRival.goles);
-        assertEquals(0.0, nuevoRival.cargaPoder, 0.001);
-        assertEquals(700.0, nuevoRival.x + nuevoRival.ancho / 2.0, 0.001);
+        assertNotEquals(primerRival, nuevoRival.obtenerNombre());
+        assertEquals(0, nuevoRival.obtenerGoles());
+        assertEquals(0.0, nuevoRival.obtenerCargaPoder(), 0.001);
+        assertEquals(700.0, nuevoRival.obtenerX() + nuevoRival.obtenerAncho() / 2.0, 0.001);
     }
 
     @Test
@@ -97,16 +97,16 @@ public class SurvivalMatchTest {
 
         partido.anotarGol(2);
         partido.actualizarTick(1.0 / 60.0);
-        double poderJugadorUno = partido.obtenerResumenJugador(1).cargaPoder;
+        double poderJugadorUno = partido.obtenerResumenJugador(1).obtenerCargaPoder();
 
         partido.anotarGol(1);
         partido.anotarGol(1);
         partido.anotarGol(1);
 
-        assertEquals(0, partido.obtenerResumenJugador(1).goles);
-        assertEquals(0, partido.obtenerResumenJugador(2).goles);
+        assertEquals(0, partido.obtenerResumenJugador(1).obtenerGoles());
+        assertEquals(0, partido.obtenerResumenJugador(2).obtenerGoles());
         assertEquals("Balones 2-3 | Racha 1", partido.obtenerEstado());
-        assertEquals(poderJugadorUno, partido.obtenerResumenJugador(1).cargaPoder, 0.001);
+        assertEquals(poderJugadorUno, partido.obtenerResumenJugador(1).obtenerCargaPoder(), 0.001);
     }
 
     @Test
@@ -127,14 +127,14 @@ public class SurvivalMatchTest {
         for (int i = 0; i < 3; i++) {
             partido.anotarGol(1);
         }
-        assertEquals(nombre0, partido.obtenerResumenJugador(2).nombre);
+        assertEquals(nombre0, partido.obtenerResumenJugador(2).obtenerNombre());
         assertEquals("Balones 3-3 | Racha 1", partido.obtenerEstado());
 
         // Derrotar al segundo rival (nombre0) -> vuelve a rotar a nombre1
         for (int i = 0; i < 3; i++) {
             partido.anotarGol(1);
         }
-        assertEquals(nombre1, partido.obtenerResumenJugador(2).nombre);
+        assertEquals(nombre1, partido.obtenerResumenJugador(2).obtenerNombre());
         assertEquals("Balones 3-3 | Racha 2", partido.obtenerEstado());
         assertFalse(partido.estaTerminado());
     }
@@ -164,7 +164,7 @@ public class SurvivalMatchTest {
         assertFalse(partido.estaTerminado());
         partido.anotarGol(1);
         assertTrue(partido.estaTerminado());
-        assertEquals(partido.obtenerResumenJugador(1).nombre, partido.obtenerNombreGanador());
+        assertEquals(partido.obtenerResumenJugador(1).obtenerNombre(), partido.obtenerNombreGanador());
     }
 
     @Test

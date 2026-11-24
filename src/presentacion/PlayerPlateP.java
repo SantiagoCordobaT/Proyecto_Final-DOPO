@@ -54,14 +54,14 @@ final class PlayerPlateP extends JPanel {
 
     void refrescar() throws POOBSoccerException {
         ResumenJugador jugador = modelo.obtenerResumenJugador(numero);
-        escudo.establecerPais(jugador.pais);
-        nombre.setText(jugador.nombre.toUpperCase());
-        poder.setValue((int) Math.round(jugador.cargaPoder * 100));
-        if (jugador.poderArmado) {
+        escudo.establecerPais(jugador.obtenerPais());
+        nombre.setText(jugador.obtenerNombre().toUpperCase());
+        poder.setValue((int) Math.round(jugador.obtenerCargaPoder() * 100));
+        if (jugador.estaPoderArmado()) {
             poder.setString(Texts.t("¡PODER LISTO!", "POWER READY!"));
             poder.setForeground(Estilo.RESALTE);
         } else {
-            poder.setString(jugador.nombrePoder);
+            poder.setString(jugador.obtenerNombrePoder());
             poder.setForeground(color);
         }
     }

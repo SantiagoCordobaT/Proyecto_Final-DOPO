@@ -46,13 +46,13 @@ final class CharacterFormD extends DialogoBase {
     CharacterFormD(Frame dueno, HeadSoccer modelo, int indiceEdicion) throws POOBSoccerException {
         this(dueno, modelo, Texts.t("Editar personaje", "Edit character"), indiceEdicion);
         FichaPersonaje ficha = modelo.obtenerFichaPersonaje(indiceEdicion);
-        nombre.setText(ficha.nombre);
-        pais.setText(ficha.pais);
-        velocidad.setValue(ficha.velocidad);
-        salto.setValue(ficha.salto);
-        fuerza.setValue(ficha.fuerza);
-        nivelPoder.setValue(ficha.nivelPoder);
-        poderes.setSelectedItem(ficha.nombrePoder);
+        nombre.setText(ficha.obtenerNombre());
+        pais.setText(ficha.obtenerPais());
+        velocidad.setValue(ficha.obtenerVelocidad());
+        salto.setValue(ficha.obtenerSalto());
+        fuerza.setValue(ficha.obtenerFuerza());
+        nivelPoder.setValue(ficha.obtenerNivelPoder());
+        poderes.setSelectedItem(ficha.obtenerNombrePoder());
     }
 
     private CharacterFormD(Frame dueno, HeadSoccer modelo, String titulo, int indiceEdicion) {

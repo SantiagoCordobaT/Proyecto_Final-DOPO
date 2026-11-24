@@ -9,19 +9,19 @@ package dominio;
  */
 public class ResumenJugador {
 
-    public final String nombre;
-    public final String pais;
-    public final double x;
-    public final double y;
-    public final double ancho;
-    public final double alto;
-    public final int goles;
-    public final double cargaPoder;
-    public final String nombrePoder;
-    public final boolean poderArmado;
-    public final String[] efectos;
-    public final int orientacion;
-    public final boolean pateando;
+    private final String nombre;
+    private final String pais;
+    private final double x;
+    private final double y;
+    private final double ancho;
+    private final double alto;
+    private final int goles;
+    private final double cargaPoder;
+    private final String nombrePoder;
+    private final boolean poderArmado;
+    private final String[] efectos;
+    private final int orientacion;
+    private final boolean pateando;
 
     ResumenJugador(String nombre, String pais, double[] limites, int goles, double cargaPoder, String nombrePoder,
             boolean poderArmado, String[] efectos, int orientacion, boolean pateando) {
@@ -35,8 +35,60 @@ public class ResumenJugador {
         this.cargaPoder = cargaPoder;
         this.nombrePoder = nombrePoder;
         this.poderArmado = poderArmado;
-        this.efectos = efectos;
+        this.efectos = efectos.clone();
         this.orientacion = orientacion;
         this.pateando = pateando;
+    }
+
+    public String obtenerNombre() {
+        return nombre;
+    }
+
+    public String obtenerPais() {
+        return pais;
+    }
+
+    public double obtenerX() {
+        return x;
+    }
+
+    public double obtenerY() {
+        return y;
+    }
+
+    public double obtenerAncho() {
+        return ancho;
+    }
+
+    public double obtenerAlto() {
+        return alto;
+    }
+
+    public int obtenerGoles() {
+        return goles;
+    }
+
+    public double obtenerCargaPoder() {
+        return cargaPoder;
+    }
+
+    public String obtenerNombrePoder() {
+        return nombrePoder;
+    }
+
+    public boolean estaPoderArmado() {
+        return poderArmado;
+    }
+
+    public String[] obtenerEfectos() {
+        return efectos.clone();
+    }
+
+    public int obtenerOrientacion() {
+        return orientacion;
+    }
+
+    public boolean estaPateando() {
+        return pateando;
     }
 }
