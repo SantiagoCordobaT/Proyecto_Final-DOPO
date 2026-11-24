@@ -5,8 +5,8 @@ import dominio.efectos.Effect;
 import dominio.personajes.Character;
 
 /**
- * Poder especial de un personaje (depende de su pais). (plantilla cada subclase
- * solo decide que efecto crea (factory)).
+ * Poder especial de un personaje segun su pais. Aplica un efecto al oponente
+ * delegando a cada subclase cual efecto concreto debe crear.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -17,8 +17,10 @@ public abstract class Power implements Named {
     private final String descripcion;
 
     /**
-     * @param nombre      Nombre del poder.
-     * @param descripcion Descripcion del poder.
+     * Crea un poder con su nombre y descripcion corta.
+     *
+     * @param nombre      Nombre visible del poder.
+     * @param descripcion Explicacion breve de lo que produce.
      */
     protected Power(String nombre, String descripcion) {
         this.nombre = nombre;
@@ -26,7 +28,7 @@ public abstract class Power implements Named {
     }
 
     /**
-     * Aplica el efecto del poder sobre el oponente.
+     * Aplica el efecto de este poder sobre el personaje rival.
      *
      * @param oponente Personaje rival que recibe el efecto.
      */
@@ -34,16 +36,28 @@ public abstract class Power implements Named {
         oponente.agregarEfecto(crearEfecto());
     }
 
-    /** @return Nuevo efecto que este poder produce en el oponente. */
+    /**
+     * Crea una instancia nueva del efecto asociado a este poder.
+     *
+     * @return Efecto nuevo listo para aplicar.
+     */
     protected abstract Effect crearEfecto();
 
-    /** @return Nombre del poder. */
+    /**
+     * Devuelve el nombre del poder.
+     *
+     * @return Nombre del poder.
+     */
     @Override
     public String obtenerNombre() {
         return nombre;
     }
 
-    /** @return Descripcion del poder. */
+    /**
+     * Devuelve la descripcion corta del poder.
+     *
+     * @return Descripcion del poder.
+     */
     public String obtenerDescripcion() {
         return descripcion;
     }

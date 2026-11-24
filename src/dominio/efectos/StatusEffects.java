@@ -1,47 +1,72 @@
 package dominio.efectos;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
- * Coleccion de efectos activos de un personaje
+ * Administra la lista de efectos temporales activos sobre un personaje.
+ * Permite agregar o reemplazar efectos repetidos, descontar su duracion
+ * paso a paso y combinar sus consecuencias sobre acciones, escala y direccion.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
 public class StatusEffects {
 
-    private final List<Effect> efectos = new ArrayList<Effect>();
+    private final List<Effect> efectos = new ArrayList<>();
+
+    /** Crea una lista vacia de efectos activos. */
+    public StatusEffects() {
+    }
 
     /**
-     * Agrega un efecto; si ya hay uno del mismo tipo se reemplaza (se reinicia su
-     * tiempo).
+     * Agrega un efecto nuevo; si ya existe otro del mismo tipo lo quita primero
+     * para reiniciar su duracion en vez de acumular duplicados.
      *
-     * @param efecto Efecto a aplicar.
+     * @param efecto Efecto temporal a aplicar.
      */
     public void agregar(Effect efecto) {
-        efectos.removeIf(activo -> activo.esMismoTipoQue(efecto));
+        if (efecto == null) {
+            return;
+        }
+        Iterator<Effect> iterador = efectos.iterator();
+        while (iterador.hasNext()) {
+            if (iterador.next().esMismoTipoQue(efecto)) {
+                iterador.remove();
+            }
+        }
         efectos.add(efecto);
     }
 
     /**
-     * Descuenta tiempo a todos los efectos y elimina los que terminaron.
+     * Descuenta el tiempo transcurrido a cada efecto y elimina con Iterator los
+     * que ya expiraron en una sola pasada.
      *
-     * @param segundosTranscurridos Segundos transcurridos.
+     * @param segundosTranscurridos Segundos transcurridos desde el ultimo paso.
      */
     public void transcurrir(double segundosTranscurridos) {
-        for (Effect efecto : efectos) {
+        Iterator<Effect> iterador = efectos.iterator();
+        while (iterador.hasNext()) {
+            Effect efecto = iterador.next();
             efecto.transcurrir(segundosTranscurridos);
+            if (efecto.haExpirado()) {
+                iterador.remove();
+            }
         }
-        efectos.removeIf(Effect::haExpirado);
     }
 
-    /** Elimina todos los efectos. */
+    /** Elimina todos los efectos activos del personaje. */
     public void limpiar() {
         efectos.clear();
     }
 
-    /** @return true si ningun efecto impide moverse, saltar o patear. */
+    /**
+     * Verifica si el personaje puede moverse, saltar y patear segun sus efectos
+     * actuales (basta uno bloqueante para impedir acciones).
+     *
+     * @return true si ningun efecto bloquea las acciones.
+     */
     public boolean permitenAcciones() {
         for (Effect efecto : efectos) {
             if (!efecto.permiteAcciones()) {
@@ -51,7 +76,12 @@ public class StatusEffects {
         return true;
     }
 
-    /** @return Escala del cuerpo (producto de las escalas de los efectos). */
+    /**
+     * Calcula la escala combinada del cuerpo multiplicando la escala de todos
+     * los efectos activos.
+     *
+     * @return Factor total de escala (1.0 si no hay reducciones).
+     */
     public double escala() {
         double escala = 1.0;
         for (Effect efecto : efectos) {
@@ -61,8 +91,10 @@ public class StatusEffects {
     }
 
     /**
-     * @return Signo del movimiento horizontal (producto de los signos de los
-     *         efectos).
+     * Calcula el signo horizontal resultante multiplicando el signo de cada
+     * efecto activo (1 normal, -1 controles invertidos).
+     *
+     * @return 1 si avanza normal o -1 si esta invertido.
      */
     public int signoHorizontal() {
         int signo = 1;
@@ -72,7 +104,13 @@ public class StatusEffects {
         return signo;
     }
 
-    /** @return Nombres de los efectos activos. */
+    /**
+     * Devuelve los nombres de todos los efectos activos para mostrarlos en
+     * pantalla.
+     * 
+     * 
+     * @return Arreglo con los nombres de los efectos vigentes.
+     */
     public String[] obtenerNombres() {
         String[] nombres = new String[efectos.size()];
         for (int i = 0; i < nombres.length; i++) {

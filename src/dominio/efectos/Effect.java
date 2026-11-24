@@ -1,9 +1,9 @@
 package dominio.efectos;
 
 /**
- * Efecto temporal sobre un personaje.
- * Por defecto no altera nada; cada subclase redefine lo que modifica y fija
- * su propia duracion.
+ * Base para los efectos temporales sobre un personaje (congelamiento,
+ * aturdimiento, reduccion o confusion). Lleva el tiempo restante y ofrece
+ * valores neutros por defecto para que cada subclase cambie solo lo que afecta.
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
@@ -14,8 +14,10 @@ public abstract class Effect {
     private double segundosRestantes;
 
     /**
-     * @param nombre           Nombre del efecto.
-     * @param duracionSegundos Duracion en segundos.
+     * Crea un efecto con nombre visible y duracion inicial en segundos.
+     *
+     * @param nombre           Nombre del efecto mostrado al jugador.
+     * @param duracionSegundos Duracion total en segundos.
      */
     protected Effect(String nombre, double duracionSegundos) {
         this.nombre = nombre;
@@ -23,43 +25,74 @@ public abstract class Effect {
     }
 
     /**
-     * Descuenta tiempo al efecto.
+     * Descuenta tiempo restante al efecto sin bajarlo de cero.
      *
-     * @param segundosTranscurridos Segundos transcurridos.
+     * @param segundosTranscurridos Segundos transcurridos desde el ultimo paso.
      */
     void transcurrir(double segundosTranscurridos) {
-        segundosRestantes = Math.max(0.0, segundosRestantes - segundosTranscurridos);
+        if (segundosTranscurridos <= 0.0) {
+            return;
+        }
+        segundosRestantes -= segundosTranscurridos;
+        if (segundosRestantes < 0.0) {
+            segundosRestantes = 0.0;
+        }
     }
 
-    /** @return true si ya termino. */
+    /**
+     * Indica si el tiempo del efecto ya llego a cero.
+     *
+     * @return true si el efecto ya termino.
+     */
     boolean haExpirado() {
         return segundosRestantes <= 0.0;
     }
 
     /**
-     * @param otro Otro efecto.
-     * @return true si ambos efectos son del mismo tipo (mismo nombre).
+     * Compara si otro efecto representa la misma alteracion usando su nombre.
+     *
+     * @param otro Efecto con el que se compara.
+     * @return true si ambos efectos son del mismo tipo.
      */
     boolean esMismoTipoQue(Effect otro) {
+        if (otro == null) {
+            return false;
+        }
         return nombre.equals(otro.nombre);
     }
 
-    /** @return Nombre del efecto. */
+    /**
+     * Devuelve el nombre visible del efecto.
+     *
+     * @return Nombre del efecto.
+     */
     String obtenerNombre() {
         return nombre;
     }
 
-    /** @return true si el personaje puede moverse, saltar y patear. */
+    /**
+     * Indica si este efecto deja moverse, saltar y patear al personaje.
+     *
+     * @return true por defecto; las subclases bloqueantes devuelven false.
+     */
     boolean permiteAcciones() {
         return true;
     }
 
-    /** @return Factor de escala del cuerpo (1.0 = normal). */
+    /**
+     * Devuelve el factor de tamano aplicado al cuerpo del personaje.
+     *
+     * @return Factor de escala (1.0 significa tamano normal).
+     */
     double obtenerEscala() {
         return 1.0;
     }
 
-    /** @return 1 si el movimiento horizontal es normal, -1 si esta invertido. */
+    /**
+     * Indica el sentido de desplazamiento horizontal bajo este efecto.
+     *
+     * @return 1 si el movimiento es normal, -1 si esta invertido.
+     */
     int obtenerSignoHorizontal() {
         return 1;
     }
