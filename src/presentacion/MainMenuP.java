@@ -29,25 +29,25 @@ final class MainMenuP extends JPanel {
 
     MainMenuP(HeadSoccerGUI ventana) {
         super(new BorderLayout());
-        setBorder(BorderFactory.createEmptyBorder(Estilo.MARGEN * 3, Estilo.MARGEN, Estilo.MARGEN * 3, Estilo.MARGEN));
+        setBorder(BorderFactory.createEmptyBorder(Style.MARGEN * 3, Style.MARGEN, Style.MARGEN * 3, Style.MARGEN));
 
-        JLabel titulo = Estilo.etiqueta("POOBSOCCER", Estilo.FUENTE_TITULO);
-        titulo.setForeground(Estilo.RESALTE);
-        subtitulo = Estilo.etiqueta("", Estilo.FUENTE_SUBTITULO);
+        JLabel titulo = Style.etiqueta("POOBSOCCER", Style.FUENTE_TITULO);
+        titulo.setForeground(Style.RESALTE);
+        subtitulo = Style.etiqueta("", Style.FUENTE_SUBTITULO);
 
-        jugar = Estilo.boton("", new ActionListener() {
+        jugar = Style.boton("", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 ventana.abrirModosJuego();
             }
         });
-        configuracion = Estilo.boton("", new ActionListener() {
+        configuracion = Style.boton("", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 ventana.abrirConfiguracion();
             }
         });
-        salir = Estilo.boton("", new ActionListener() {
+        salir = Style.boton("", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 ventana.cerrar();
@@ -59,7 +59,7 @@ final class MainMenuP extends JPanel {
         encabezado.add(titulo);
         encabezado.add(subtitulo);
 
-        JPanel botones = new JPanel(new FlowLayout(FlowLayout.CENTER, Estilo.MARGEN * 2, 0));
+        JPanel botones = new JPanel(new FlowLayout(FlowLayout.CENTER, Style.MARGEN * 2, 0));
         botones.setOpaque(false);
         botones.add(jugar);
         botones.add(configuracion);
@@ -80,6 +80,6 @@ final class MainMenuP extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Estilo.dibujarFondoCancha(g, getWidth(), getHeight(), (int) (getHeight() * 0.78));
+        Style.dibujarFondoCancha(g, getWidth(), getHeight(), (int) (getHeight() * 0.78));
     }
 }

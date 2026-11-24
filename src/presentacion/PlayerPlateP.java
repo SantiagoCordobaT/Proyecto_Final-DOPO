@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
 import dominio.HeadSoccer;
-import dominio.ResumenJugador;
+import dominio.PlayerSummary;
 import dominio.excepciones.POOBSoccerException;
 
 /**
@@ -31,12 +31,12 @@ final class PlayerPlateP extends JPanel {
     private final JProgressBar poder;
 
     PlayerPlateP(HeadSoccer modelo, int numero, String ladoEscudo) {
-        super(new BorderLayout(Estilo.MARGEN, 0));
+        super(new BorderLayout(Style.MARGEN, 0));
         this.modelo = modelo;
         this.numero = numero;
-        this.color = Estilo.colorJugador(numero);
-        nombre = Estilo.etiqueta("", Estilo.FUENTE_SUBTITULO);
-        poder = Estilo.barra(100, color);
+        this.color = Style.colorJugador(numero);
+        nombre = Style.etiqueta("", Style.FUENTE_SUBTITULO);
+        poder = Style.barra(100, color);
         poder.setStringPainted(true);
 
         JPanel datos = new JPanel(new GridLayout(2, 1, 0, 4));
@@ -44,22 +44,22 @@ final class PlayerPlateP extends JPanel {
         datos.add(nombre);
         datos.add(poder);
 
-        setBackground(Estilo.FONDO);
+        setBackground(Style.FONDO);
         setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 0, 4, 0, color),
-                BorderFactory.createEmptyBorder(6, Estilo.MARGEN, 6, Estilo.MARGEN)));
+                BorderFactory.createEmptyBorder(6, Style.MARGEN, 6, Style.MARGEN)));
         add(escudo, ladoEscudo);
         add(datos, BorderLayout.CENTER);
     }
 
     void refrescar() throws POOBSoccerException {
-        ResumenJugador jugador = modelo.obtenerResumenJugador(numero);
+        PlayerSummary jugador = modelo.obtenerResumenJugador(numero);
         escudo.establecerPais(jugador.obtenerPais());
         nombre.setText(jugador.obtenerNombre().toUpperCase());
         poder.setValue((int) Math.round(jugador.obtenerCargaPoder() * 100));
         if (jugador.estaPoderArmado()) {
             poder.setString(Texts.t("¡PODER LISTO!", "POWER READY!"));
-            poder.setForeground(Estilo.RESALTE);
+            poder.setForeground(Style.RESALTE);
         } else {
             poder.setString(jugador.obtenerNombrePoder());
             poder.setForeground(color);

@@ -7,7 +7,7 @@ package dominio;
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-public class FichaPersonaje {
+public class CharacterInfo {
 
     private final String nombre;
     private final String pais;
@@ -18,7 +18,7 @@ public class FichaPersonaje {
     private final String nombrePoder;
     private final String descripcionPoder;
 
-    FichaPersonaje(String nombre, String pais, int velocidad, int salto, int fuerza, int nivelPoder,
+    CharacterInfo(String nombre, String pais, int velocidad, int salto, int fuerza, int nivelPoder,
             String nombrePoder, String descripcionPoder) {
         this.nombre = nombre;
         this.pais = pais;

@@ -31,13 +31,13 @@ final class TeamBadge extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Color[] colores = Estilo.coloresPais(pais);
+        Color[] colores = Style.coloresPais(pais);
         int franja = getWidth() / colores.length;
         for (int i = 0; i < colores.length; i++) {
             g.setColor(colores[i]);
             g.fillRect(i * franja, 0, franja, getHeight());
         }
-        g.setColor(Estilo.TEXTO);
+        g.setColor(Style.TEXTO);
         g.drawRect(0, 0, colores.length * franja - 1, getHeight() - 1);
     }
 }

@@ -20,7 +20,7 @@ import javax.swing.SwingConstants;
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-final class Estilo {
+final class Style {
 
     static final Color FONDO = new Color(18, 28, 42);
     static final Color TARJETA = new Color(30, 46, 66);
@@ -37,7 +37,7 @@ final class Estilo {
     static final Font FUENTE_NORMAL = new Font(Font.SANS_SERIF, Font.BOLD, 14);
     static final Font FUENTE_PEQUENA = new Font(Font.SANS_SERIF, Font.PLAIN, 11);
 
-    private Estilo() {
+    private Style() {
     }
 
     static Color colorJugador(int numero) {

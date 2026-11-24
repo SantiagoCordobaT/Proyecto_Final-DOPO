@@ -69,9 +69,9 @@ public final class HeadSoccer {
         return poderes.obtenerNombres();
     }
 
-    public FichaPersonaje obtenerFichaPersonaje(int indice) throws POOBSoccerException {
+    public CharacterInfo obtenerFichaPersonaje(int indice) throws POOBSoccerException {
         Character p = personajes.obtener(indice);
-        return new FichaPersonaje(p.obtenerNombre(), p.obtenerPais(), p.obtenerVelocidad(), p.obtenerSalto(),
+        return new CharacterInfo(p.obtenerNombre(), p.obtenerPais(), p.obtenerVelocidad(), p.obtenerSalto(),
                 p.obtenerFuerza(), p.obtenerNivelPoder(), p.obtenerNombrePoder(), p.obtenerDescripcionPoder());
     }
 
@@ -157,7 +157,7 @@ public final class HeadSoccer {
         partidoActivo().soltar(numero, Action.porNombre(accion));
     }
 
-    public ResumenJugador obtenerResumenJugador(int numero) throws POOBSoccerException {
+    public PlayerSummary obtenerResumenJugador(int numero) throws POOBSoccerException {
         return partidoActivo().obtenerResumenJugador(numero);
     }
 

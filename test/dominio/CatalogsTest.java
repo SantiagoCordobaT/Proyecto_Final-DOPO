@@ -21,7 +21,7 @@ import dominio.poderes.PowerCatalog;
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-public class CatalogosTest {
+public class CatalogsTest {
 
     @Test
     public void catalogosTraenOpcionesInicialesEsperadas() throws POOBSoccerException {
@@ -127,7 +127,7 @@ public class CatalogosTest {
     @Test
     public void fichaPersonajeDesdeFachada() throws POOBSoccerException {
         HeadSoccer juego = HeadSoccer.obtenerInstancia();
-        FichaPersonaje ficha = juego.obtenerFichaPersonaje(0);
+        CharacterInfo ficha = juego.obtenerFichaPersonaje(0);
         assertEquals("Jacob", ficha.obtenerNombre());
         assertEquals("Canadá", ficha.obtenerPais());
         assertEquals(3, ficha.obtenerVelocidad());

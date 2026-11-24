@@ -12,7 +12,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 
-import dominio.FichaPersonaje;
+import dominio.CharacterInfo;
 import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
 
@@ -23,7 +23,7 @@ import dominio.excepciones.POOBSoccerException;
  * @version 1.0
  */
 @SuppressWarnings("serial")
-final class CharacterFormD extends DialogoBase {
+final class CharacterFormD extends BaseDialog {
 
     private static final int NUEVO = -1;
 
@@ -45,7 +45,7 @@ final class CharacterFormD extends DialogoBase {
 
     CharacterFormD(Frame dueno, HeadSoccer modelo, int indiceEdicion) throws POOBSoccerException {
         this(dueno, modelo, Texts.t("Editar personaje", "Edit character"), indiceEdicion);
-        FichaPersonaje ficha = modelo.obtenerFichaPersonaje(indiceEdicion);
+        CharacterInfo ficha = modelo.obtenerFichaPersonaje(indiceEdicion);
         nombre.setText(ficha.obtenerNombre());
         pais.setText(ficha.obtenerPais());
         velocidad.setValue(ficha.obtenerVelocidad());
@@ -61,8 +61,8 @@ final class CharacterFormD extends DialogoBase {
         this.indiceEdicion = indiceEdicion;
         this.poderes = new JComboBox<>(modelo.obtenerNombresPoderes());
 
-        JPanel formulario = new JPanel(new GridLayout(0, 2, Estilo.MARGEN, 6));
-        formulario.setBackground(Estilo.FONDO);
+        JPanel formulario = new JPanel(new GridLayout(0, 2, Style.MARGEN, 6));
+        formulario.setBackground(Style.FONDO);
         agregarCampo(formulario, Texts.t("Nombre", "Name"), nombre);
         agregarCampo(formulario, Texts.t("País", "Country"), pais);
         agregarCampo(formulario, Texts.t("Velocidad", "Speed"), velocidad);
@@ -72,13 +72,13 @@ final class CharacterFormD extends DialogoBase {
         agregarCampo(formulario, Texts.t("Poder", "Power"), poderes);
         ponerCentro(formulario);
 
-        agregarBoton(Estilo.boton(Texts.t("Guardar", "Save"), new ActionListener() {
+        agregarBoton(Style.boton(Texts.t("Guardar", "Save"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 guardar();
             }
         }));
-        agregarBoton(Estilo.boton(Texts.t("Volver", "Back"), new ActionListener() {
+        agregarBoton(Style.boton(Texts.t("Volver", "Back"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 alCerrar();
@@ -91,7 +91,7 @@ final class CharacterFormD extends DialogoBase {
     }
 
     private void agregarCampo(JPanel panel, String etiqueta, JComponent campo) {
-        panel.add(Estilo.etiqueta(etiqueta, Estilo.FUENTE_NORMAL));
+        panel.add(Style.etiqueta(etiqueta, Style.FUENTE_NORMAL));
         panel.add(campo);
     }
 

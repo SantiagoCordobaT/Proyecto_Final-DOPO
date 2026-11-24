@@ -17,7 +17,7 @@ import dominio.excepciones.POOBSoccerException;
  * @version 1.0
  */
 @SuppressWarnings("serial")
-final class CharacterSelectD extends DialogoBase {
+final class CharacterSelectD extends BaseDialog {
 
     private final HeadSoccerGUI ventana;
     private final HeadSoccer modelo;
@@ -32,26 +32,26 @@ final class CharacterSelectD extends DialogoBase {
         primero = new CharacterCard(this, modelo, 1, 0);
         segundo = new CharacterCard(this, modelo, 2, 1);
 
-        JPanel fichas = new JPanel(new BorderLayout(Estilo.MARGEN, 0));
-        fichas.setBackground(Estilo.FONDO);
+        JPanel fichas = new JPanel(new BorderLayout(Style.MARGEN, 0));
+        fichas.setBackground(Style.FONDO);
         fichas.add(primero, BorderLayout.WEST);
-        fichas.add(Estilo.etiqueta("VS", Estilo.FUENTE_TITULO), BorderLayout.CENTER);
+        fichas.add(Style.etiqueta("VS", Style.FUENTE_TITULO), BorderLayout.CENTER);
         fichas.add(segundo, BorderLayout.EAST);
         ponerCentro(fichas);
 
-        agregarBoton(Estilo.boton(Texts.t("Jugar", "Play"), new ActionListener() {
+        agregarBoton(Style.boton(Texts.t("Jugar", "Play"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 jugar();
             }
         }));
-        agregarBoton(Estilo.boton(Texts.t("Crear personaje", "Create character"), new ActionListener() {
+        agregarBoton(Style.boton(Texts.t("Crear personaje", "Create character"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 crearPersonaje();
             }
         }));
-        agregarBoton(Estilo.boton(Texts.t("Volver", "Back"), new ActionListener() {
+        agregarBoton(Style.boton(Texts.t("Volver", "Back"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 alCerrar();

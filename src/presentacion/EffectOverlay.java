@@ -27,7 +27,7 @@ final class EffectOverlay {
                 g.fillOval(15, -105, 10, 10);
             } else if ("Confundido".equals(efecto)) {
                 g.setColor(new Color(220, 150, 255));
-                g.setFont(Estilo.FUENTE_SUBTITULO);
+                g.setFont(Style.FUENTE_SUBTITULO);
                 g.drawString("?", -15, -95);
                 g.drawString("?", 5, -100);
             } else if ("Reducido".equals(efecto)) {

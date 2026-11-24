@@ -15,7 +15,7 @@ import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import dominio.FichaPersonaje;
+import dominio.CharacterInfo;
 import dominio.HeadSoccer;
 import dominio.excepciones.POOBSoccerException;
 
@@ -45,21 +45,21 @@ final class CharacterCard extends JPanel {
     private final JLabel descripcion;
 
     CharacterCard(CharacterSelectD padre, HeadSoccer modelo, int numero, int inicial) {
-        super(new BorderLayout(Estilo.MARGEN, Estilo.MARGEN));
+        super(new BorderLayout(Style.MARGEN, Style.MARGEN));
         this.modelo = modelo;
         this.numero = numero;
 
-        setBackground(Estilo.TARJETA);
+        setBackground(Style.TARJETA);
         setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Estilo.colorJugador(numero), 3),
-                BorderFactory.createEmptyBorder(Estilo.MARGEN, Estilo.MARGEN, Estilo.MARGEN, Estilo.MARGEN)));
+                BorderFactory.createLineBorder(Style.colorJugador(numero), 3),
+                BorderFactory.createEmptyBorder(Style.MARGEN, Style.MARGEN, Style.MARGEN, Style.MARGEN)));
 
-        personajes = Estilo.lista(modelo.obtenerNombresPersonajes());
-        pais = Estilo.etiqueta("", Estilo.FUENTE_NORMAL);
+        personajes = Style.lista(modelo.obtenerNombresPersonajes());
+        pais = Style.etiqueta("", Style.FUENTE_NORMAL);
         estadisticas = new JPanel(new GridLayout(0, 1, 0, 6));
         estadisticas.setOpaque(false);
 
-        JPanel equipo = new JPanel(new FlowLayout(FlowLayout.CENTER, Estilo.MARGEN, 0));
+        JPanel equipo = new JPanel(new FlowLayout(FlowLayout.CENTER, Style.MARGEN, 0));
         equipo.setOpaque(false);
         equipo.add(escudo);
         equipo.add(pais);
@@ -70,27 +70,27 @@ final class CharacterCard extends JPanel {
         fuerza = agregarBarra(Texts.t("Fuerza", "Strength"));
         poder = agregarBarra(Texts.t("Poder Único", "Unique Power"));
 
-        especial = Estilo.etiqueta("", Estilo.FUENTE_NORMAL);
-        descripcion = Estilo.etiqueta("", Estilo.FUENTE_NORMAL);
+        especial = Style.etiqueta("", Style.FUENTE_NORMAL);
+        descripcion = Style.etiqueta("", Style.FUENTE_NORMAL);
         estadisticas.add(especial);
         estadisticas.add(descripcion);
 
         JPanel acciones = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 0));
         acciones.setOpaque(false);
-        acciones.add(Estilo.boton(Texts.t("Editar", "Edit"), new ActionListener() {
+        acciones.add(Style.boton(Texts.t("Editar", "Edit"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 padre.editarPersonaje(CharacterCard.this);
             }
         }));
-        acciones.add(Estilo.boton(Texts.t("Eliminar", "Delete"), new ActionListener() {
+        acciones.add(Style.boton(Texts.t("Eliminar", "Delete"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 padre.eliminarPersonaje(CharacterCard.this);
             }
         }));
 
-        add(Estilo.etiqueta(Texts.t("Jugador", "Player") + " " + numero, Estilo.FUENTE_SUBTITULO), BorderLayout.NORTH);
+        add(Style.etiqueta(Texts.t("Jugador", "Player") + " " + numero, Style.FUENTE_SUBTITULO), BorderLayout.NORTH);
         add(new JScrollPane(personajes), BorderLayout.WEST);
         add(estadisticas, BorderLayout.CENTER);
         add(acciones, BorderLayout.SOUTH);
@@ -125,10 +125,10 @@ final class CharacterCard extends JPanel {
     }
 
     private JProgressBar agregarBarra(String nombre) {
-        JProgressBar barra = Estilo.barra(MAX_STAT, Estilo.colorJugador(numero));
-        JPanel fila = new JPanel(new GridLayout(1, 2, Estilo.MARGEN, 0));
+        JProgressBar barra = Style.barra(MAX_STAT, Style.colorJugador(numero));
+        JPanel fila = new JPanel(new GridLayout(1, 2, Style.MARGEN, 0));
         fila.setOpaque(false);
-        fila.add(Estilo.etiqueta(nombre, Estilo.FUENTE_NORMAL));
+        fila.add(Style.etiqueta(nombre, Style.FUENTE_NORMAL));
         fila.add(barra);
         estadisticas.add(fila);
         return barra;
@@ -140,7 +140,7 @@ final class CharacterCard extends JPanel {
             return;
         }
         try {
-            FichaPersonaje ficha = modelo.obtenerFichaPersonaje(indice);
+            CharacterInfo ficha = modelo.obtenerFichaPersonaje(indice);
             escudo.establecerPais(ficha.obtenerPais());
             pais.setText(ficha.obtenerPais());
             velocidad.setValue(ficha.obtenerVelocidad());

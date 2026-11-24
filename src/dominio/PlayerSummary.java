@@ -7,7 +7,7 @@ package dominio;
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
  */
-public class ResumenJugador {
+public class PlayerSummary {
 
     private final String nombre;
     private final String pais;
@@ -23,7 +23,7 @@ public class ResumenJugador {
     private final int orientacion;
     private final boolean pateando;
 
-    ResumenJugador(String nombre, String pais, double[] limites, int goles, double cargaPoder, String nombrePoder,
+    PlayerSummary(String nombre, String pais, double[] limites, int goles, double cargaPoder, String nombrePoder,
             boolean poderArmado, String[] efectos, int orientacion, boolean pateando) {
         this.nombre = nombre;
         this.pais = pais;

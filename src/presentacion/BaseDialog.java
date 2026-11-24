@@ -21,21 +21,21 @@ import javax.swing.WindowConstants;
  * @version 1.0
  */
 @SuppressWarnings("serial")
-abstract class DialogoBase extends JDialog {
+abstract class BaseDialog extends JDialog {
 
     private final JPanel contenido;
     private final JPanel botones;
 
-    DialogoBase(Frame dueno, String titulo) {
+    BaseDialog(Frame dueno, String titulo) {
         super(dueno, titulo, true);
-        contenido = new JPanel(new BorderLayout(Estilo.MARGEN, Estilo.MARGEN));
-        contenido.setBackground(Estilo.FONDO);
-        contenido.setBorder(BorderFactory.createEmptyBorder(Estilo.MARGEN, Estilo.MARGEN * 2,
-                Estilo.MARGEN, Estilo.MARGEN * 2));
-        contenido.add(Estilo.etiqueta(titulo, Estilo.FUENTE_SUBTITULO), BorderLayout.NORTH);
+        contenido = new JPanel(new BorderLayout(Style.MARGEN, Style.MARGEN));
+        contenido.setBackground(Style.FONDO);
+        contenido.setBorder(BorderFactory.createEmptyBorder(Style.MARGEN, Style.MARGEN * 2,
+                Style.MARGEN, Style.MARGEN * 2));
+        contenido.add(Style.etiqueta(titulo, Style.FUENTE_SUBTITULO), BorderLayout.NORTH);
 
-        botones = new JPanel(new FlowLayout(FlowLayout.CENTER, Estilo.MARGEN, 0));
-        botones.setBackground(Estilo.FONDO);
+        botones = new JPanel(new FlowLayout(FlowLayout.CENTER, Style.MARGEN, 0));
+        botones.setBackground(Style.FONDO);
         contenido.add(botones, BorderLayout.SOUTH);
 
         setContentPane(contenido);

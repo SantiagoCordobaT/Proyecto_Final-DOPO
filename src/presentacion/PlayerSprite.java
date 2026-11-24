@@ -5,7 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 
 import dominio.HeadSoccer;
-import dominio.ResumenJugador;
+import dominio.PlayerSummary;
 import dominio.excepciones.POOBSoccerException;
 
 /**
@@ -38,19 +38,19 @@ final class PlayerSprite {
     PlayerSprite(HeadSoccer modelo, int numero) {
         this.modelo = modelo;
         this.numero = numero;
-        this.colorIndicador = Estilo.colorJugador(numero);
-        this.equipo = Estilo.coloresPais("");
+        this.colorIndicador = Style.colorJugador(numero);
+        this.equipo = Style.coloresPais("");
     }
 
     void actualizar() throws POOBSoccerException {
-        ResumenJugador j = modelo.obtenerResumenJugador(numero);
+        PlayerSummary j = modelo.obtenerResumenJugador(numero);
         centroX = j.obtenerX() + j.obtenerAncho() / 2.0;
         baseY = j.obtenerY() + j.obtenerAlto();
         escala = j.obtenerAncho() / ANCHO_BASE;
         orientacion = j.obtenerOrientacion();
         armado = j.estaPoderArmado();
         pateando = j.estaPateando();
-        equipo = Estilo.coloresPais(j.obtenerPais());
+        equipo = Style.coloresPais(j.obtenerPais());
         efectos = j.obtenerEfectos();
     }
 
@@ -63,7 +63,7 @@ final class PlayerSprite {
         g.drawOval(-25, -6, 50, 12);
 
         if (armado) {
-            g.setColor(Estilo.RESALTE);
+            g.setColor(Style.RESALTE);
             g.drawOval(-35, -95, 70, 95);
         }
 

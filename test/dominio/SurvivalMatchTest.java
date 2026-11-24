@@ -79,7 +79,7 @@ public class SurvivalMatchTest {
         partido.anotarGol(1);
         partido.anotarGol(1);
 
-        ResumenJugador nuevoRival = partido.obtenerResumenJugador(2);
+        PlayerSummary nuevoRival = partido.obtenerResumenJugador(2);
         assertFalse(partido.estaTerminado());
         assertEquals("Balones 3-3 | Racha 1", partido.obtenerEstado());
         assertNotEquals(primerRival, nuevoRival.obtenerNombre());

@@ -31,13 +31,13 @@ final class HudP extends JPanel {
         this.modelo = modelo;
         izquierda = new PlayerPlateP(modelo, 1, BorderLayout.WEST);
         derecha = new PlayerPlateP(modelo, 2, BorderLayout.EAST);
-        estado = Estilo.etiqueta("", Estilo.FUENTE_NORMAL);
-        marcador = Estilo.etiqueta("", Estilo.FUENTE_MARCADOR);
-        ayuda = Estilo.etiqueta("", Estilo.FUENTE_PEQUENA);
-        estado.setForeground(Estilo.RESALTE);
+        estado = Style.etiqueta("", Style.FUENTE_NORMAL);
+        marcador = Style.etiqueta("", Style.FUENTE_MARCADOR);
+        ayuda = Style.etiqueta("", Style.FUENTE_PEQUENA);
+        estado.setForeground(Style.RESALTE);
 
         JPanel centro = new JPanel(new BorderLayout());
-        centro.setBackground(Estilo.FONDO);
+        centro.setBackground(Style.FONDO);
         centro.add(estado, BorderLayout.NORTH);
         centro.add(marcador, BorderLayout.CENTER);
         centro.add(ayuda, BorderLayout.SOUTH);

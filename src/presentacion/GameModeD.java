@@ -23,7 +23,7 @@ import dominio.excepciones.POOBSoccerException;
  * @version 1.0
  */
 @SuppressWarnings("serial")
-final class GameModeD extends DialogoBase {
+final class GameModeD extends BaseDialog {
 
     private final HeadSoccerGUI ventana;
     private final HeadSoccer modelo;
@@ -36,23 +36,23 @@ final class GameModeD extends DialogoBase {
         this.ventana = ventana;
         this.modelo = modelo;
 
-        modos = Estilo.lista(modelo.obtenerNombresModos());
-        tiposPartido = Estilo.lista(modelo.obtenerNombresTiposPartido());
+        modos = Style.lista(modelo.obtenerNombresModos());
+        tiposPartido = Style.lista(modelo.obtenerNombresTiposPartido());
 
-        JPanel listas = new JPanel(new GridLayout(1, 2, Estilo.MARGEN, 0));
-        listas.setBackground(Estilo.FONDO);
+        JPanel listas = new JPanel(new GridLayout(1, 2, Style.MARGEN, 0));
+        listas.setBackground(Style.FONDO);
         listas.add(columna(Texts.t("Modalidad", "Mode"), modos));
         listas.add(columna(Texts.t("Tipo de partido", "Match type"), tiposPartido));
         ponerCentro(listas);
 
-        seleccionar = Estilo.boton(Texts.t("Seleccionar", "Select"), new ActionListener() {
+        seleccionar = Style.boton(Texts.t("Seleccionar", "Select"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 seleccionar();
             }
         });
         agregarBoton(seleccionar);
-        agregarBoton(Estilo.boton(Texts.t("Volver", "Back"), new ActionListener() {
+        agregarBoton(Style.boton(Texts.t("Volver", "Back"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 alCerrar();
@@ -71,8 +71,8 @@ final class GameModeD extends DialogoBase {
 
     private JPanel columna(String titulo, JList<String> lista) {
         JPanel columna = new JPanel(new BorderLayout(0, 6));
-        columna.setBackground(Estilo.FONDO);
-        columna.add(Estilo.etiqueta(titulo, Estilo.FUENTE_NORMAL), BorderLayout.NORTH);
+        columna.setBackground(Style.FONDO);
+        columna.add(Style.etiqueta(titulo, Style.FUENTE_NORMAL), BorderLayout.NORTH);
         columna.add(new JScrollPane(lista), BorderLayout.CENTER);
         return columna;
     }

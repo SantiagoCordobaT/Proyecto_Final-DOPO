@@ -135,9 +135,9 @@ final class Match {
         return numero - 1;
     }
 
-    ResumenJugador obtenerResumenJugador(int numero) throws POOBSoccerException {
+    PlayerSummary obtenerResumenJugador(int numero) throws POOBSoccerException {
         Character j = jugadores[indiceJugador(numero)];
-        return new ResumenJugador(j.obtenerNombre(), j.obtenerPais(), j.obtenerLimites(), j.obtenerGoles(),
+        return new PlayerSummary(j.obtenerNombre(), j.obtenerPais(), j.obtenerLimites(), j.obtenerGoles(),
                 j.obtenerCargaPoder(), j.obtenerNombrePoder(), j.estaPoderArmado(), j.obtenerNombresEfectos(),
                 j.obtenerOrientacion(), j.estaPateando());
     }

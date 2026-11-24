@@ -14,7 +14,7 @@ import javax.swing.JTextArea;
  * @version 1.0
  */
 @SuppressWarnings("serial")
-final class PauseD extends DialogoBase {
+final class PauseD extends BaseDialog {
 
     private final MatchP partido;
 
@@ -34,19 +34,19 @@ final class PauseD extends DialogoBase {
 
         JTextArea controles = new JTextArea(ayuda);
         controles.setEditable(false);
-        controles.setFont(Estilo.FUENTE_NORMAL);
-        controles.setBackground(Estilo.TARJETA);
-        controles.setForeground(Estilo.TEXTO);
-        controles.setBorder(BorderFactory.createEmptyBorder(Estilo.MARGEN, Estilo.MARGEN, Estilo.MARGEN, Estilo.MARGEN));
+        controles.setFont(Style.FUENTE_NORMAL);
+        controles.setBackground(Style.TARJETA);
+        controles.setForeground(Style.TEXTO);
+        controles.setBorder(BorderFactory.createEmptyBorder(Style.MARGEN, Style.MARGEN, Style.MARGEN, Style.MARGEN));
         ponerCentro(controles);
 
-        agregarBoton(Estilo.boton(Texts.t("Reanudar", "Resume"), new ActionListener() {
+        agregarBoton(Style.boton(Texts.t("Reanudar", "Resume"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 alCerrar();
             }
         }));
-        agregarBoton(Estilo.boton(Texts.t("Abandonar", "Give up"), new ActionListener() {
+        agregarBoton(Style.boton(Texts.t("Abandonar", "Give up"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose();

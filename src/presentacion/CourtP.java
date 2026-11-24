@@ -40,7 +40,7 @@ final class CourtP extends JPanel {
         balon = new BallSprite(modelo);
         arcos = new GoalSprite(modelo);
         setPreferredSize(new Dimension((int) modelo.obtenerAnchoCancha(), ALTO_CANCHA));
-        setBackground(Estilo.FONDO);
+        setBackground(Style.FONDO);
     }
 
     void entrar() {
@@ -71,20 +71,20 @@ final class CourtP extends JPanel {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        Estilo.dibujarFondoCancha(g2, getWidth(), getHeight(), (int) modelo.obtenerSueloY());
+        Style.dibujarFondoCancha(g2, getWidth(), getHeight(), (int) modelo.obtenerSueloY());
         jugador1.dibujar(g2);
         jugador2.dibujar(g2);
         balon.dibujar(g2);
         arcos.dibujar(g2);
 
         if (tiempoAvisoGol > 0.0) {
-            g2.setFont(Estilo.FUENTE_TITULO);
+            g2.setFont(Style.FUENTE_TITULO);
             String texto = Texts.t("¡GOL!", "GOAL!");
             int x = (getWidth() - g2.getFontMetrics().stringWidth(texto)) / 2;
             int y = (int) (modelo.obtenerSueloY() * 0.42);
             g2.setColor(Color.BLACK);
             g2.drawString(texto, x + 3, y + 3);
-            g2.setColor(Estilo.RESALTE);
+            g2.setColor(Style.RESALTE);
             g2.drawString(texto, x, y);
         }
     }

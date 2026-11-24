@@ -8,7 +8,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import dominio.HeadSoccer;
-import dominio.ResumenJugador;
+import dominio.PlayerSummary;
 import dominio.excepciones.POOBSoccerException;
 
 /**
@@ -19,7 +19,7 @@ import dominio.excepciones.POOBSoccerException;
  * @version 1.0
  */
 @SuppressWarnings("serial")
-final class ResultD extends DialogoBase {
+final class ResultD extends BaseDialog {
 
     private final HeadSoccerGUI ventana;
 
@@ -27,26 +27,26 @@ final class ResultD extends DialogoBase {
         super(ventana, Texts.t("Fin del partido", "Match over"));
         this.ventana = ventana;
 
-        JLabel ganador = Estilo.etiqueta("", Estilo.FUENTE_SUBTITULO);
-        JLabel marcador = Estilo.etiqueta("", Estilo.FUENTE_MARCADOR);
-        JLabel estado = Estilo.etiqueta("", Estilo.FUENTE_NORMAL);
-        ganador.setForeground(Estilo.RESALTE);
+        JLabel ganador = Style.etiqueta("", Style.FUENTE_SUBTITULO);
+        JLabel marcador = Style.etiqueta("", Style.FUENTE_MARCADOR);
+        JLabel estado = Style.etiqueta("", Style.FUENTE_NORMAL);
+        ganador.setForeground(Style.RESALTE);
 
         JPanel cuerpo = new JPanel(new GridLayout(3, 1, 0, 6));
-        cuerpo.setBackground(Estilo.FONDO);
+        cuerpo.setBackground(Style.FONDO);
         cuerpo.add(ganador);
         cuerpo.add(marcador);
         cuerpo.add(estado);
         ponerCentro(cuerpo);
 
-        agregarBoton(Estilo.boton(Texts.t("Revancha", "Rematch"), new ActionListener() {
+        agregarBoton(Style.boton(Texts.t("Revancha", "Rematch"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 alCerrar();
                 ventana.abrirSeleccionPersonajes();
             }
         }));
-        agregarBoton(Estilo.boton(Texts.t("Menú", "Menu"), new ActionListener() {
+        agregarBoton(Style.boton(Texts.t("Menú", "Menu"), new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 alCerrar();
@@ -54,8 +54,8 @@ final class ResultD extends DialogoBase {
         }));
 
         try {
-            ResumenJugador j1 = modelo.obtenerResumenJugador(1);
-            ResumenJugador j2 = modelo.obtenerResumenJugador(2);
+            PlayerSummary j1 = modelo.obtenerResumenJugador(1);
+            PlayerSummary j2 = modelo.obtenerResumenJugador(2);
             ganador.setText(Texts.t("Ganador:", "Winner:") + " " + modelo.obtenerNombreGanador());
             marcador.setText(j1.obtenerNombre() + "  " + j1.obtenerGoles() + " - " + j2.obtenerGoles() + "  "
                     + j2.obtenerNombre());

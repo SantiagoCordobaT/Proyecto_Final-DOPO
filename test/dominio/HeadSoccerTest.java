@@ -97,7 +97,7 @@ public class HeadSoccerTest {
             juego.seleccionarJugador(2, indice);
             juego.iniciarPartido();
 
-            ResumenJugador rival = juego.obtenerResumenJugador(2);
+            PlayerSummary rival = juego.obtenerResumenJugador(2);
             assertEquals("Lucas", rival.obtenerNombre());
             assertEquals("Perú", rival.obtenerPais());
             assertEquals(juego.obtenerNombresPoderes()[2], rival.obtenerNombrePoder());
@@ -119,7 +119,7 @@ public class HeadSoccerTest {
 
         juego.reanudar();
         juego.actualizarTick(1.0 / 60.0);
-        ResumenJugador j1 = juego.obtenerResumenJugador(1);
+        PlayerSummary j1 = juego.obtenerResumenJugador(1);
         assertEquals(200.0, j1.obtenerX() + j1.obtenerAncho() / 2.0, 0.001);
 
         juego.actualizarTick(1.0);
@@ -134,8 +134,8 @@ public class HeadSoccerTest {
         juego.soltarTodasLasAcciones();
         juego.actualizarTick(1.0);
 
-        ResumenJugador j1 = juego.obtenerResumenJugador(1);
-        ResumenJugador j2 = juego.obtenerResumenJugador(2);
+        PlayerSummary j1 = juego.obtenerResumenJugador(1);
+        PlayerSummary j2 = juego.obtenerResumenJugador(2);
         assertEquals(200.0, j1.obtenerX() + j1.obtenerAncho() / 2.0, 0.001);
         assertEquals(700.0, j2.obtenerX() + j2.obtenerAncho() / 2.0, 0.001);
         assertEquals("Meta: 3 goles | 00:01", juego.obtenerEstadoPartido());
@@ -236,8 +236,8 @@ public class HeadSoccerTest {
     @Test
     public void fachadaExponeResumenJugadorYMedidasDeCancha() throws POOBSoccerException {
         arrancar(PVSP, GOLES_3, 0, 1);
-        ResumenJugador j1 = juego.obtenerResumenJugador(1);
-        ResumenJugador j2 = juego.obtenerResumenJugador(2);
+        PlayerSummary j1 = juego.obtenerResumenJugador(1);
+        PlayerSummary j2 = juego.obtenerResumenJugador(2);
 
         assertEquals(1, j1.obtenerOrientacion());
         assertEquals(-1, j2.obtenerOrientacion());

@@ -43,36 +43,15 @@ Cada personaje tiene 4 estadísticas de **1 a 5**: Velocidad, Salto, Fuerza y Po
 | **Mateo** | Colombia | 4 | 3 | 3 | 4 | Confusión (invierte controles 5 s) |
 | **Rafael** | Brasil | 4 | 5 | 3 | 3 | Reducción (mitad de tamaño 6 s) |
 
-## Cómo ejecutar
-
-Desde la raíz del proyecto (requiere JDK 17+):
-
-### Compilar y abrir el juego (PowerShell / Windows)
-
-```powershell
-mkdir out -Force
-$fuentes = Get-ChildItem -Recurse -Filter *.java src | ForEach-Object { $_.FullName }
-javac -encoding UTF-8 -d out $fuentes
-java -cp out presentacion.HeadSoccerGUI
-```
-
-### Ejecutar las pruebas unitarias (JUnit 5)
-
-```powershell
-$todos = Get-ChildItem -Recurse -Filter *.java src, test | ForEach-Object { $_.FullName }
-javac -encoding UTF-8 -cp "lib\junit-platform-console-standalone.jar" -d out $todos
-java -jar "lib\junit-platform-console-standalone.jar" execute --class-path out --scan-class-path
-```
-
 ## Arquitectura
 
-- `src/dominio/`: Fachada `HeadSoccer`, simulación `Match`, física (`Field`, `Goal`, `Ball`), resúmenes de solo lectura (`ResumenJugador`, `FichaPersonaje`), personajes (`dominio.personajes`), modalidades (`dominio.modalidades`), reglas (`dominio.partidos`), poderes y efectos (`dominio.poderes`, `dominio.efectos`) y excepciones (`dominio.excepciones`).
-- `src/presentacion/`: Ventana principal `HeadSoccerGUI`, menú, diálogos sobre `DialogoBase`, utilidades visuales en `Estilo` y dibujo en Swing sin lógica de negocio.
-- `test/dominio/`: Pruebas unitarias separadas por módulo (`BallTest`, `CharacterTest`, `SurvivalMatchTest`, `CatalogosTest`, `HeadSoccerTest`).
+- `src/dominio/`: Fachada `HeadSoccer`, simulación `Match`, física (`Field`, `Goal`, `Ball`), resúmenes de solo lectura (`PlayerSummary`, `CharacterInfo`), personajes (`dominio.personajes`), modalidades (`dominio.modalidades`), reglas (`dominio.partidos`), poderes y efectos (`dominio.poderes`, `dominio.efectos`) y excepciones (`dominio.excepciones`).
+- `src/presentacion/`: Ventana principal `HeadSoccerGUI`, menú, diálogos sobre `BaseDialog`, utilidades visuales en `Style` y dibujo en Swing sin lógica de negocio.
+- `test/dominio/`: Pruebas unitarias separadas por módulo (`BallTest`, `CharacterTest`, `SurvivalMatchTest`, `CatalogsTest`, `HeadSoccerTest`).
 
 ## Uso de herramientas de IA
 
-Una primera versión del código, las pruebas y la documentación se generó con ayuda de herramientas de IA (Claude). Después, los autores rediseñaron y reescribieron el dominio, la interfaz y las pruebas, siguiendo en parte recomendaciones de la misma herramienta, y verificaron el resultado con pruebas propias.
+Una primera versión del código, las pruebas y la documentación se generó con ayuda de herramientas de IA. Después, los autores rediseñaron y reescribieron el dominio, la interfaz y las pruebas, siguiendo en parte recomendaciones de la misma herramienta, y verificaron el resultado con pruebas propias.
 
 ## Autores y colaboradores
 
