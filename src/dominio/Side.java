@@ -3,7 +3,8 @@ package dominio;
 import dominio.personajes.Character;
 
 /**
- * Guarda la posición X inicial y hacia qué lado mira cada jugador (1 derecha, -1 izquierda).
+ * Guarda la posición X inicial y hacia qué lado mira cada jugador (1 derecha,
+ * -1 izquierda).
  *
  * @author Santiago Cordoba - Camilo Rivas
  * @version 1.0
